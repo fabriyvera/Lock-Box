@@ -1,5 +1,5 @@
 'use client';
-
+import { useRouter } from 'next/navigation';
 import { useState, FormEvent } from 'react';
 import Head from 'next/head';
 
@@ -23,6 +23,7 @@ const FLOW = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [activeNav, setActiveNav] = useState<string>('inicio');
   const [role, setRole] = useState<Role>(null);
   const [form, setForm] = useState({
@@ -34,10 +35,15 @@ export default function Home() {
   });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
+ const handleSubmit = (e: FormEvent) => {
+  e.preventDefault();
+  setSubmitted(true);
+  
+  // Te lleva al dashboard después de 1 segundo
+  setTimeout(() => {
+    router.push('/dashboard');
+  }, 1000);
+};
 
   const scrollTo = (id: string) => {
     setActiveNav(id);
@@ -180,7 +186,6 @@ export default function Home() {
             <div style={{ position: 'absolute', bottom: '20px', right: '20px', width: '3px', height: '40px', background: '#2a5298' }} />
           </div>
         </section>
-
         {/* ══════════════════════════════════════════ SOBRE NOSOTROS ══════════════════════════════════════════ */}
         <section id="nosotros" style={{
           height: '100vh', background: '#080f1e', position: 'relative', overflow: 'hidden',
@@ -368,7 +373,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
         {/* ══════════════════════════════════════════ REGISTRO ══════════════════════════════════════════ */}
         <section id="registro" style={{
           height: '100vh', background: '#0d1a30',
