@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, FormEvent } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 
 type Role = 'comprador' | 'vendedor' | null;
 
@@ -75,13 +76,13 @@ export default function Home() {
             <div style={{ background: '#1a3a6b', color: '#ffffff', fontWeight: 900, fontSize: '15px', letterSpacing: '0.06em', padding: '4px 10px', lineHeight: 1 }}>BOX</div>
           </button>
 
-          <div style={{ display: 'flex', gap: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            {/* Enlaces Informativos Internos */}
             {[
               { id: 'inicio', label: 'inicio' },
               { id: 'nosotros', label: 'nosotros' },
               { id: 'servicios', label: 'servicios' },
               { id: 'planes', label: 'planes' },
-              { id: 'registro', label: 'registro' },
               { id: 'contacto', label: 'contacto' },
             ].map(({ id, label }) => (
               <button key={id} onClick={() => scrollTo(id)} style={{
@@ -96,6 +97,30 @@ export default function Home() {
                 onMouseLeave={e => { if (activeNav !== id) e.currentTarget.style.color = '#adc4de'; }}
               >{label}</button>
             ))}
+
+            <div style={{ width: '1px', height: '18px', background: '#1e3358', margin: '0 4px' }} />
+            <Link href="/login" style={{
+              fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '11px',
+              letterSpacing: '0.08em', textTransform: 'uppercase', color: A,
+              textDecoration: 'none', transition: 'color 0.2s'
+            }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#ffffff')}
+              onMouseLeave={e => (e.currentTarget.style.color = A)}
+            >
+              Iniciar Sesión
+            </Link>
+
+            <button onClick={() => scrollTo('registro')} style={{
+              background: A, color: '#080f1e', border: 'none', padding: '7px 16px',
+              fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: '11px',
+              letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+              transition: 'opacity 0.2s'
+            }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              Registro
+            </button>
           </div>
         </nav>
 
