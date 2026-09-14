@@ -160,7 +160,7 @@ export default function LoginPage() {
             <p className="text-sm text-slate-400">
               ¿Aún no eres parte de la red Phygital?{" "}
               <Link
-                href="/registro"
+                href="/register"
                 className="text-[#00E59B] font-bold hover:underline"
               >
                 Regístrate aquí

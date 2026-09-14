@@ -30,6 +30,8 @@ export default function Home() {
   const [form, setForm] = useState({
     nombre: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     telefono: '',
     ciudad: '',
     tienda: '',
@@ -398,7 +400,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        {/* ══════════════════════════════════════════ REGISTRO ══════════════════════════════════════════ */}
+{/* ══════════════════════════════════════════ REGISTRO ══════════════════════════════════════════ */}
         <section id="registro" style={{
           height: '100vh', background: '#0d1a30',
           display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px', overflow: 'hidden',
@@ -511,20 +513,29 @@ export default function Home() {
                   <div style={{ fontSize: '13px', color: '#dce8f5', lineHeight: 1.6 }}>
                     Te contactaremos a <strong style={{ color: '#ffffff' }}>{form.email}</strong> para activar tu cuenta de {role}.
                   </div>
-                  <button onClick={() => { setSubmitted(false); setForm({ nombre: '', email: '', telefono: '', ciudad: '', tienda: '' }); }}
+                  <button onClick={() => { setSubmitted(false); setForm({ nombre: '', email: '', password: '', confirmPassword: '', telefono: '', ciudad: '', tienda: '' }); }}
                     style={{ marginTop: '16px', background: 'transparent', border: `1px solid #1e3358`, color: '#adc4de', padding: '8px 20px', cursor: 'pointer', fontSize: '11px', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.2s, color 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = A; e.currentTarget.style.color = '#ffffff'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e3358'; e.currentTarget.style.color = '#adc4de'; }}
                   >Registrar otra cuenta</button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={e => {
+                  e.preventDefault();
+                  if (form.password !== form.confirmPassword) {
+                    alert('Las contraseñas no coinciden');
+                    return;
+                  }
+                  handleSubmit(e); // Llama a la función de envío existente de tu compañero
+                }}>
                   <div style={{ fontWeight: 700, fontSize: '15px', color: '#ffffff', marginBottom: '20px' }}>
                     Registro como <span style={{ color: A, textTransform: 'capitalize' }}>{role}</span>
                   </div>
                   {[
                     { key: 'nombre', label: 'Nombre completo', type: 'text', placeholder: 'Ej. María Gonzáles' },
                     { key: 'email', label: 'Correo electrónico', type: 'email', placeholder: 'tucorreo@gmail.com' },
+                    { key: 'password', label: 'Contraseña', type: 'password', placeholder: '••••••••' },
+                    { key: 'confirmPassword', label: 'Confirmar contraseña', type: 'password', placeholder: '••••••••' },
                     { key: 'telefono', label: 'Número de celular', type: 'tel', placeholder: '+591 7xx-xxxxx' },
                     { key: 'ciudad', label: 'Ciudad', type: 'text', placeholder: 'La Paz, Cochabamba...' },
                     ...(role === 'vendedor' ? [{ key: 'tienda', label: 'Tienda en TikTok', type: 'text', placeholder: '@mitienda' }] : []),
