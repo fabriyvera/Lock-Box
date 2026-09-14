@@ -3,14 +3,48 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { Lock, Mail, ArrowRight } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("Iniciando sesión con:", email, password);
+    if (!captchaToken) {
+      setError("Completa la verificación de seguridad.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, captchaToken }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Error al iniciar sesión.");
+        setLoading(false);
+        return;
+      }
+
+      window.location.href = "/dashboard";
+    } catch {
+      setError("Error de conexión con el servidor.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,10 +64,8 @@ export default function LoginPage() {
 
         {/* CARD */}
         <div className="relative bg-[#0B1221] border border-[#1C263A] p-8 shadow-2xl">
-          {/* Barra verde lateral */}
           <div className="absolute top-0 left-0 w-1 h-full bg-[#00E59B]" />
 
-          {/* Header */}
           <div className="mb-8 pl-2">
             <p className="text-[10px] font-bold text-[#00E59B] uppercase tracking-[0.2em] mb-2">
               Sección de Acceso
@@ -42,8 +74,7 @@ export default function LoginPage() {
               INICIAR SESIÓN
             </h1>
             <p className="text-sm text-slate-400">
-              Ingresar tu correo electrónico y contraseña para acceder a tu
-              cuenta.
+              Ingresa tu correo electrónico y contraseña.
             </p>
           </div>
 
@@ -92,17 +123,39 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* TURNSTILE */}
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                options={{ theme: "dark", size: "flexible" }}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                onError={() => setCaptchaToken(null)}
+              />
+            </div>
+
+            {/* ERROR */}
+            {error && (
+              <div className="text-red-500 text-xs font-bold text-center bg-red-500/10 border border-red-500/30 rounded py-2">
+                {error}
+              </div>
+            )}
+
             {/* BOTÓN */}
             <button
               type="submit"
-              className="w-full h-14 bg-[#00E59B] hover:bg-[#00C988] text-[#060B14] font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 rounded transition-colors mt-2"
+              disabled={!captchaToken || loading}
+              className={`w-full h-14 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 rounded transition-colors mt-2 ${
+                captchaToken && !loading
+                  ? "bg-[#00E59B] hover:bg-[#00C988] text-[#060B14] cursor-pointer"
+                  : "bg-[#1C263A] text-slate-500 cursor-not-allowed"
+              }`}
             >
-              Ingresar a mi cuenta
-              <ArrowRight className="w-4 h-4" />
+              {loading ? "Verificando..." : "Ingresar a mi cuenta"}
+              {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
 
-          {/* FOOTER */}
           <div className="mt-8 pt-6 border-t border-[#1C263A] text-center">
             <p className="text-sm text-slate-400">
               ¿Aún no eres parte de la red Phygital?{" "}
