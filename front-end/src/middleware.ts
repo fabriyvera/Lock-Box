@@ -1,7 +1,12 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
+  // The academic seller demo has no Supabase dependency or authenticated data.
+  // Remove this bypass when the demo adapter is replaced by the authenticated API.
+  if (request.nextUrl.pathname === '/vendedor' || request.nextUrl.pathname.startsWith('/vendedor/')) {
+    return NextResponse.next({ request });
+  }
   return await updateSession(request);
 }
 

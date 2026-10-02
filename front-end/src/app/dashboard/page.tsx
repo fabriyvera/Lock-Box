@@ -186,7 +186,7 @@ function MapPlaceholder({ locker }: { locker: typeof LOCKERS[0] }) {
   );
 }
 
-export default function ClientDashboard({ onBack = () => {} }: { onBack?: () => void }) {
+export default function ClientDashboard() {
   const router = useRouter();
   const [screen, setScreen] = useState<ClientScreen>(1);
   const [activeSeller, setActiveSeller] = useState<typeof SELLERS[0] | null>(null);

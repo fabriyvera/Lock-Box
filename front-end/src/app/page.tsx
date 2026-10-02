@@ -44,7 +44,7 @@ export default function Home() {
   
   // Te lleva al dashboard después de 1 segundo
   setTimeout(() => {
-    router.push('/dashboard');
+    router.push(role === 'vendedor' ? '/vendedor' : '/dashboard');
   }, 1000);
 };
 
