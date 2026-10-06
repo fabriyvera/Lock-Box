@@ -1,5 +1,5 @@
 export const SUPABASE_CONFIG_ERROR =
-  "Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY) en front-end/.env.local y reinicia npm run dev. La demo está disponible en /vendedor sin Supabase.";
+  "Configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY) en front-end/.env.local y reinicia npm run dev. El módulo vendedor requiere Supabase y una sesión válida.";
 
 export function getSupabaseConfig() {
   // Next.js needs direct references to include public values in browser bundles.
