@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useRef, FormEvent } from "react";
 import Link from "next/link";
 import { Lock, Mail, ArrowRight } from "lucide-react";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const captcha = useRef<TurnstileInstance>(undefined);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,8 +30,9 @@ export default function LoginPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(20000),
           body: JSON.stringify({ email, password, captchaToken }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -37,13 +40,26 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.message || "Error al iniciar sesión.");
         setLoading(false);
+        setCaptchaToken(null);
+        captcha.current?.reset();
         return;
       }
 
-      window.location.href = "/dashboard";
+      if (!data.session?.access_token || !data.session?.refresh_token) {
+        throw new Error("El backend no devolvió una sesión de Supabase.");
+      }
+      const { error: sessionError } = await createClient().auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+      if (sessionError) throw sessionError;
+      window.location.href =
+        data.user?.role === "vendedor" ? "/vendedor" : "/dashboard";
     } catch {
       setError("Error de conexión con el servidor.");
       setLoading(false);
+      setCaptchaToken(null);
+      captcha.current?.reset();
     }
   };
 
@@ -81,12 +97,17 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-5">
             {/* EMAIL */}
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              <label
+                htmlFor="login-email"
+                className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2"
+              >
                 Correo Electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
                 <input
+                  id="login-email"
+                  autoComplete="email"
                   type="email"
                   required
                   value={email}
@@ -100,7 +121,10 @@ export default function LoginPage() {
             {/* PASSWORD */}
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <label
+                  htmlFor="login-password"
+                  className="block text-xs font-bold text-slate-300 uppercase tracking-wider"
+                >
                   Contraseña
                 </label>
                 <Link
@@ -113,6 +137,8 @@ export default function LoginPage() {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
                 <input
+                  id="login-password"
+                  autoComplete="current-password"
                   type="password"
                   required
                   value={password}
@@ -126,6 +152,7 @@ export default function LoginPage() {
             {/* TURNSTILE */}
             <div className="flex justify-center">
               <Turnstile
+                ref={captcha}
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 options={{ theme: "dark", size: "flexible" }}
                 onSuccess={(token) => setCaptchaToken(token)}

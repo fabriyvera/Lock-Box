@@ -1,3 +1,5 @@
+> Documento histórico de la primera demo en `vendedores`. En `backend-sellers`, la persistencia local y el login simulado se reemplazaron por Supabase y Express. La configuración y el alcance actuales están en [BACKEND_SELLERS.md](BACKEND_SELLERS.md).
+
 # Módulo del vendedor — MVP académico
 
 Rama: `vendedores`. Ruta: `/vendedor`.
@@ -8,14 +10,14 @@ Esta entrega implementa la experiencia del vendedor como **simulación local**, 
 
 Los datos se guardan en `localStorage` bajo `lockbox.seller.demo.v1`, separados del dashboard del comprador. Cada navegador tiene su propia tienda de ejemplo; no hay sincronización entre compradores y vendedores. La ruta pública solo contiene datos de demostración. Reiniciar la demo requiere confirmación y restaura los datos iniciales.
 
-| Caso | Funcionalidad |
-| --- | --- |
-| C1 | Crear, listar, buscar, editar y archivar productos; filtros por categoría y estado; SKU único y precio en centavos. |
-| C2 | Publicar o pausar productos. Publicación requiere stock; los productos nuevos empiezan como borradores. |
-| C3 | Iniciar y finalizar un live simulado con productos publicados; una sola transmisión activa; catálogo copiable para TikTok e historial de lives. |
-| C10 | Cambiar entre Emprende y Pro con confirmación, sin cobros reales. |
-| Vistas de integración | Pedidos e historial, despacho de pedidos pagados, exportación CSV, resumen de ventas, saldo y solicitudes de liquidación simuladas. |
-| Perfil de tienda | Editar nombre, usuario público, ciudad y descripción de la tienda de demo. |
+| Caso                  | Funcionalidad                                                                                                                                   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| C1                    | Crear, listar, buscar, editar y archivar productos; filtros por categoría y estado; SKU único y precio en centavos.                             |
+| C2                    | Publicar o pausar productos. Publicación requiere stock; los productos nuevos empiezan como borradores.                                         |
+| C3                    | Iniciar y finalizar un live simulado con productos publicados; una sola transmisión activa; catálogo copiable para TikTok e historial de lives. |
+| C10                   | Cambiar entre Emprende y Pro con confirmación, sin cobros reales.                                                                               |
+| Vistas de integración | Pedidos e historial, despacho de pedidos pagados, exportación CSV, resumen de ventas, saldo y solicitudes de liquidación simuladas.             |
+| Perfil de tienda      | Editar nombre, usuario público, ciudad y descripción de la tienda de demo.                                                                      |
 
 Las vistas de pedidos y saldo ofrecen continuidad en la demostración. No reemplazan los módulos de escrow, QR, IA o analytics asignados a otros integrantes.
 
@@ -46,17 +48,17 @@ La persistencia valida snapshots antes de usarlos y muestra un aviso si están d
 
 Estos endpoints son **contratos para la siguiente integración**, no rutas de servidor implementadas en esta entrega. Sustituir el adaptador local por un adaptador HTTP, validando el JWT real de Supabase y el rol `vendedor`. El backend determina `seller_id` desde la sesión; nunca desde un ID suministrado por el cliente.
 
-| Operación | Endpoint propuesto | Restricción |
-| --- | --- | --- |
-| Cargar tienda | `GET /api/seller/workspace` | Solo datos del vendedor autenticado. |
-| Crear producto | `POST /api/seller/products` | Zod; precio y stock válidos; SKU único. |
-| Editar producto | `PATCH /api/seller/products/:id` | Propiedad del producto; no editar durante live. |
-| Publicar/pausar | `PATCH /api/seller/products/:id/status` | Stock para publicar; archivar con `is_active=false`. |
-| Iniciar live | `POST /api/seller/live-sessions` | Productos propios publicados, con stock; una sesión activa. |
-| Finalizar live | `PATCH /api/seller/live-sessions/:id/end` | Sesión propia activa. |
-| Despachar pedido | `POST /api/seller/orders/:id/dispatch` | Actualización atómica condicionada a `status='paid'`. |
-| Solicitar liquidación | `POST /api/seller/payouts` | Cálculo servidor, saldo bloqueado y clave de idempotencia. |
-| Cambiar plan | `POST /api/seller/subscriptions` | Tarifas servidor; activar solo tras confirmación del proveedor si se cobran suscripciones. |
+| Operación             | Endpoint propuesto                        | Restricción                                                                                |
+| --------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Cargar tienda         | `GET /api/seller/workspace`               | Solo datos del vendedor autenticado.                                                       |
+| Crear producto        | `POST /api/seller/products`               | Zod; precio y stock válidos; SKU único.                                                    |
+| Editar producto       | `PATCH /api/seller/products/:id`          | Propiedad del producto; no editar durante live.                                            |
+| Publicar/pausar       | `PATCH /api/seller/products/:id/status`   | Stock para publicar; archivar con `is_active=false`.                                       |
+| Iniciar live          | `POST /api/seller/live-sessions`          | Productos propios publicados, con stock; una sesión activa.                                |
+| Finalizar live        | `PATCH /api/seller/live-sessions/:id/end` | Sesión propia activa.                                                                      |
+| Despachar pedido      | `POST /api/seller/orders/:id/dispatch`    | Actualización atómica condicionada a `status='paid'`.                                      |
+| Solicitar liquidación | `POST /api/seller/payouts`                | Cálculo servidor, saldo bloqueado y clave de idempotencia.                                 |
+| Cambiar plan          | `POST /api/seller/subscriptions`          | Tarifas servidor; activar solo tras confirmación del proveedor si se cobran suscripciones. |
 
 Los modelos tipados actuales definen la forma de las acciones y vistas. Para persistencia real, mapear `priceCents` a `products.price`, `category` a `categories.id`, imágenes a `product_images` y etiquetas a `tags/product_tags`, usando el esquema de `docs/db_structure.md`. El estado `draft/published/paused/archived` requiere un campo de publicación o una convención explícita: `is_active` por sí solo no distingue todos los estados. Los campos de liquidación son snapshots por pedido, no el plan actual del vendedor.
 

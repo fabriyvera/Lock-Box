@@ -426,13 +426,13 @@
   color: #93a4bd;
   font-size: 11px;
 }
-.metric svg[data-tone='green'] {
+.metric svg[data-tone="green"] {
   color: #00e59b;
 }
-.metric svg[data-tone='amber'] {
+.metric svg[data-tone="amber"] {
   color: #eeb75b;
 }
-.metric svg[data-tone='blue'] {
+.metric svg[data-tone="blue"] {
   color: #6094ef;
 }
 .metric > strong {
@@ -493,22 +493,22 @@
   white-space: nowrap;
   line-height: 1.2;
 }
-.badge[data-tone='green'] {
+.badge[data-tone="green"] {
   color: #00e59b;
   border-color: #00e59b30;
   background: #00e59b0a;
 }
-.badge[data-tone='blue'] {
+.badge[data-tone="blue"] {
   color: #8ab5ff;
   border-color: #2563eb40;
   background: #2563eb13;
 }
-.badge[data-tone='amber'] {
+.badge[data-tone="amber"] {
   color: #eab86a;
   border-color: #eab86a30;
   background: #eab86a0a;
 }
-.badge[data-tone='red'] {
+.badge[data-tone="red"] {
   color: #ff9393;
   border-color: #ef444440;
   background: #ef444411;
@@ -707,19 +707,22 @@
   place-items: center;
   width: 100%;
   height: 170px;
-  background: radial-gradient(ellipse at 50% 80%, #00e59b12, transparent 70%), #0d1b26;
+  background:
+    radial-gradient(ellipse at 50% 80%, #00e59b12, transparent 70%), #0d1b26;
   color: #679b96;
   overflow: hidden;
 }
-.productVisual[data-category='Tecnología'] {
-  background: radial-gradient(ellipse at 50% 80%, #2563eb28, transparent 70%), #0e182b;
+.productVisual[data-category="Tecnología"] {
+  background:
+    radial-gradient(ellipse at 50% 80%, #2563eb28, transparent 70%), #0e182b;
   color: #6380ab;
 }
-.productVisual[data-category='Accesorios'] {
-  background: radial-gradient(ellipse at 50% 80%, #aa722d1c, transparent 70%), #1d1a20;
+.productVisual[data-category="Accesorios"] {
+  background:
+    radial-gradient(ellipse at 50% 80%, #aa722d1c, transparent 70%), #1d1a20;
   color: #9d856c;
 }
-.productVisual[data-category='Belleza'] {
+.productVisual[data-category="Belleza"] {
   background: #221b2c;
   color: #9884b2;
 }
@@ -772,7 +775,7 @@
   font-size: 9px;
   color: #839aab;
 }
-.priceRow span[data-low='true'] {
+.priceRow span[data-low="true"] {
   color: #e4b767;
 }
 .tags {
@@ -836,7 +839,8 @@
   justify-content: center;
   min-height: 280px;
   padding: 35px;
-  background: radial-gradient(ellipse at top, #2563eb0e, transparent 80%), #070e19;
+  background:
+    radial-gradient(ellipse at top, #2563eb0e, transparent 80%), #070e19;
   border-bottom: 1px solid #1c263a;
   text-align: center;
 }
@@ -1146,7 +1150,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: radial-gradient(ellipse at top right, #00e59b16, transparent 70%), #0b1a21;
+  background:
+    radial-gradient(ellipse at top right, #00e59b16, transparent 70%), #0b1a21;
   border: 1px solid #00e59b30;
   padding: 34px;
   margin-bottom: 22px;
@@ -1334,7 +1339,7 @@
   font-size: 12px;
   line-height: 1.7;
 }
-.toast[data-error='true'] {
+.toast[data-error="true"] {
   background: #2c121c;
   border-color: #ef444450;
   color: #ffa4a4;
@@ -1660,4 +1665,10 @@
   .dialog button {
     transition: none;
   }
+}
+.operationFields {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
 }

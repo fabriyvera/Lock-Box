@@ -1,11 +1,9 @@
-import { env } from '../config/env.js';
-
 const TURNSTILE_VERIFY_URL =
-  'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 type TurnstileResponse = {
   success: boolean;
-  'error-codes'?: string[];
+  "error-codes"?: string[];
 };
 
 export type VerifyResult =
@@ -13,21 +11,23 @@ export type VerifyResult =
   | { success: false; errorCodes: string[] };
 
 export async function verifyTurnstileToken(
+  secret: string,
   token: string,
-  remoteIp?: string
+  remoteIp?: string,
 ): Promise<VerifyResult> {
   const body = new URLSearchParams({
-    secret: env.TURNSTILE_SECRET_KEY,
+    secret,
     response: token,
   });
 
-  if (remoteIp) body.append('remoteip', remoteIp);
+  if (remoteIp) body.append("remoteip", remoteIp);
 
   try {
     const res = await fetch(TURNSTILE_VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
+      signal: AbortSignal.timeout(15000),
     });
 
     const data = (await res.json()) as TurnstileResponse;
@@ -36,9 +36,9 @@ export async function verifyTurnstileToken(
 
     return {
       success: false,
-      errorCodes: data['error-codes'] ?? ['unknown-error'],
+      errorCodes: data["error-codes"] ?? ["unknown-error"],
     };
   } catch {
-    return { success: false, errorCodes: ['network-error'] };
+    return { success: false, errorCodes: ["network-error"] };
   }
 }

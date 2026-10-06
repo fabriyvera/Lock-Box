@@ -6,13 +6,17 @@ import {
   House,
   Package,
   type LucideIcon,
-} from 'lucide-react';
-import type { SellerProduct, SellerAction, SellerState } from '@/lib/seller/model';
-import styles from './seller.module.css';
+} from "lucide-react";
+import type {
+  SellerProduct,
+  SellerAction,
+  SellerState,
+} from "@/lib/seller/model";
+import styles from "./seller.module.css";
 
 export type PanelProps = {
   state: SellerState;
-  act: (action: SellerAction, message: string) => boolean;
+  act: (action: SellerAction, message: string) => Promise<boolean>;
 };
 export function ProductVisual({ product }: { product: SellerProduct }) {
   const Icon: LucideIcon =
@@ -37,7 +41,7 @@ export function ProductVisual({ product }: { product: SellerProduct }) {
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={(event) => {
-            event.currentTarget.style.display = 'none';
+            event.currentTarget.style.display = "none";
           }}
         />
       )}
@@ -46,7 +50,7 @@ export function ProductVisual({ product }: { product: SellerProduct }) {
 }
 export function Badge({
   children,
-  tone = 'neutral',
+  tone = "neutral",
 }: {
   children: React.ReactNode;
   tone?: string;
@@ -58,15 +62,21 @@ export function Badge({
   );
 }
 export function dateLabel(value: string) {
-  return new Intl.DateTimeFormat('es-BO', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'America/La_Paz',
+  return new Intl.DateTimeFormat("es-BO", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/La_Paz",
   }).format(new Date(value));
 }
-export function Empty({ title, children }: { title: string; children: React.ReactNode }) {
+export function Empty({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className={styles.empty}>
       <Package size={32} />

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 import {
   LayoutDashboard,
   Package,
@@ -14,35 +14,38 @@ import {
   RotateCcw,
   X,
   Store,
-} from 'lucide-react';
-import { useSellerStore } from '@/lib/seller/store';
-import { activeLive } from '@/lib/seller/domain';
-import { PLANS, type SellerAction } from '@/lib/seller/model';
-import CatalogPanel from './CatalogPanel';
-import LivePanel from './LivePanel';
-import OrdersPanel from './OrdersPanel';
-import { WalletPanel, PlansPanel } from './FinancePanel';
-import ProfilePanel from './ProfilePanel';
-import OverviewPanel, { type Screen } from './OverviewPanel';
-import Dialog from './Dialog';
-import { Badge } from './ui';
-import styles from './seller.module.css';
+} from "lucide-react";
+import { useSellerStore } from "@/lib/seller/store";
+import { activeLive } from "@/lib/seller/domain";
+import { PLANS, type SellerAction } from "@/lib/seller/model";
+import CatalogPanel from "./CatalogPanel";
+import LivePanel from "./LivePanel";
+import OrdersPanel from "./OrdersPanel";
+import { WalletPanel, PlansPanel } from "./FinancePanel";
+import ProfilePanel from "./ProfilePanel";
+import OverviewPanel, { type Screen } from "./OverviewPanel";
+import { Badge } from "./ui";
+import styles from "./seller.module.css";
 
 const NAV = [
-  { id: 'overview', label: 'Resumen', icon: LayoutDashboard },
-  { id: 'catalog', label: 'Mi catálogo', icon: Package },
-  { id: 'live', label: 'Live & ventas', icon: Radio },
-  { id: 'orders', label: 'Pedidos', icon: ClipboardList },
-  { id: 'wallet', label: 'Mi saldo', icon: Wallet },
-  { id: 'plans', label: 'Mi plan', icon: Crown },
-  { id: 'profile', label: 'Mi tienda', icon: Settings },
+  { id: "overview", label: "Resumen", icon: LayoutDashboard },
+  { id: "catalog", label: "Mi catálogo", icon: Package },
+  { id: "live", label: "Live & ventas", icon: Radio },
+  { id: "orders", label: "Pedidos", icon: ClipboardList },
+  { id: "wallet", label: "Mi saldo", icon: Wallet },
+  { id: "plans", label: "Mi plan", icon: Crown },
+  { id: "profile", label: "Mi tienda", icon: Settings },
 ] as const;
 
 export default function SellerDashboard() {
-  const { state, dispatch, reset, storageWarning } = useSellerStore();
-  const [screen, setScreen] = useState<Screen>('overview');
-  const [toast, setToast] = useState<{ message: string; error: boolean } | null>(null);
-  const [confirmReset, setConfirmReset] = useState(false);
+  const { state, dispatch, refresh, logout, error, loading } = useSellerStore();
+  const [screen, setScreen] = useState<Screen>("overview");
+  const [toast, setToast] = useState<{
+    message: string;
+    error: boolean;
+  } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const busy = useRef(false);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
@@ -53,36 +56,64 @@ export default function SellerDashboard() {
     const timer = setTimeout(() => setToast(null), 5000);
     return () => clearTimeout(timer);
   }, [toast]);
-  function act(action: SellerAction, message: string) {
+  async function act(action: SellerAction, message: string) {
+    if (busy.current) return false;
+    busy.current = true;
+    setSaving(true);
     try {
-      dispatch(action);
+      await dispatch(action);
       setToast({ message, error: false });
       return true;
     } catch (err) {
       setToast({
-        message: err instanceof Error ? err.message : 'No se pudo guardar el cambio.',
+        message:
+          err instanceof Error ? err.message : "No se pudo guardar el cambio.",
         error: true,
       });
       return false;
+    } finally {
+      busy.current = false;
+      setSaving(false);
     }
   }
   if (!state)
     return (
-      <main className={styles.loading} aria-busy="true">
+      <main className={styles.loading} aria-busy={loading}>
         <div className={styles.logo}>
           <span>LOCK</span>
           <span>BOX</span>
         </div>
-        <p>Cargando tu espacio de vendedor…</p>
+        <p>{loading ? "Cargando tu espacio de vendedor…" : error}</p>
+        {!loading && (
+          <>
+            <Link href="/login" className={styles.primary}>
+              Iniciar sesión
+            </Link>
+            <button
+              className={styles.secondary}
+              onClick={() => void refresh().catch(() => {})}
+            >
+              Reintentar
+            </button>
+          </>
+        )}
       </main>
     );
-  const paidCount = state.orders.filter((order) => order.status === 'paid').length;
+  const paidCount = state.orders.filter(
+    (order) => order.status === "paid",
+  ).length;
   const live = activeLive(state);
+  const plans = state.planSettings ?? PLANS;
   const props = { state, act };
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
-        <Link href="/" prefetch={false} className={styles.logo} aria-label="LockBox, ir al inicio">
+        <Link
+          href="/"
+          prefetch={false}
+          className={styles.logo}
+          aria-label="LockBox, ir al inicio"
+        >
           <span>LOCK</span>
           <span>BOX</span>
         </Link>
@@ -93,13 +124,13 @@ export default function SellerDashboard() {
               key={item.id}
               aria-label={item.label}
               onClick={() => setScreen(item.id)}
-              aria-current={screen === item.id ? 'page' : undefined}
-              className={screen === item.id ? styles.activeNav : ''}
+              aria-current={screen === item.id ? "page" : undefined}
+              className={screen === item.id ? styles.activeNav : ""}
             >
               <item.icon size={19} />
               <span>{item.label}</span>
-              {item.id === 'orders' && paidCount > 0 && <b>{paidCount}</b>}
-              {item.id === 'live' && live && <i className={styles.liveDot} />}
+              {item.id === "orders" && paidCount > 0 && <b>{paidCount}</b>}
+              {item.id === "live" && live && <i className={styles.liveDot} />}
             </button>
           ))}
         </nav>
@@ -107,11 +138,14 @@ export default function SellerDashboard() {
           <div className={styles.sidebarPlan}>
             <Crown size={20} />
             <div>
-              <strong>Plan {PLANS[state.plan].name}</strong>
-              <p>{PLANS[state.plan].commissionPercent}% de comisión · demo</p>
+              <strong>Plan {plans[state.plan].name}</strong>
+              <p>{plans[state.plan].commissionPercent}% de comisión · prueba</p>
             </div>
           </div>
-          <button className={styles.textButton} onClick={() => setScreen('plans')}>
+          <button
+            className={styles.textButton}
+            onClick={() => setScreen("plans")}
+          >
             Explorar planes →
           </button>
           <Link href="/" prefetch={false} className={styles.backLink}>
@@ -127,14 +161,31 @@ export default function SellerDashboard() {
           </div>
           <div className={styles.topbarRight}>
             {live && (
-              <button className={styles.liveIndicator} onClick={() => setScreen('live')}>
+              <button
+                className={styles.liveIndicator}
+                onClick={() => setScreen("live")}
+              >
                 <i className={styles.liveDot} /> EN LIVE
               </button>
             )}
-            <Badge tone="green">DEMO ACADÉMICA</Badge>
+            <Badge tone="green">PRUEBAS EN SUPABASE</Badge>
+            <button
+              className={styles.textButton}
+              disabled={saving}
+              onClick={() =>
+                void logout().catch(() =>
+                  setToast({
+                    message: "No se pudo cerrar sesión.",
+                    error: true,
+                  }),
+                )
+              }
+            >
+              Cerrar sesión
+            </button>
             <button
               className={styles.account}
-              onClick={() => setScreen('profile')}
+              onClick={() => setScreen("profile")}
               aria-label="Editar mi tienda"
             >
               <div className={styles.avatar}>
@@ -149,11 +200,15 @@ export default function SellerDashboard() {
         </header>
         <div className={styles.demoBanner}>
           <span>
-            <strong>Modo demostración.</strong> Productos y operaciones simulados, guardados en este
-            navegador. No procesa pagos reales.
+            <strong>Entorno de pruebas.</strong> Datos sincronizados con
+            Supabase mediante el backend. Las ventas, lives y liquidaciones de
+            prueba no procesan dinero real.
           </span>
-          <button onClick={() => setConfirmReset(true)}>
-            <RotateCcw size={14} /> Reiniciar demo
+          <button
+            disabled={saving}
+            onClick={() => void refresh().catch(() => {})}
+          >
+            <RotateCcw size={14} /> Actualizar datos
           </button>
         </div>
         <main className={styles.content} id="seller-content">
@@ -163,32 +218,36 @@ export default function SellerDashboard() {
                 {state.profile.city.toUpperCase()} / COMERCIO SOCIAL SEGURO
               </span>
               <h1>
-                {screen === 'overview'
+                {screen === "overview"
                   ? `Hola, ${state.profile.storeName}.`
                   : NAV.find((item) => item.id === screen)?.label}
               </h1>
             </div>
             <span className={styles.date}>
-              {new Intl.DateTimeFormat('es-BO', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-                timeZone: 'America/La_Paz',
+              {new Intl.DateTimeFormat("es-BO", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: "America/La_Paz",
               }).format(now)}
             </span>
           </div>
-          {storageWarning && (
-            <p role="alert" className={styles.error}>
-              {storageWarning}
+          {saving && (
+            <p role="status" className={styles.note}>
+              Guardando cambios en Supabase…
             </p>
           )}
-          {screen === 'overview' && <OverviewPanel state={state} now={now} navigate={setScreen} />}
-          {screen === 'catalog' && <CatalogPanel {...props} />}
-          {screen === 'live' && <LivePanel {...props} now={now} />}
-          {screen === 'orders' && <OrdersPanel {...props} />}
-          {screen === 'wallet' && <WalletPanel {...props} now={now} />}
-          {screen === 'plans' && <PlansPanel {...props} />}
-          {screen === 'profile' && <ProfilePanel {...props} />}
+          <fieldset disabled={saving} className={styles.operationFields}>
+            {screen === "overview" && (
+              <OverviewPanel state={state} now={now} navigate={setScreen} />
+            )}
+            {screen === "catalog" && <CatalogPanel {...props} />}
+            {screen === "live" && <LivePanel {...props} now={now} />}
+            {screen === "orders" && <OrdersPanel {...props} />}
+            {screen === "wallet" && <WalletPanel {...props} now={now} />}
+            {screen === "plans" && <PlansPanel {...props} />}
+            {screen === "profile" && <ProfilePanel {...props} />}
+          </fieldset>
           <footer className={styles.footer}>
             <span>LOCKBOX · TU NEGOCIO, TU COMUNIDAD.</span>
             <span>Comercio social seguro / Bolivia</span>
@@ -197,7 +256,7 @@ export default function SellerDashboard() {
       </div>
       {toast && (
         <div
-          role={toast.error ? 'alert' : 'status'}
+          role={toast.error ? "alert" : "status"}
           className={styles.toast}
           data-error={toast.error}
         >
@@ -206,39 +265,6 @@ export default function SellerDashboard() {
             <X size={17} />
           </button>
         </div>
-      )}
-      {confirmReset && (
-        <Dialog title="Reiniciar datos de demostración" onClose={() => setConfirmReset(false)}>
-          <div className={styles.form}>
-            <p>
-              Se restaurará la tienda de ejemplo. Los productos, lives, cambios de plan y
-              solicitudes guardados en este navegador se perderán.
-            </p>
-            <div className={styles.actions}>
-              <button className={styles.secondary} onClick={() => setConfirmReset(false)}>
-                Conservar cambios
-              </button>
-              <button
-                className={styles.danger}
-                onClick={() => {
-                  try {
-                    reset();
-                    setConfirmReset(false);
-                    setScreen('overview');
-                    setToast({ message: 'Demo restaurada.', error: false });
-                  } catch (err) {
-                    setToast({
-                      message: err instanceof Error ? err.message : 'No se pudo reiniciar.',
-                      error: true,
-                    });
-                  }
-                }}
-              >
-                Reiniciar demo
-              </button>
-            </div>
-          </div>
-        </Dialog>
       )}
     </div>
   );

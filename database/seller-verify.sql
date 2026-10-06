@@ -1,0 +1,60 @@
+-- Run after seller-seed.sql in the SQL editor. All QA writes are rolled back.
+begin;
+insert into public.products(seller_id,title,price,stock,sku)
+select id,'Otro propietario QA',50,1,'ROLLBACK-OTHER-SELLER' from public.profiles where username='seller_test_buyer';
+select set_config('seller.qa_other_product',(select id::text from public.products where sku='ROLLBACK-OTHER-SELLER'),true);
+select set_config('request.jwt.claim.sub',(select id::text from public.profiles where username='lockbox_store'),true);
+set local role authenticated;
+do $$
+declare s jsonb; p uuid:=gen_random_uuid(); live uuid:=gen_random_uuid(); request uuid:=gen_random_uuid(); a jsonb;
+  paid uuid; available numeric; history_count integer;
+begin
+  s:=public.seller_state();
+  if jsonb_array_length(s->'products')<>9 or jsonb_array_length(s->'orders')<>12 then raise exception 'Conteos iniciales incorrectos'; end if;
+  if exists(select 1 from public.products where sku='ROLLBACK-OTHER-SELLER') then raise exception 'RLS permite datos ajenos'; end if;
+  begin perform public.seller_action(jsonb_build_object('type','setProductStatus','id',current_setting('seller.qa_other_product'),'status','published'),gen_random_uuid()); raise exception 'Mutación de producto ajeno aceptada'; exception when insufficient_privilege then null; end;
+  if has_column_privilege('authenticated','public.orders','qr_code','select') or has_column_privilege('authenticated','public.orders','buyer_id','select') then raise exception 'Columnas privadas expuestas'; end if;
+  if has_function_privilege('anon','public.seller_state()','execute') or has_function_privilege('anon','public.seller_action(jsonb,uuid)','execute') then raise exception 'RPC expuesta a anon'; end if;
+  begin update public.profiles set role='admin' where id=auth.uid(); raise exception 'Escritura directa permitida'; exception when insufficient_privilege then null; end;
+  a:=jsonb_build_object('type','saveProduct','product',jsonb_build_object('id',p,'title','Prueba rollback','description','','category','Otros','priceCents',5000,'stock',2,'sku','ROLLBACK-SELLER-TEST','imageUrl','','tags','["QA rollback"]'::jsonb,'status','draft'));
+  perform public.seller_action(a,request);
+  perform public.seller_action(a,request);
+  s:=public.seller_state();
+  if jsonb_array_length(s->'products')<>10 then raise exception 'Idempotencia incorrecta'; end if;
+  begin perform public.seller_action(jsonb_set(a,'{product,title}','"Otro contenido"'),request); raise exception 'Reutilización de solicitud aceptada'; exception when sqlstate '22023' then null; end;
+  begin perform public.seller_action(jsonb_build_object('type','setProductStatus','id',(select id from public.products where sku='LB-TEST-DRAFT'),'status','published'),gen_random_uuid()); raise exception 'Publicación sin stock aceptada'; exception when sqlstate '22023' then null; end;
+  perform public.seller_action(jsonb_build_object('type','setProductStatus','id',p,'status','published'),gen_random_uuid());
+  perform public.seller_action(jsonb_build_object('type','startLive','id',live,'title','Live rollback','productIds',jsonb_build_array(p)),gen_random_uuid());
+  begin perform public.seller_action(jsonb_build_object('type','setProductStatus','id',p,'status','paused'),gen_random_uuid()); raise exception 'Cambio durante live aceptado'; exception when sqlstate '22023' then null; end;
+  begin perform public.seller_action(jsonb_build_object('type','startLive','id',gen_random_uuid(),'title','Segundo live','productIds',jsonb_build_array(p)),gen_random_uuid()); raise exception 'Dos lives aceptados'; exception when sqlstate '22023' then null; end;
+  perform public.seller_action('{"type":"endLive"}',gen_random_uuid());
+  select id into paid from public.orders where test_reference='seller-module-v1:paid';
+  select count(*) into history_count from public.order_status_history where order_id=paid;
+  request:=gen_random_uuid(); a:=jsonb_build_object('type','dispatchOrder','id',paid);
+  perform public.seller_action(a,request); perform public.seller_action(a,request);
+  if (select status from public.orders where id=paid)<>'dispatched' or (select count(*) from public.order_status_history where order_id=paid)<>history_count+1 then raise exception 'Despacho/historial incorrecto'; end if;
+  begin perform public.seller_action(a,gen_random_uuid()); raise exception 'Despacho duplicado aceptado'; exception when sqlstate '22023' then null; end;
+  begin perform public.seller_action('{"type":"releaseOrder"}',gen_random_uuid()); raise exception 'Liberación por vendedor aceptada'; exception when sqlstate '22023' then null; end;
+  perform public.seller_action('{"type":"changePlan","plan":"pro"}',gen_random_uuid());
+  s:=public.seller_state();
+  if s->>'plan'<>'pro' or (select count(*) from public.subscriptions where seller_id=auth.uid() and status='active')<>1 then raise exception 'Suscripción incorrecta'; end if;
+  if (select commission_amount from public.orders where test_reference='seller-module-v1:released-available')<>7.80 or (select settlement_delay_hours from public.orders where test_reference='seller-module-v1:released-available')<>48 then raise exception 'Plan cambió pedido histórico'; end if;
+  perform public.seller_action(jsonb_build_object('type','saveProfile','profile',(s->'profile')||'{"storeName":"QA temporal"}'::jsonb),gen_random_uuid());
+  if (select role from public.profiles where id=auth.uid())<>'vendedor' then raise exception 'Rol cambiado'; end if;
+  a:=jsonb_build_object('type','requestPayout','id',gen_random_uuid(),'at','2099-01-01T00:00:00Z','amountCents',999999);
+  request:=gen_random_uuid();
+  perform public.seller_action(a,request); perform public.seller_action(a,request);
+  select sum(amount) into available from public.payouts where seller_id=auth.uid();
+  if available<>249.60 or (select count(*) from public.payouts where seller_id=auth.uid())<>1 then raise exception 'Monto o idempotencia de liquidación incorrectos'; end if;
+  begin perform public.seller_action(jsonb_build_object('type','requestPayout','id',gen_random_uuid()),gen_random_uuid()); raise exception 'Doble liquidación aceptada'; exception when sqlstate '22023' then null; end;
+end $$;
+reset role;
+select set_config('request.jwt.claim.sub',(select id::text from public.profiles where username='seller_test_buyer'),true);
+set local role authenticated;
+do $$ begin
+  if exists(select 1 from public.products where sku='TECH-ARO-01') then raise exception 'Comprador ve catálogo privado'; end if;
+  begin perform public.seller_state(); raise exception 'Comprador accede a vendedor'; exception when insufficient_privilege then null; end;
+  begin perform public.seller_action('{"type":"changePlan","plan":"pro"}',gen_random_uuid()); raise exception 'Comprador modifica datos vendedor'; exception when insufficient_privilege then null; end;
+end $$;
+rollback;
+select 'PASS: RLS, roles, CRUD, retries, live, dispatch, plans and payouts; QA writes rolled back' as verification;
