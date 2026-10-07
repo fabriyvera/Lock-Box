@@ -1,0 +1,158 @@
+/* No declarar colores aquí: la paleta pertenece a globals.css. */
+.page {
+  color: var(--color-foreground);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.icon {
+  color: var(--color-accent);
+}
+
+.flowConnector {
+  color: var(--color-text-muted);
+}
+
+.navButton {
+  color: var(--color-text-secondary);
+  border: 0;
+  border-bottom: 2px solid transparent;
+}
+
+.navButton[data-active="true"] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.navButton:not([data-active="true"]):is(:hover, :focus-visible),
+.accentLink:is(:hover, :focus-visible),
+.textLink:is(:hover, :focus-visible) {
+  color: var(--color-foreground);
+}
+
+.accentLink {
+  color: var(--color-accent);
+}
+
+.textLink,
+.secondaryButton,
+.planButton,
+.socialLink {
+  color: var(--color-text-secondary);
+}
+
+.primaryButton {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  transition: background-color 0.2s;
+}
+
+.primaryButton:is(:hover, :focus-visible) {
+  background: var(--color-accent-hover);
+}
+
+.secondaryButton {
+  border: 1px solid var(--color-border-strong);
+}
+
+.secondaryStrong {
+  border-width: 2px;
+  border-color: var(--color-border-emphasis);
+}
+
+.secondaryButton:is(:hover, :focus-visible) {
+  border-color: var(--color-accent);
+  color: var(--color-foreground);
+}
+
+.flowCard {
+  border-left: 3px solid var(--color-border-strong);
+}
+
+.flowCard[data-highlighted="true"],
+.flowCard:hover {
+  border-left-color: var(--color-accent);
+}
+
+.valueCard {
+  background: var(--color-surface-raised);
+  border-left: 3px solid transparent;
+}
+
+.valueCard:hover {
+  background: var(--color-surface-hover);
+  border-left-color: var(--color-accent);
+}
+
+.serviceCard {
+  border-bottom: 3px solid transparent;
+}
+
+.serviceCard:hover {
+  border-bottom-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.planButton,
+.socialLink,
+.affiliateButton {
+  background: transparent;
+}
+
+.planButton:is(:hover, :focus-visible) {
+  background: var(--color-brand-secondary-hover);
+  color: var(--color-foreground);
+}
+
+.roleCard {
+  background: var(--color-surface-deep);
+  border: 2px solid var(--color-border-strong);
+  color: var(--color-foreground);
+}
+
+.roleCard[data-selected="true"] {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+}
+
+.roleCard:not([data-selected="true"]):is(:hover, :focus-visible) {
+  border-color: var(--color-brand-secondary-hover);
+}
+
+.formInput {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-foreground);
+}
+
+.formInput:focus {
+  border-color: var(--color-accent);
+}
+
+.socialLink {
+  border: 1px solid var(--color-border-strong);
+}
+
+.socialLink:is(:hover, :focus-visible) {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.affiliateButton {
+  color: var(--color-accent);
+}
+
+.affiliateButton:is(:hover, :focus-visible) {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .serviceCard:hover {
+    transform: none;
+  }
+}
