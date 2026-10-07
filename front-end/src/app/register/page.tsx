@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ArrowLeft, ShoppingCart, Store } from 'lucide-react';
+import { DecorativeIcon } from '@/components/ui/DecorativeIcon';
 
 type Role = 'comprador' | 'vendedor';
 
@@ -39,7 +41,7 @@ export default function RegisterPage() {
           <span className="bg-surface-deep border border-border text-white font-bold px-2 py-1 text-sm rounded-r tracking-wider">BOX</span>
         </div>
         <Link href="/" className="text-sm text-text-muted hover:text-accent transition-colors">
-          ← Volver al inicio
+          <DecorativeIcon icon={ArrowLeft} size={16} /> Volver al inicio
         </Link>
       </header>
 
@@ -71,7 +73,7 @@ export default function RegisterPage() {
                     : 'border-border bg-surface-deep hover:border-border-strong'
                 }`}
               >
-                <div className="text-2xl mb-2">🛒</div>
+                <div className="text-2xl mb-2"><DecorativeIcon icon={ShoppingCart} size={28} className="text-accent" /></div>
                 <h3 className="font-bold text-base mb-1 text-white">Comprador</h3>
                 <p className="text-xs text-text-muted leading-relaxed">
                   Compra en lives de TikTok con pago protegido y recoge en un Punto LockBox cercano.
@@ -86,7 +88,7 @@ export default function RegisterPage() {
                     : 'border-border bg-surface-deep hover:border-border-strong'
                 }`}
               >
-                <div className="text-2xl mb-2">🏪</div>
+                <div className="text-2xl mb-2"><DecorativeIcon icon={Store} size={28} className="text-accent" /></div>
                 <h3 className="font-bold text-base mb-1 text-white">Vendedor</h3>
                 <p className="text-xs text-text-muted leading-relaxed">
                   Vende durante tus lives con catálogo integrado y recibe pagos seguros en 48 horas.

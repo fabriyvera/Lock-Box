@@ -3,6 +3,8 @@ import { useRouter } from 'next/navigation';
 import { useState, FormEvent } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { ChartColumnIncreasing, ChevronDown, CircleCheck, CreditCard, Package, ScanSearch, ShieldCheck, ShoppingCart, Smartphone, Store, Video, Zap } from 'lucide-react';
+import { DecorativeIcon } from '@/components/ui/DecorativeIcon';
 
 type Role = 'comprador' | 'vendedor' | null;
 
@@ -15,10 +17,10 @@ const VALUES = [
 ];
 
 const FLOW = [
-  { icon: '🎥', step: '01', label: 'Live en TikTok', sub: 'Vendedor expone catálogo' },
-  { icon: '💳', step: '02', label: 'Pago Escrow', sub: 'Dinero retenido seguro' },
-  { icon: '📦', step: '03', label: 'Punto LockBox', sub: 'Tienda aliada recibe' },
-  { icon: '✅', step: '04', label: 'QR Confirmado', sub: 'Pago liberado al vendedor' },
+  { icon: Video, step: '01', label: 'Live en TikTok', sub: 'Vendedor expone catálogo' },
+  { icon: CreditCard, step: '02', label: 'Pago Escrow', sub: 'Dinero retenido seguro' },
+  { icon: Package, step: '03', label: 'Punto LockBox', sub: 'Tienda aliada recibe' },
+  { icon: CircleCheck, step: '04', label: 'QR Confirmado', sub: 'Pago liberado al vendedor' },
 ];
 
 export default function Home() {
@@ -179,13 +181,13 @@ export default function Home() {
                   <div style={{ width: '36px', height: '36px', background: i === 0 || i === 3 ? 'var(--color-accent-soft)' : 'var(--color-surface-hover)', border: `1px solid ${i === 0 || i === 3 ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, flexDirection: 'column' }}>
                     <div style={{ fontSize: '8px', fontWeight: 700, color: 'var(--color-accent)', letterSpacing: '0.05em' }}>{item.step}</div>
                   </div>
-                  <div style={{ fontSize: '22px', flexShrink: 0 }}>{item.icon}</div>
+                  <div style={{ fontSize: '22px', flexShrink: 0 }}><DecorativeIcon icon={item.icon} size="1em" /></div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)', marginBottom: '2px' }}>{item.label}</div>
                     <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 400 }}>{item.sub}</div>
                   </div>
                   {i < FLOW.length - 1 && (
-                    <div style={{ fontSize: '14px', color: 'var(--color-border-strong)' }}>▼</div>
+                    <div style={{ fontSize: '14px', color: 'var(--color-border-strong)' }}><DecorativeIcon icon={ChevronDown} size={14} /></div>
                   )}
                 </div>
               ))}
@@ -238,7 +240,7 @@ export default function Home() {
             </div>
             <div>
               <p style={{ fontSize: '14px', lineHeight: 1.7, color: 'var(--color-foreground)', margin: '0 0 12px 0', fontWeight: 300 }}>
-                Nuestra solución combina un sistema de pagos tipo <strong style={{ color: 'var(--color-white)', fontWeight: 500 }}>escrow</strong> —que retiene el dinero hasta confirmar la entrega— con una red física de tiendas aliadas llamadas <strong style={{ color: 'var(--color-accent)', fontWeight: 500 }}>"Puntos LockBox"</strong>.
+                Nuestra solución combina un sistema de pagos tipo <strong style={{ color: 'var(--color-white)', fontWeight: 500 }}>escrow</strong> —que retiene el dinero hasta confirmar la entrega— con una red física de tiendas aliadas llamadas <strong style={{ color: 'var(--color-accent)', fontWeight: 500 }}>&quot;Puntos LockBox&quot;</strong>.
               </p>
               <p style={{ fontSize: '14px', lineHeight: 1.7, color: 'var(--color-foreground)', margin: 0, fontWeight: 300 }}>
                 El comprador escanea un código QR único en el punto de entrega y el sistema libera automáticamente el pago al vendedor. Sin estafas, sin caos, sin riesgo.
@@ -297,12 +299,12 @@ export default function Home() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
               {[
-                { icon: '🛡️', title: 'Pago en Garantía', desc: 'Tu dinero queda retenido hasta que confirmes haber recibido tu pedido. Sin estafas.', tag: 'COMPRADORES' },
-                { icon: '📦', title: 'Puntos LockBox', desc: 'Red de tiendas aliadas que reciben los paquetes y los entregan contra escaneo de QR.', tag: 'ENTREGA' },
-                { icon: '📲', title: 'Catálogo en Live', desc: 'Vende durante tu live en TikTok con catálogo integrado. Tus clientes compran con un clic.', tag: 'VENDEDORES' },
-                { icon: '⚡', title: 'Liquidación 48H', desc: 'Confirmada la entrega, el dinero llega a tu Yape o BCP en menos de 48 horas.', tag: 'VENDEDORES' },
-                { icon: '🔍', title: 'Validación QR', desc: 'Cada compra genera un QR único. Al escanearlo se libera el pago automáticamente.', tag: 'SEGURIDAD' },
-                { icon: '📊', title: 'Dashboard Pro', desc: 'Métricas de rotación, historial de ventas y análisis de clientes. Desde 1% de comisión.', tag: 'ANALYTICS' },
+                { icon: ShieldCheck, title: 'Pago en Garantía', desc: 'Tu dinero queda retenido hasta que confirmes haber recibido tu pedido. Sin estafas.', tag: 'COMPRADORES' },
+                { icon: Package, title: 'Puntos LockBox', desc: 'Red de tiendas aliadas que reciben los paquetes y los entregan contra escaneo de QR.', tag: 'ENTREGA' },
+                { icon: Smartphone, title: 'Catálogo en Live', desc: 'Vende durante tu live en TikTok con catálogo integrado. Tus clientes compran con un clic.', tag: 'VENDEDORES' },
+                { icon: Zap, title: 'Liquidación 48H', desc: 'Confirmada la entrega, el dinero llega a tu Yape o BCP en menos de 48 horas.', tag: 'VENDEDORES' },
+                { icon: ScanSearch, title: 'Validación QR', desc: 'Cada compra genera un QR único. Al escanearlo se libera el pago automáticamente.', tag: 'SEGURIDAD' },
+                { icon: ChartColumnIncreasing, title: 'Dashboard Pro', desc: 'Métricas de rotación, historial de ventas y análisis de clientes. Desde 1% de comisión.', tag: 'ANALYTICS' },
               ].map((s, i) => (
                 <div key={i} style={{
                   background: 'var(--color-surface-deep)', padding: '22px',
@@ -312,7 +314,7 @@ export default function Home() {
                   onMouseLeave={e => { e.currentTarget.style.borderBottomColor = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '22px', lineHeight: 1 }}>{s.icon}</span>
+                    <span style={{ fontSize: '22px', lineHeight: 1 }}><DecorativeIcon icon={s.icon} size="1em" /></span>
                     <span style={{ background: 'var(--color-accent-soft)', color: 'var(--color-accent)', fontWeight: 700, fontSize: '8px', letterSpacing: '0.2em', padding: '2px 6px', textTransform: 'uppercase' }}>{s.tag}</span>
                   </div>
                   <h3 style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)', margin: '0 0 5px 0' }}>{s.title}</h3>
@@ -419,8 +421,8 @@ export default function Home() {
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', marginBottom: '20px' }}>
                 {([
-                  { r: 'comprador' as Role, icon: '🛒', title: 'Comprador', desc: 'Compra en lives de TikTok con pago protegido y recoge en un Punto LockBox cercano.' },
-                  { r: 'vendedor' as Role, icon: '🏪', title: 'Vendedor', desc: 'Vende durante tus lives con catálogo integrado y recibe pagos seguros en 48 horas.' },
+                  { r: 'comprador' as Role, icon: ShoppingCart, title: 'Comprador', desc: 'Compra en lives de TikTok con pago protegido y recoge en un Punto LockBox cercano.' },
+                  { r: 'vendedor' as Role, icon: Store, title: 'Vendedor', desc: 'Vende durante tus lives con catálogo integrado y recibe pagos seguros en 48 horas.' },
                 ]).map(({ r, icon, title, desc }) => (
                   <button key={r!} onClick={() => { setRole(r); setSubmitted(false); }} style={{
                     background: role === r ? 'var(--color-accent-soft)' : 'var(--color-surface-deep)',
@@ -431,7 +433,7 @@ export default function Home() {
                     onMouseEnter={e => { if (role !== r) e.currentTarget.style.borderColor = 'var(--color-brand-secondary-hover)'; }}
                     onMouseLeave={e => { if (role !== r) e.currentTarget.style.borderColor = 'var(--color-border-strong)'; }}
                   >
-                    <div style={{ fontSize: '20px', marginBottom: '6px' }}>{icon}</div>
+                    <div style={{ fontSize: '20px', marginBottom: '6px' }}><DecorativeIcon icon={icon} size="1em" /></div>
                     <div style={{ fontWeight: 700, fontSize: '14px', color: role === r ? 'var(--color-accent)' : 'var(--color-white)', marginBottom: '4px' }}>{title}</div>
                     <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', lineHeight: 1.55, fontWeight: 400 }}>{desc}</div>
                   </button>
@@ -485,11 +487,11 @@ export default function Home() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {[
-                      { icon: '🛒', role: 'Comprador', detail: 'Compra segura · Recogida QR · Sin comisión' },
-                      { icon: '🏪', role: 'Vendedor', detail: 'Pago garantizado · Dashboard · Liquidación 48H' },
+                      { icon: ShoppingCart, role: 'Comprador', detail: 'Compra segura · Recogida QR · Sin comisión' },
+                      { icon: Store, role: 'Vendedor', detail: 'Pago garantizado · Dashboard · Liquidación 48H' },
                     ].map(item => (
                       <div key={item.role} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', background: 'var(--color-surface-raised)', borderLeft: '3px solid var(--color-border-strong)' }}>
-                        <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                        <span style={{ fontSize: '24px' }}><DecorativeIcon icon={item.icon} size="1em" /></span>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-white)', marginBottom: '2px' }}>{item.role}</div>
                           <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{item.detail}</div>
@@ -505,7 +507,7 @@ export default function Home() {
                 </div>
               ) : submitted ? (
                 <div style={{ textAlign: 'center', padding: '32px 0' }}>
-                  <div style={{ fontSize: '44px', marginBottom: '10px' }}>✅</div>
+                  <div style={{ fontSize: '44px', marginBottom: '10px' }}><DecorativeIcon icon={CircleCheck} size={44} className="text-accent" /></div>
                   <div style={{ fontWeight: 800, fontSize: '18px', color: 'var(--color-accent)', marginBottom: '8px' }}>¡Registro exitoso!</div>
                   <div style={{ fontSize: '13px', color: 'var(--color-foreground)', lineHeight: 1.6 }}>
                     Te contactaremos a <strong style={{ color: 'var(--color-white)' }}>{form.email}</strong> para activar tu cuenta de {role}.
