@@ -1,53 +1,107 @@
 @import "tailwindcss";
 
-/* Reset básico */
-* {
-  box-sizing: border-box;
+/* LockBox: única fuente de colores. Los nombres describen su uso, no su tono.
+ * @theme static expone los mismos tokens a Tailwind, CSS Modules y estilos inline.
+ * Se desactiva la paleta predeterminada para evitar colores ajenos al tema.
+ */
+@theme static {
+  --color-*: initial;
+  --color-canvas: #060b14;
+  --color-surface-deep: #080f1e;
+  --color-surface: #0b1221;
+  --color-surface-raised: #0d1a30;
+  --color-surface-hover: #122040;
+  --color-border: #1c263a;
+  --color-border-strong: #26334a;
+  --color-border-emphasis: #314762;
+  --color-brand-secondary: #1a3a6b;
+  --color-brand-secondary-hover: #2a5298;
+  --color-foreground: #edf3fb;
+  --color-text-secondary: #b8c6da;
+  --color-text-muted: #8797b1;
+  --color-text-subtle: #647795;
+  --color-text-disabled: #4f627d;
+  --color-accent: #00e59b;
+  --color-accent-hover: #00c988;
+  --color-accent-bright: #5cffcb;
+  --color-on-accent: #060b14;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-success: #00e59b;
+  --color-success-surface: #0d2722;
+  --color-on-success: #b3f2d8;
+  --color-info: #8ab5ff;
+  --color-info-strong: #2563eb;
+  --color-warning: #eab86a;
+  --color-warning-strong: #f5a623;
+  --color-danger: #ffa4a4;
+  --color-danger-strong: #ef4444;
+  --color-danger-surface: #2c121c;
+  --color-product-default: #0d1b26;
+  --color-product-default-foreground: #679b96;
+  --color-product-tech: #0e182b;
+  --color-product-tech-foreground: #6380ab;
+  --color-product-accessories: #1d1a20;
+  --color-product-accessories-foreground: #9d856c;
+  --color-product-beauty: #221b2c;
+  --color-product-beauty-foreground: #9884b2;
+  --color-product-accessories-accent: #aa722d;
+
+  /* Transparencias derivadas: cambiar el color base actualiza sus variantes. */
+  --color-accent-border: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  --color-accent-faint: color-mix(in srgb, var(--color-accent) 4%, transparent);
+  --color-accent-glow: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  --color-accent-muted: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  --color-accent-subtle: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  --color-black-strong: color-mix(in srgb, var(--color-black) 60%, transparent);
+  --color-border-soft: color-mix(in srgb, var(--color-border) 40%, transparent);
+  --color-canvas-glass: color-mix(in srgb, var(--color-canvas) 85%, transparent);
+  --color-danger-strong-border: color-mix(in srgb, var(--color-danger-strong) 25%, transparent);
+  --color-danger-strong-muted: color-mix(in srgb, var(--color-danger-strong) 18%, transparent);
+  --color-danger-strong-soft: color-mix(in srgb, var(--color-danger-strong) 12%, transparent);
+  --color-danger-strong-subtle: color-mix(in srgb, var(--color-danger-strong) 8%, transparent);
+  --color-info-strong-border: color-mix(in srgb, var(--color-info-strong) 25%, transparent);
+  --color-info-strong-faint: color-mix(in srgb, var(--color-info-strong) 4%, transparent);
+  --color-info-strong-muted: color-mix(in srgb, var(--color-info-strong) 18%, transparent);
+  --color-info-strong-subtle: color-mix(in srgb, var(--color-info-strong) 8%, transparent);
+  --color-product-accessories-accent-soft: color-mix(in srgb, var(--color-product-accessories-accent) 12%, transparent);
+  --color-surface-deep-glass: color-mix(in srgb, var(--color-surface-deep) 85%, transparent);
+  --color-surface-deep-opaque: color-mix(in srgb, var(--color-surface-deep) 95%, transparent);
+  --color-surface-raised-soft: color-mix(in srgb, var(--color-surface-raised) 40%, transparent);
+  --color-warning-faint: color-mix(in srgb, var(--color-warning) 4%, transparent);
+  --color-warning-muted: color-mix(in srgb, var(--color-warning) 18%, transparent);
+  --color-warning-strong-border: color-mix(in srgb, var(--color-warning-strong) 25%, transparent);
+  --color-warning-strong-subtle: color-mix(in srgb, var(--color-warning-strong) 8%, transparent);
 }
+
+* { box-sizing: border-box; }
 
 html,
 body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #060B14;
-  color: #e2e8f0;
+  background: var(--color-canvas);
+  color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+input { font-family: inherit; }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-input {
-  font-family: inherit;
-}
-
-/* Fix autofill de Chrome (input amarillo) */
+/* Evita que el autocompletado cambie el tema del formulario. */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #ffffff !important;
-  -webkit-box-shadow: 0 0 0 1000px #060B14 inset !important;
+  -webkit-text-fill-color: var(--color-white) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-canvas) inset !important;
   transition: background-color 5000s ease-in-out 0s;
-  caret-color: #ffffff;
+  caret-color: var(--color-white);
 }
 
-/* Scrollbar sutil */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: #1C263A;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }

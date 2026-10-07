@@ -4,9 +4,6 @@ import { useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/navigation';
 /* ─── constants ─── */
-const A = '#00D4AA';
-const AD = 'rgba(0,212,170,0.10)';
-const ABD = 'rgba(0,212,170,0.18)';
 
 const SELLERS = [
   {
@@ -156,31 +153,31 @@ function QRCode({ seed = 0 }: { seed?: number }) {
   const cell = 6, size = pat.length * cell + 16;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block' }}>
-      <rect width={size} height={size} fill="#ffffff" rx="8" />
+      <rect width={size} height={size} fill="var(--color-white)" rx="8" />
       {pat.map((row, r) => row.map((v, c) => v
-        ? <rect key={`${r}-${c}`} x={c * cell + 8} y={r * cell + 8} width={cell - 1} height={cell - 1} fill="#0a1525" rx="1" />
+        ? <rect key={`${r}-${c}`} x={c * cell + 8} y={r * cell + 8} width={cell - 1} height={cell - 1} fill="var(--color-surface)" rx="1" />
         : null
       ))}
-      <rect x={size/2-12} y={size/2-12} width={24} height={24} fill={A} rx="4" />
-      <text x={size/2} y={size/2+5} textAnchor="middle" fill="#080f1e" fontSize="11" fontWeight="900" fontFamily="Inter,sans-serif">LB</text>
+      <rect x={size/2-12} y={size/2-12} width={24} height={24} fill={'var(--color-accent)'} rx="4" />
+      <text x={size/2} y={size/2+5} textAnchor="middle" fill="var(--color-surface-deep)" fontSize="11" fontWeight="900" fontFamily="Inter,sans-serif">LB</text>
     </svg>
   );
 }
 
 function MapPlaceholder({ locker }: { locker: typeof LOCKERS[0] }) {
   return (
-    <div style={{ position: 'relative', background: '#0a1525', borderRadius: '10px', overflow: 'hidden', height: '150px', border: '1px solid #1e3358' }}>
+    <div style={{ position: 'relative', background: 'var(--color-surface)', borderRadius: '10px', overflow: 'hidden', height: '150px', border: '1px solid var(--color-border-strong)' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
-        {[0,1,2,3,4].map(i => <line key={`h${i}`} x1="0" y1={`${i*25}%`} x2="100%" y2={`${i*25}%`} stroke="#1e3358" strokeWidth="1" />)}
-        {[0,1,2,3,4,5,6].map(i => <line key={`v${i}`} x1={`${i*17}%`} y1="0" x2={`${i*17}%`} y2="100%" stroke="#1e3358" strokeWidth="1" />)}
-        <rect x="0" y="45%" width="100%" height="8%" fill="#122040" />
-        <rect x="38%" y="0" width="8%" height="100%" fill="#122040" />
-        <circle cx="42%" cy="49%" r="10" fill={A} opacity="0.9" />
-        <text x="42%" y="52%" textAnchor="middle" fill="#080f1e" fontSize="12" fontWeight="900">P</text>
+        {[0,1,2,3,4].map(i => <line key={`h${i}`} x1="0" y1={`${i*25}%`} x2="100%" y2={`${i*25}%`} stroke="var(--color-border-strong)" strokeWidth="1" />)}
+        {[0,1,2,3,4,5,6].map(i => <line key={`v${i}`} x1={`${i*17}%`} y1="0" x2={`${i*17}%`} y2="100%" stroke="var(--color-border-strong)" strokeWidth="1" />)}
+        <rect x="0" y="45%" width="100%" height="8%" fill="var(--color-surface-hover)" />
+        <rect x="38%" y="0" width="8%" height="100%" fill="var(--color-surface-hover)" />
+        <circle cx="42%" cy="49%" r="10" fill={'var(--color-accent)'} opacity="0.9" />
+        <text x="42%" y="52%" textAnchor="middle" fill="var(--color-surface-deep)" fontSize="12" fontWeight="900">P</text>
       </svg>
-      <div style={{ position: 'absolute', bottom: '8px', left: '8px', background: 'rgba(8,15,30,0.88)', padding: '4px 10px', borderRadius: '4px', border: `1px solid ${A}` }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, color: A }}>📍 {locker.name}</div>
-        <div style={{ fontSize: '10px', color: '#adc4de' }}>{locker.address}</div>
+      <div style={{ position: 'absolute', bottom: '8px', left: '8px', background: 'var(--color-surface-deep-glass)', padding: '4px 10px', borderRadius: '4px', border: `1px solid var(--color-accent)` }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-accent)' }}>📍 {locker.name}</div>
+        <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>{locker.address}</div>
       </div>
     </div>
   );
@@ -224,26 +221,26 @@ export default function ClientDashboard() {
   };
 
   const NavBar = () => (
-    <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'rgba(8,15,30,0.96)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #1e3358', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 36px', height: '54px' }}>
+    <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--color-surface-deep-opaque)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 36px', height: '54px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <button onClick={() => router.push('/')} style={{ background: '#0d1a30', border: '1px solid #1e3358', color: '#adc4de', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', fontFamily: "'Inter',sans-serif", transition: 'border-color 0.2s, color 0.2s' }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = A; e.currentTarget.style.color = '#fff'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e3358'; e.currentTarget.style.color = '#adc4de'; }}
+        <button onClick={() => router.push('/')} style={{ background: 'var(--color-surface-raised)', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-secondary)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', fontFamily: "'Inter',sans-serif", transition: 'border-color 0.2s, color 0.2s' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.color = 'var(--color-white)'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border-strong)'; e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
         >← Salir</button>
         <div style={{ display: 'flex' }}>
-          <div style={{ background: A, color: '#080f1e', fontWeight: 900, fontSize: '13px', padding: '3px 8px', borderRadius: '4px 0 0 4px', lineHeight: 1 }}>LOCK</div>
-          <div style={{ background: '#1a3a6b', color: '#fff', fontWeight: 900, fontSize: '13px', padding: '3px 8px', borderRadius: '0 4px 4px 0', lineHeight: 1 }}>BOX</div>
+          <div style={{ background: 'var(--color-accent)', color: 'var(--color-surface-deep)', fontWeight: 900, fontSize: '13px', padding: '3px 8px', borderRadius: '4px 0 0 4px', lineHeight: 1 }}>LOCK</div>
+          <div style={{ background: 'var(--color-brand-secondary)', color: 'var(--color-white)', fontWeight: 900, fontSize: '13px', padding: '3px 8px', borderRadius: '0 4px 4px 0', lineHeight: 1 }}>BOX</div>
         </div>
-        <span style={{ fontSize: '11px', color: '#adc4de', fontWeight: 500, borderLeft: '1px solid #1e3358', paddingLeft: '12px' }}>Vista Cliente</span>
+        <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 500, borderLeft: '1px solid var(--color-border-strong)', paddingLeft: '12px' }}>Vista Cliente</span>
       </div>
 
-      <div style={{ display: 'flex', gap: '4px', background: '#0d1a30', padding: '4px', borderRadius: '8px' }}>
+      <div style={{ display: 'flex', gap: '4px', background: 'var(--color-surface-raised)', padding: '4px', borderRadius: '8px' }}>
         {([
           [1, '🎥', 'Live Commerce'],
           [2, '💳', 'Checkout Seguro'],
           [3, '🔑', `Mis Llaves${keys.length > 0 ? ` (${keys.length})` : ''}`],
         ] as [ClientScreen, string, string][]).map(([s, ico, label]) => (
-          <button key={s} onClick={() => goTo(s)} style={{ background: screen === s ? A : 'transparent', color: screen === s ? '#080f1e' : '#adc4de', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter',sans-serif", transition: 'background 0.2s, color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button key={s} onClick={() => goTo(s)} style={{ background: screen === s ? 'var(--color-accent)' : 'transparent', color: screen === s ? 'var(--color-surface-deep)' : 'var(--color-text-secondary)', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter',sans-serif", transition: 'background 0.2s, color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>{ico}</span> {label}
           </button>
         ))}
@@ -251,28 +248,28 @@ export default function ClientDashboard() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         {keys.length >= MAX_KEYS && (
-          <div style={{ fontSize: '10px', color: '#f5a623', fontWeight: 700, background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.3)', borderRadius: '4px', padding: '3px 8px' }}>
+          <div style={{ fontSize: '10px', color: 'var(--color-warning-strong)', fontWeight: 700, background: 'var(--color-warning-strong-subtle)', border: '1px solid var(--color-warning-strong-border)', borderRadius: '4px', padding: '3px 8px' }}>
             Máx. {MAX_KEYS} llaves alcanzado
           </div>
         )}
-        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: ABD, border: `2px solid ${A}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>👤</div>
+        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-accent-muted)', border: `2px solid var(--color-accent)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>👤</div>
         <div>
-          <div style={{ fontSize: '12px', fontWeight: 600, color: '#fff', lineHeight: 1 }}>Mi cuenta</div>
-          <div style={{ fontSize: '10px', color: A }}>Comprador</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-white)', lineHeight: 1 }}>Mi cuenta</div>
+          <div style={{ fontSize: '10px', color: 'var(--color-accent)' }}>Comprador</div>
         </div>
       </div>
     </div>
    ); /* ════════ SCREEN 1 — Live Commerce ════════ */
   if (screen === 1) return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#080f1e', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--color-surface-deep)', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
       <NavBar />
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '28px 36px' }}>
         <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: A, textTransform: 'uppercase', marginBottom: '4px' }}>DESCUBRIMIENTO</div>
-            <h1 style={{ fontWeight: 900, fontSize: '26px', color: '#fff', margin: 0 }}>Lives en este momento</h1>
+            <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '4px' }}>DESCUBRIMIENTO</div>
+            <h1 style={{ fontWeight: 900, fontSize: '26px', color: 'var(--color-white)', margin: 0 }}>Lives en este momento</h1>
           </div>
-          <div style={{ fontSize: '12px', color: '#adc4de', background: '#0d1a30', padding: '6px 14px', border: '1px solid #1e3358', borderRadius: '6px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', background: 'var(--color-surface-raised)', padding: '6px 14px', border: '1px solid var(--color-border-strong)', borderRadius: '6px' }}>
             {SELLERS.reduce((a, s) => a + s.viewers, 0).toLocaleString('es-BO')} espectadores en vivo
           </div>
         </div>
@@ -280,26 +277,26 @@ export default function ClientDashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '28px' }}>
           {SELLERS.map(seller => (
             <div key={seller.id} onClick={() => setActiveSeller(activeSeller?.id === seller.id ? null : seller)}
-              style={{ background: '#0d1a30', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer', border: `2px solid ${activeSeller?.id === seller.id ? A : '#1e3358'}`, transition: 'border-color 0.2s, transform 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = A; e.currentTarget.style.transform = 'translateY(-2px)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = activeSeller?.id === seller.id ? A : '#1e3358'; e.currentTarget.style.transform = 'translateY(0)' }}
+              style={{ background: 'var(--color-surface-raised)', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer', border: `2px solid ${activeSeller?.id === seller.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, transition: 'border-color 0.2s, transform 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = activeSeller?.id === seller.id ? 'var(--color-accent)' : 'var(--color-border-strong)'; e.currentTarget.style.transform = 'translateY(0)' }}
             >
               <div style={{ position: 'relative' }}>
                 <img src={seller.cover} alt={seller.name} style={{ width: '100%', height: '110px', objectFit: 'cover', display: 'block' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(8,15,30,0.85))' }} />
-                <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', alignItems: 'center', gap: '5px', background: '#e53935', borderRadius: '12px', padding: '3px 8px' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fff' }} />
-                  <span style={{ fontWeight: 800, fontSize: '9px', color: '#fff', letterSpacing: '0.1em' }}>EN VIVO</span>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, var(--color-surface-deep-glass))' }} />
+                <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', alignItems: 'center', gap: '5px', background: 'var(--color-danger-strong)', borderRadius: '12px', padding: '3px 8px' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-white)' }} />
+                  <span style={{ fontWeight: 800, fontSize: '9px', color: 'var(--color-white)', letterSpacing: '0.1em' }}>EN VIVO</span>
                 </div>
-                <div style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(8,15,30,0.75)', borderRadius: '10px', padding: '2px 8px', fontSize: '10px', color: '#fff', fontWeight: 600 }}>
+                <div style={{ position: 'absolute', top: '8px', right: '8px', background: 'var(--color-surface-deep-glass)', borderRadius: '10px', padding: '2px 8px', fontSize: '10px', color: 'var(--color-white)', fontWeight: 600 }}>
                   👁 {seller.viewers.toLocaleString('es-BO')}
                 </div>
               </div>
               <div style={{ padding: '10px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <img src={seller.avatar} alt={seller.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${A}`, flexShrink: 0 }} />
+                <img src={seller.avatar} alt={seller.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `2px solid var(--color-accent)`, flexShrink: 0 }} />
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: '12px', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{seller.handle}</div>
-                  <div style={{ fontSize: '10px', color: '#adc4de' }}>{seller.category}</div>
+                  <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--color-white)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{seller.handle}</div>
+                  <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>{seller.category}</div>
                 </div>
               </div>
             </div>
@@ -307,56 +304,56 @@ export default function ClientDashboard() {
         </div>
 
         {activeSeller && (
-          <div style={{ background: '#0d1a30', borderRadius: '12px', border: `2px solid ${A}`, overflow: 'hidden' }}>
+          <div style={{ background: 'var(--color-surface-raised)', borderRadius: '12px', border: `2px solid var(--color-accent)`, overflow: 'hidden' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 0 }}>
               <div style={{ position: 'relative' }}>
                 <img src={activeSeller.cover} alt={activeSeller.name} style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(8,15,30,0.9))' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, var(--color-surface-deep-glass))' }} />
                 <div style={{ position: 'absolute', bottom: '14px', left: '14px', right: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img src={activeSeller.avatar} alt={activeSeller.name} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${A}`, flexShrink: 0 }} />
+                  <img src={activeSeller.avatar} alt={activeSeller.name} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: `3px solid var(--color-accent)`, flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '15px', color: '#fff' }}>{activeSeller.handle}</div>
-                    <div style={{ fontSize: '11px', color: '#dce8f5' }}>{activeSeller.category} · Bolivia {activeSeller.flag}</div>
+                    <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--color-white)' }}>{activeSeller.handle}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--color-foreground)' }}>{activeSeller.category} · Bolivia {activeSeller.flag}</div>
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: '#080f1e' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: '#080f1e' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: 'var(--color-surface-deep)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: 'var(--color-surface-deep)' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', color: '#adc4de', textTransform: 'uppercase', marginBottom: '6px' }}>Transmitiendo en</div>
-                  <div style={{ fontWeight: 900, fontSize: '20px', color: '#fff' }}>TikTok Live</div>
+                  <div style={{ fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '6px' }}>Transmitiendo en</div>
+                  <div style={{ fontWeight: 900, fontSize: '20px', color: 'var(--color-white)' }}>TikTok Live</div>
                 </div>
                 
-                <a href={`https://www.tiktok.com/${activeSeller.handle}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#010101', borderRadius: '10px', padding: '14px 28px', textDecoration: 'none', border: '2px solid #2a2a2a', transition: 'border-color 0.2s', width: '100%', boxSizing: 'border-box' }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = A)}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = '#2a2a2a')}
+                <a href={`https://www.tiktok.com/${activeSeller.handle}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'var(--color-black)', borderRadius: '10px', padding: '14px 28px', textDecoration: 'none', border: '2px solid var(--color-border-strong)', transition: 'border-color 0.2s', width: '100%', boxSizing: 'border-box' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-accent)')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-border-strong)')}
                 >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z" fill="white"/></svg>
-                  <span style={{ fontWeight: 700, fontSize: '14px', color: '#fff' }}>Ir al Live en TikTok</span>
-                  <span style={{ fontSize: '12px', color: '#adc4de' }}>↗</span>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z" fill="var(--color-white)"/></svg>
+                  <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)' }}>Ir al Live en TikTok</span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>↗</span>
                 </a>
               </div>
                 
               </div>
             </div>
 
-            <div style={{ padding: '20px', borderTop: '1px solid #1e3358' }}>
+            <div style={{ padding: '20px', borderTop: '1px solid var(--color-border-strong)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <div style={{ fontWeight: 700, fontSize: '14px', color: '#fff' }}>Productos disponibles</div>
+                <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)' }}>Productos disponibles</div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                 {activeSeller.products.map(p => {
                   const full = keys.length >= MAX_KEYS;
                   return (
-                    <div key={p.id} style={{ background: '#0a1525', borderRadius: '8px', overflow: 'hidden', border: '1px solid #1e3358' }}>
+                    <div key={p.id} style={{ background: 'var(--color-surface)', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--color-border-strong)' }}>
                       <div style={{ position: 'relative' }}>
                         <img src={p.img} alt={p.name} style={{ width: '100%', height: '100px', objectFit: 'cover', display: 'block' }} />
-                        <div style={{ position: 'absolute', top: '5px', left: '5px', background: 'rgba(8,15,30,0.82)', borderRadius: '3px', padding: '2px 6px', fontSize: '9px', fontWeight: 700, color: '#fff' }}>{p.tag}</div>
+                        <div style={{ position: 'absolute', top: '5px', left: '5px', background: 'var(--color-surface-deep-glass)', borderRadius: '3px', padding: '2px 6px', fontSize: '9px', fontWeight: 700, color: 'var(--color-white)' }}>{p.tag}</div>
                       </div>
                       <div style={{ padding: '10px' }}>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#dce8f5', marginBottom: '4px', lineHeight: 1.3 }}>{p.name}</div>
-                        <div style={{ fontSize: '14px', fontWeight: 900, color: A, marginBottom: '8px' }}>{p.price}</div>
-                        <button onClick={() => !full && handleBuy(p, activeSeller)} disabled={full} style={{ width: '100%', background: full ? '#1e3358' : A, border: 'none', borderRadius: '6px', color: full ? '#adc4de' : '#080f1e', fontWeight: 700, fontSize: '11px', padding: '8px', cursor: full ? 'not-allowed' : 'pointer' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-foreground)', marginBottom: '4px', lineHeight: 1.3 }}>{p.name}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 900, color: 'var(--color-accent)', marginBottom: '8px' }}>{p.price}</div>
+                        <button onClick={() => !full && handleBuy(p, activeSeller)} disabled={full} style={{ width: '100%', background: full ? 'var(--color-border-strong)' : 'var(--color-accent)', border: 'none', borderRadius: '6px', color: full ? 'var(--color-text-secondary)' : 'var(--color-surface-deep)', fontWeight: 700, fontSize: '11px', padding: '8px', cursor: full ? 'not-allowed' : 'pointer' }}>
                           {full ? 'Sin espacio' : 'Comprar Seguro'}
                         </button>
                       </div>
@@ -373,39 +370,39 @@ export default function ClientDashboard() {
 
   /* ════════ SCREEN 2 — Checkout ════════ */
   if (screen === 2 && selectedProduct) return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#080f1e', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--color-surface-deep)', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
       <NavBar />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '28px 36px' }}>
         <div style={{ marginBottom: '20px' }}>
-          <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: A, textTransform: 'uppercase', marginBottom: '4px' }}>PAGO ESCROW</div>
-          <h1 style={{ fontWeight: 900, fontSize: '26px', color: '#fff', margin: 0 }}>Checkout Seguro</h1>
+          <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '4px' }}>PAGO ESCROW</div>
+          <h1 style={{ fontWeight: 900, fontSize: '26px', color: 'var(--color-white)', margin: 0 }}>Checkout Seguro</h1>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ background: '#0d1a30', borderRadius: '12px', padding: '18px', border: '1px solid #1e3358' }}>
-              <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: '#adc4de', textTransform: 'uppercase', marginBottom: '12px' }}>Resumen del pedido</div>
+            <div style={{ background: 'var(--color-surface-raised)', borderRadius: '12px', padding: '18px', border: '1px solid var(--color-border-strong)' }}>
+              <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '12px' }}>Resumen del pedido</div>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '14px' }}>
                 <img src={selectedProduct.img} alt={selectedProduct.name} style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '14px', color: '#fff', marginBottom: '3px' }}>{selectedProduct.name}</div>
-                  <div style={{ fontSize: '11px', color: '#adc4de', marginBottom: '3px' }}>Vendedor: {activeSeller?.handle}</div>
-                  <div style={{ fontWeight: 900, fontSize: '18px', color: A }}>{selectedProduct.price}</div>
+                  <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)', marginBottom: '3px' }}>{selectedProduct.name}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginBottom: '3px' }}>Vendedor: {activeSeller?.handle}</div>
+                  <div style={{ fontWeight: 900, fontSize: '18px', color: 'var(--color-accent)' }}>{selectedProduct.price}</div>
                 </div>
               </div>
             </div>
 
-            <div style={{ background: '#0d1a30', borderRadius: '12px', padding: '18px', border: '1px solid #1e3358' }}>
-              <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: '#adc4de', textTransform: 'uppercase', marginBottom: '12px' }}>Smart Locker más cercano</div>
+            <div style={{ background: 'var(--color-surface-raised)', borderRadius: '12px', padding: '18px', border: '1px solid var(--color-border-strong)' }}>
+              <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '12px' }}>Smart Locker más cercano</div>
               <MapPlaceholder locker={selectedLocker} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
                 {LOCKERS.map(loc => (
-                  <div key={loc.id} onClick={() => setSelectedLocker(loc)} style={{ padding: '10px 12px', borderRadius: '7px', border: `1px solid ${selectedLocker.id === loc.id ? A : '#1e3358'}`, background: selectedLocker.id === loc.id ? AD : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div key={loc.id} onClick={() => setSelectedLocker(loc)} style={{ padding: '10px 12px', borderRadius: '7px', border: `1px solid ${selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedLocker.id === loc.id ? 'var(--color-accent-soft)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', border: `2px solid ${selectedLocker.id === loc.id ? A : '#1e3358'}`, background: selectedLocker.id === loc.id ? A : 'transparent' }} />
+                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', border: `2px solid ${selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedLocker.id === loc.id ? 'var(--color-accent)' : 'transparent' }} />
                       <div>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: selectedLocker.id === loc.id ? A : '#dce8f5' }}>{loc.name}</div>
-                        <div style={{ fontSize: '10px', color: '#adc4de' }}>{loc.address}</div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-foreground)' }}>{loc.name}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>{loc.address}</div>
                       </div>
                     </div>
                   </div>
@@ -415,19 +412,19 @@ export default function ClientDashboard() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ background: '#0d1a30', borderRadius: '12px', padding: '18px', border: '1px solid #1e3358' }}>
-              <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: '#adc4de', textTransform: 'uppercase', marginBottom: '14px' }}>Método de pago</div>
+            <div style={{ background: 'var(--color-surface-raised)', borderRadius: '12px', padding: '18px', border: '1px solid var(--color-border-strong)' }}>
+              <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '14px' }}>Método de pago</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
                 {PAYMENT_METHODS.map(m => (
-                  <div key={m.id} onClick={() => setSelectedPayment(m.id)} style={{ padding: '11px 12px', borderRadius: '8px', border: `2px solid ${selectedPayment === m.id ? A : '#1e3358'}`, background: selectedPayment === m.id ? AD : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div key={m.id} onClick={() => setSelectedPayment(m.id)} style={{ padding: '11px 12px', borderRadius: '8px', border: `2px solid ${selectedPayment === m.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedPayment === m.id ? 'var(--color-accent-soft)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div>
-                      <div style={{ fontSize: '12px', fontWeight: 700, color: selectedPayment === m.id ? A : '#dce8f5' }}>{m.icon} {m.label}</div>
-                      <div style={{ fontSize: '9px', color: '#adc4de' }}>{m.desc}</div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: selectedPayment === m.id ? 'var(--color-accent)' : 'var(--color-foreground)' }}>{m.icon} {m.label}</div>
+                      <div style={{ fontSize: '9px', color: 'var(--color-text-secondary)' }}>{m.desc}</div>
                     </div>
                   </div>
                 ))}
               </div>
-              <button onClick={handlePay} disabled={!selectedPayment || paying} style={{ width: '100%', background: (!selectedPayment || paying) ? '#0a6655' : A, border: 'none', borderRadius: '8px', color: '#080f1e', fontWeight: 800, fontSize: '14px', padding: '15px', cursor: (!selectedPayment || paying) ? 'not-allowed' : 'pointer' }}>
+              <button onClick={handlePay} disabled={!selectedPayment || paying} style={{ width: '100%', background: (!selectedPayment || paying) ? 'var(--color-success-surface)' : 'var(--color-accent)', border: 'none', borderRadius: '8px', color: 'var(--color-surface-deep)', fontWeight: 800, fontSize: '14px', padding: '15px', cursor: (!selectedPayment || paying) ? 'not-allowed' : 'pointer' }}>
                 {paying ? '⏳ Procesando pago seguro...' : '🔑 Pagar y Generar Llave QR'}
               </button>
             </div>
@@ -439,51 +436,51 @@ export default function ClientDashboard() {
 
   /* ════════ SCREEN 3 — Mis Llaves ════════ */
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#080f1e', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--color-surface-deep)', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
       <NavBar />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '28px 36px' }}>
         <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: A, textTransform: 'uppercase', marginBottom: '4px' }}>RETIRO EN CASILLERO</div>
-            <h1 style={{ fontWeight: 900, fontSize: '26px', color: '#fff', margin: 0 }}>Mis Llaves Digitales</h1>
+            <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '4px' }}>RETIRO EN CASILLERO</div>
+            <h1 style={{ fontWeight: 900, fontSize: '26px', color: 'var(--color-white)', margin: 0 }}>Mis Llaves Digitales</h1>
           </div>
           {keys.length < MAX_KEYS && (
-            <button onClick={() => goTo(1)} style={{ background: AD, border: `1px solid ${A}`, borderRadius: '8px', color: A, fontWeight: 700, fontSize: '12px', padding: '10px 20px', cursor: 'pointer' }}>
+            <button onClick={() => goTo(1)} style={{ background: 'var(--color-accent-soft)', border: `1px solid var(--color-accent)`, borderRadius: '8px', color: 'var(--color-accent)', fontWeight: 700, fontSize: '12px', padding: '10px 20px', cursor: 'pointer' }}>
               + Comprar otro producto
             </button>
           )}
         </div>
 
         {keys.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 40px', background: '#0d1a30', borderRadius: '12px', border: '1px dashed #1e3358' }}>
+          <div style={{ textAlign: 'center', padding: '80px 40px', background: 'var(--color-surface-raised)', borderRadius: '12px', border: '1px dashed var(--color-border-strong)' }}>
             <div style={{ fontSize: '56px', marginBottom: '16px' }}>🔑</div>
-            <div style={{ fontWeight: 700, fontSize: '18px', color: '#adc4de', marginBottom: '8px' }}>Aún no tienes llaves digitales</div>
-            <button onClick={() => goTo(1)} style={{ background: A, border: 'none', borderRadius: '8px', color: '#080f1e', fontWeight: 700, fontSize: '13px', padding: '13px 32px', cursor: 'pointer', marginTop: '10px' }}>Ver Lives</button>
+            <div style={{ fontWeight: 700, fontSize: '18px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Aún no tienes llaves digitales</div>
+            <button onClick={() => goTo(1)} style={{ background: 'var(--color-accent)', border: 'none', borderRadius: '8px', color: 'var(--color-surface-deep)', fontWeight: 700, fontSize: '13px', padding: '13px 32px', cursor: 'pointer', marginTop: '10px' }}>Ver Lives</button>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: keys.length === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }}>
             {keys.map((key, idx) => (
-              <div key={idx} style={{ background: '#0d1a30', borderRadius: '14px', border: `2px solid ${A}`, overflow: 'hidden' }}>
-                <div style={{ background: 'linear-gradient(135deg, #0a2018, #0a1a30)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e3358' }}>
+              <div key={idx} style={{ background: 'var(--color-surface-raised)', borderRadius: '14px', border: `2px solid var(--color-accent)`, overflow: 'hidden' }}>
+                <div style={{ background: 'linear-gradient(135deg, var(--color-success-surface), var(--color-surface-raised))', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border-strong)' }}>
                   <div>
-                    <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', color: A, textTransform: 'uppercase', marginBottom: '2px' }}>Llave #{idx + 1}</div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>{key.product.name}</div>
+                    <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '2px' }}>Llave #{idx + 1}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-white)' }}>{key.product.name}</div>
                   </div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#f5a623' }}>En espera</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-warning-strong)' }}>En espera</div>
                 </div>
                 <div style={{ padding: '18px', display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                  <div style={{ flexShrink: 0, padding: '10px', background: '#fff', borderRadius: '10px', boxShadow: `0 0 0 3px ${ABD}` }}>
+                  <div style={{ flexShrink: 0, padding: '10px', background: 'var(--color-white)', borderRadius: '10px', boxShadow: `0 0 0 3px var(--color-accent-muted)` }}>
                     <QRCode seed={idx + key.product.id} />
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#080f1e', borderRadius: '8px', padding: '10px' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'var(--color-surface-deep)', borderRadius: '8px', padding: '10px' }}>
                       <img src={key.product.img} alt={key.product.name} style={{ width: '44px', height: '44px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0 }} />
                       <div>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#dce8f5' }}>{key.product.name}</div>
-                        <div style={{ fontSize: '13px', fontWeight: 900, color: A }}>{key.product.price}</div>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-foreground)' }}>{key.product.name}</div>
+                        <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--color-accent)' }}>{key.product.price}</div>
                       </div>
                     </div>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#fff' }}>📍 {key.locker.name} - Casillero #{key.casillero}</div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-white)' }}>📍 {key.locker.name} - Casillero #{key.casillero}</div>
                   </div>
                 </div>
               </div>
