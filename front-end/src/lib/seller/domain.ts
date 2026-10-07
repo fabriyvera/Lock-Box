@@ -173,12 +173,10 @@ export function applySellerAction(state: SellerState, action: SellerAction): Sel
         action.profile.storeName.length > 80 ||
         !/^[a-z0-9._]{3,30}$/.test(action.profile.handle) ||
         /^\.|\.$|\.\.|__/.test(action.profile.handle) ||
-        !action.profile.city.trim() ||
-        action.profile.city.length > 60 ||
         action.profile.bio.length > 500
       )
         throw new Error(
-          'Revisa el nombre, ciudad y usuario. Usa 3–30 minúsculas, números, puntos o guiones bajos; sin puntos al inicio/final ni .. o __.',
+          'Revisa el nombre y usuario. Usa 3–30 minúsculas, números, puntos o guiones bajos; sin puntos al inicio/final ni .. o __.',
         );
       return { ...state, profile: action.profile };
     case 'requestPayout': {

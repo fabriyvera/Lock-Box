@@ -215,7 +215,7 @@ export default function SellerDashboard() {
           <div className={styles.pageHeading}>
             <div>
               <span className={styles.eyebrow}>
-                {state.profile.city.toUpperCase()} / COMERCIO SOCIAL SEGURO
+                TU TIENDA / COMERCIO SOCIAL SEGURO
               </span>
               <h1>
                 {screen === "overview"

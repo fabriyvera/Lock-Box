@@ -83,10 +83,13 @@ Aplicadas mediante el plugin Supabase; las versiones son UTC:
 | 20261006032623 | seller_module_point_policy         | `database/seller-point-policy.sql`  |
 | 20261006033129 | seller_module_sku_uniqueness       | `database/seller-sku-index.sql`     |
 | 20261006034154 | seller_module_order_column_privacy | `database/seller-order-privacy.sql` |
+| 20261007161246 | remove_profile_city               | `database/seller-remove-profile-city.sql` |
+
+El 7 de octubre de 2026 se eliminó `public.profiles.city` del registro y del contrato de perfil del vendedor. Para otro entorno, aplica `seller-remove-profile-city.sql` después de los parches anteriores y antes del seed. Las ciudades de `lockbox_points` siguen disponibles para la logística. Detalles y comprobaciones: [REGISTRO_SIN_CIUDAD.md](REGISTRO_SIN_CIUDAD.md).
 
 `seller-schema.sql` incorpora las correcciones finales de variables, políticas y privacidad para reproducir la integración sobre el esquema original de LockBox. No es un dump completo ni un registro byte por byte de las versiones intermedias. Los parches restantes documentan el endurecimiento aplicado; `seller-action-fix.sql` conserva el cuerpo final de la función. No se deben volver a ejecutar estos DDL sobre el proyecto ya migrado.
 
-Para otro entorno con el esquema original: revisar permisos existentes, aplicar schema → hardening → action-fix → point-policy → sku-index → order-privacy, y luego `seller-seed.sql`. El seed resuelve UUID por claves naturales; no depende de IDs generados en este proyecto. Se puede repetir sin duplicar fixtures ni sobrescribir sus operaciones posteriores. Requiere el vendedor `lockbox_store`, los productos y punto originales; si cambias su username, ajusta la referencia antes de repetirlo. Las fechas de fixtures no se reinician al repetir el seed.
+Para otro entorno con el esquema original: revisar permisos existentes, aplicar schema → hardening → action-fix → point-policy → sku-index → order-privacy → remove-profile-city, y luego `seller-seed.sql`. El seed resuelve UUID por claves naturales; no depende de IDs generados en este proyecto. Se puede repetir sin duplicar fixtures ni sobrescribir sus operaciones posteriores. Requiere el vendedor `lockbox_store`, los productos y punto originales; si cambias su username, ajusta la referencia antes de repetirlo. Las fechas de fixtures no se reinician al repetir el seed.
 
 `seller-verify.sql` prueba la base real en una transacción y termina con ROLLBACK. No usar sobre un catálogo de producción: presupone los fixtures iniciales y sus conteos/saldos. La aplicación no tiene botón de reset ni genera ventas artificiales al cargar.
 

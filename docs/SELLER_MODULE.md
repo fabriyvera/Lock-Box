@@ -17,7 +17,7 @@ Los datos se guardan en `localStorage` bajo `lockbox.seller.demo.v1`, separados 
 | C3                    | Iniciar y finalizar un live simulado con productos publicados; una sola transmisión activa; catálogo copiable para TikTok e historial de lives. |
 | C10                   | Cambiar entre Emprende y Pro con confirmación, sin cobros reales.                                                                               |
 | Vistas de integración | Pedidos e historial, despacho de pedidos pagados, exportación CSV, resumen de ventas, saldo y solicitudes de liquidación simuladas.             |
-| Perfil de tienda      | Editar nombre, usuario público, ciudad y descripción de la tienda de demo.                                                                      |
+| Perfil de tienda      | Editar nombre, usuario público y descripción de la tienda de demo.                                                                      |
 
 Las vistas de pedidos y saldo ofrecen continuidad en la demostración. No reemplazan los módulos de escrow, QR, IA o analytics asignados a otros integrantes.
 

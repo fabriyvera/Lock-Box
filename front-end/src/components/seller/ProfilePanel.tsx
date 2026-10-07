@@ -24,7 +24,7 @@ export default function ProfilePanel({ state, act }: PanelProps) {
           </div>
           <h3>{profile.storeName || 'Mi tienda'}</h3>
           <p>
-            @{profile.handle || 'mi_tienda'} · {profile.city || 'Mi ciudad'}
+            @{profile.handle || 'mi_tienda'}
           </p>
           <span>Tienda de demostración</span>
         </div>
@@ -38,7 +38,6 @@ export default function ProfilePanel({ state, act }: PanelProps) {
                 profile: {
                   ...profile,
                   storeName: profile.storeName.trim(),
-                  city: profile.city.trim(),
                   bio: profile.bio.trim(),
                 },
               },
@@ -55,7 +54,7 @@ export default function ProfilePanel({ state, act }: PanelProps) {
               onChange={(e) => field('storeName', e.target.value)}
             />
           </label>
-          <div className={styles.formGrid}>
+          <div>
             <label>
               Usuario público
               <input
@@ -67,15 +66,6 @@ export default function ProfilePanel({ state, act }: PanelProps) {
                 onChange={(e) => field('handle', e.target.value)}
               />
               <small>Sin @; usa minúsculas, números, puntos o guiones bajos.</small>
-            </label>
-            <label>
-              Ciudad
-              <input
-                required
-                maxLength={60}
-                value={profile.city}
-                onChange={(e) => field('city', e.target.value)}
-              />
             </label>
           </div>
           <label>

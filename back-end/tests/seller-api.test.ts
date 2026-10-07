@@ -149,7 +149,6 @@ test("actions reject escrow transitions, forged owners, monetary amounts and mal
           profile: {
             storeName: "Seller",
             handle: "seller",
-            city: "La Paz",
             bio: "",
             role: "admin",
           },
@@ -180,6 +179,34 @@ test("actions reject escrow transitions, forged owners, monetary amounts and mal
       400,
     );
     assert.equal(calls.length, 0);
+  });
+});
+
+test("seller profiles save without city and reject the removed field", async () => {
+  calls.length = 0;
+  const profile = { storeName: "Seller", handle: "seller", bio: "" };
+  await withServer(dependencies(), async (url) => {
+    const body = { action: { type: "saveProfile", profile }, requestId };
+    const response = await fetch(`${url}/api/seller/actions`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(calls[0].args, {
+      action: body.action,
+      request_id: requestId,
+    });
+    const legacy = await fetch(`${url}/api/seller/actions`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        ...body,
+        action: { ...body.action, profile: { ...profile, city: "La Paz" } },
+      }),
+    });
+    assert.equal(legacy.status, 400);
+    assert.equal(calls.length, 1);
   });
 });
 

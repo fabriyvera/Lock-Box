@@ -13,7 +13,7 @@ export function decodeSnapshot(raw: string): SellerState {
     state.version !== 1 ||
     !["emprende", "pro"].includes(state.plan) ||
     !state.profile ||
-    !["storeName", "handle", "city", "bio"].every(
+    !["storeName", "handle", "bio"].every(
       (key) =>
         typeof state.profile[key as keyof SellerState["profile"]] === "string",
     ) ||

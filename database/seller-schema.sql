@@ -76,7 +76,7 @@ begin
   end if;
   select jsonb_build_object(
     'version',1,
-    'profile',jsonb_build_object('storeName',coalesce(p.full_name,p.username),'handle',p.username,'city',coalesce(p.city,'La Paz'),'bio',coalesce(p.bio,'')),
+    'profile',jsonb_build_object('storeName',coalesce(p.full_name,p.username),'handle',p.username,'bio',coalesce(p.bio,'')),
     'plan',coalesce((select pl.code from public.subscriptions s join public.plans pl on pl.id=s.plan_id where s.seller_id=actor and s.status='active' and (s.expires_at is null or s.expires_at>now())),'emprende'),
     'planSettings',(select coalesce(jsonb_object_agg(code,jsonb_build_object('name',name,'commissionPercent',commission_rate*100,'settlementHours',settlement_delay_hours)),'{}') from public.plans where is_active and code in ('emprende','pro')),
     'products',coalesce((select jsonb_agg(jsonb_build_object('id',x.id,'title',x.title,'description',coalesce(x.description,''),'category',coalesce(c.seller_label,'Otros'),'priceCents',round(x.price*100)::bigint,'stock',x.stock,'sku',coalesce(x.sku,''),'imageUrl',coalesce((select url from public.product_images where product_id=x.id order by position,id limit 1),''),'tags',coalesce((select jsonb_agg(t.name order by t.name) from public.product_tags pt join public.tags t on t.id=pt.tag_id where pt.product_id=x.id),'[]'),'status',x.seller_status,'createdAt',x.created_at) order by x.created_at desc) from public.products x left join public.categories c on c.id=x.category_id where x.seller_id=actor),'[]'),
@@ -177,8 +177,8 @@ begin
   elsif kind='saveProfile' then
     item := action->'profile';
     if coalesce(length(btrim(item->>'storeName')),0) not between 1 and 80 or coalesce(item->>'handle','') !~ '^[a-z0-9._]{3,30}$' or item->>'handle' ~ '^\.|\.$|\.\.|__'
-      or coalesce(length(btrim(item->>'city')),0) not between 1 and 60 or coalesce(length(item->>'bio'),0)>500 then raise exception 'Revisa los datos de la tienda' using errcode='22023'; end if;
-    update public.profiles set full_name=btrim(item->>'storeName'),username=item->>'handle',city=btrim(item->>'city'),bio=item->>'bio',updated_at=now() where id=actor;
+      or coalesce(length(item->>'bio'),0)>500 then raise exception 'Revisa los datos de la tienda' using errcode='22023'; end if;
+    update public.profiles set full_name=btrim(item->>'storeName'),username=item->>'handle',bio=item->>'bio',updated_at=now() where id=actor;
   elsif kind='requestPayout' then
     select coalesce(sum(subtotal-commission_amount),0) into available from public.orders where seller_id=actor and status='released' and released_at+settlement_delay_hours*interval '1 hour'<=now();
     available := available - coalesce((select sum(amount) from public.payouts where seller_id=actor and status in ('pending','completed')),0);

@@ -13,8 +13,8 @@ begin
     insert into auth.users(id,instance_id,aud,role,email,encrypted_password,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
     values(gen_random_uuid(),'00000000-0000-0000-0000-000000000000','authenticated','authenticated','buyer.seller-tests@example.invalid','',
       '{"test_fixture":"seller-module-v1"}','{}',now(),now()) returning id into buyer;
-    insert into public.profiles(id,username,role,full_name,city,is_active,bio)
-    values(buyer,'seller_test_buyer','comprador','Comprador de prueba','La Paz',false,'TEST:seller-module-v1; referencia de pedidos, sin acceso de login');
+    insert into public.profiles(id,username,role,full_name,is_active,bio)
+    values(buyer,'seller_test_buyer','comprador','Comprador de prueba',false,'TEST:seller-module-v1; referencia de pedidos, sin acceso de login');
   end if;
   -- Complete existing catalog relationships only when they are missing.
   update public.products p set category_id=c.id from public.categories c

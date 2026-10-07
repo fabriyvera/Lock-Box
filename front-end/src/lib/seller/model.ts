@@ -52,7 +52,7 @@ export interface LiveSession {
 
 export interface SellerState {
   version: 1;
-  profile: { storeName: string; handle: string; city: string; bio: string };
+  profile: { storeName: string; handle: string; bio: string };
   plan: PlanCode;
   planSettings?: Record<
     PlanCode,

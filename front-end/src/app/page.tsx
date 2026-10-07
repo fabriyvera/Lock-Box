@@ -33,7 +33,6 @@ export default function Home() {
     password: '',
     confirmPassword: '',
     telefono: '',
-    ciudad: '',
     tienda: '',
   });
   const [submitted, setSubmitted] = useState(false);
@@ -513,7 +512,7 @@ export default function Home() {
                   <div style={{ fontSize: '13px', color: '#dce8f5', lineHeight: 1.6 }}>
                     Te contactaremos a <strong style={{ color: '#ffffff' }}>{form.email}</strong> para activar tu cuenta de {role}.
                   </div>
-                  <button onClick={() => { setSubmitted(false); setForm({ nombre: '', email: '', password: '', confirmPassword: '', telefono: '', ciudad: '', tienda: '' }); }}
+                  <button onClick={() => { setSubmitted(false); setForm({ nombre: '', email: '', password: '', confirmPassword: '', telefono: '', tienda: '' }); }}
                     style={{ marginTop: '16px', background: 'transparent', border: `1px solid #1e3358`, color: '#adc4de', padding: '8px 20px', cursor: 'pointer', fontSize: '11px', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.2s, color 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = A; e.currentTarget.style.color = '#ffffff'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e3358'; e.currentTarget.style.color = '#adc4de'; }}
@@ -537,7 +536,6 @@ export default function Home() {
                     { key: 'password', label: 'Contraseña', type: 'password', placeholder: '••••••••' },
                     { key: 'confirmPassword', label: 'Confirmar contraseña', type: 'password', placeholder: '••••••••' },
                     { key: 'telefono', label: 'Número de celular', type: 'tel', placeholder: '+591 7xx-xxxxx' },
-                    { key: 'ciudad', label: 'Ciudad', type: 'text', placeholder: 'La Paz, Cochabamba...' },
                     ...(role === 'vendedor' ? [{ key: 'tienda', label: 'Tienda en TikTok', type: 'text', placeholder: '@mitienda' }] : []),
                   ].map(field => (
                     <div key={field.key} style={{ marginBottom: '11px' }}>

@@ -83,8 +83,8 @@ begin
   elsif kind='saveProfile' then
     item := action->'profile';
     if coalesce(length(btrim(item->>'storeName')),0) not between 1 and 80 or coalesce(item->>'handle','') !~ '^[a-z0-9._]{3,30}$' or item->>'handle' ~ '^\.|\.$|\.\.|__'
-      or coalesce(length(btrim(item->>'city')),0) not between 1 and 60 or coalesce(length(item->>'bio'),0)>500 then raise exception 'Revisa los datos de la tienda' using errcode='22023'; end if;
-    update public.profiles set full_name=btrim(item->>'storeName'),username=item->>'handle',city=btrim(item->>'city'),bio=item->>'bio',updated_at=now() where id=actor;
+      or coalesce(length(item->>'bio'),0)>500 then raise exception 'Revisa los datos de la tienda' using errcode='22023'; end if;
+    update public.profiles set full_name=btrim(item->>'storeName'),username=item->>'handle',bio=item->>'bio',updated_at=now() where id=actor;
   elsif kind='requestPayout' then
     select coalesce(sum(subtotal-commission_amount),0) into available from public.orders where seller_id=actor and status='released' and released_at+settlement_delay_hours*interval '1 hour'<=now();
     available := available - coalesce((select sum(amount) from public.payouts where seller_id=actor and status in ('pending','completed')),0);

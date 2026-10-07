@@ -85,7 +85,6 @@ export function createDemoState(now = Date.now()): SellerState {
     profile: {
       storeName: 'Mi tienda',
       handle: 'mi_tienda',
-      city: 'La Paz',
       bio: 'Productos elegidos para ti. Compra durante el live y recoge en un Punto LockBox.',
     },
     plan: 'emprende',

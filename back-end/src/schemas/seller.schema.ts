@@ -31,7 +31,6 @@ const product = z
 const profile = z
   .object({
     storeName: z.string().trim().min(1).max(80),
-    city: z.string().trim().min(1).max(60),
     bio: z.string().max(500),
     handle: z
       .string()

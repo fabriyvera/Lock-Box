@@ -11,7 +11,6 @@ export default function RegisterPage() {
     nombreCompleto: '',
     correo: '',
     celular: '',
-    ciudad: '',
     tiendaTiktok: '',
     password: '',
     confirmPassword: '',
@@ -192,7 +191,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
                     Número de Celular
@@ -203,20 +202,6 @@ export default function RegisterPage() {
                     value={formData.celular}
                     onChange={handleChange}
                     placeholder="+591 7xx-xxxxx"
-                    className="w-full bg-[#050811] border border-gray-800 rounded-md px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00F2B8] transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
-                    Ciudad
-                  </label>
-                  <input
-                    type="text"
-                    name="ciudad"
-                    value={formData.ciudad}
-                    onChange={handleChange}
-                    placeholder="La Paz, Cochabamba..."
                     className="w-full bg-[#050811] border border-gray-800 rounded-md px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00F2B8] transition-colors"
                     required
                   />

@@ -66,7 +66,6 @@ Datos públicos del usuario. Vinculada a `auth.users` de Supabase.
 | `bio` | `text` | | Biografía corta |
 | `phone` | `text` | UNIQUE | Teléfono de contacto |
 | `avatar_url` | `text` | | URL del avatar |
-| `city` | `text` | | Ciudad |
 | `is_verified` | `boolean` | NOT NULL, default `false` | Verificación KYC |
 | `is_active` | `boolean` | NOT NULL, default `true` | Soft delete |
 | `created_at` | `timestamptz` | NOT NULL, default `now()` | Fecha de creación |

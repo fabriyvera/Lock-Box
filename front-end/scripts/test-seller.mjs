@@ -281,6 +281,8 @@ test("corrupt/obsolete browser snapshots are rejected rather than trusted", () =
 });
 test("seller store profiles are validated", () => {
   const state = fixture();
+  assert.equal(Object.hasOwn(state.profile, "city"), false);
+  assert.deepEqual(decodeSnapshot(JSON.stringify(state)).profile, state.profile);
   assert.throws(() =>
     applySellerAction(state, {
       type: "saveProfile",
