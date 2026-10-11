@@ -1,0 +1,113 @@
+.form {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.form h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.form h3 span,
+.notice h3 {
+  color: var(--color-accent);
+}
+.fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.fields label {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.fields input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 5px;
+  background: var(--color-canvas);
+  color: var(--color-foreground);
+  font-size: 16px;
+}
+.fields input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.fields small {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.captcha {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-size: 13px;
+}
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 16px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  border: 0;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.submit:hover {
+  background: var(--color-accent-hover);
+}
+.submit:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+.error {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--color-danger-strong-border);
+  color: var(--color-danger);
+  background: var(--color-danger-surface);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.signIn {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+.signIn a {
+  color: var(--color-accent);
+}
+.notice {
+  display: grid;
+  gap: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.notice h3,
+.notice p {
+  margin: 0;
+}
+.back {
+  min-height: 44px;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground);
+}

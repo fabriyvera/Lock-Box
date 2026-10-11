@@ -16,6 +16,14 @@ Proyecto: **LockBox's Project** (`anprldvvagovpyyenrif`). El 11 de octubre de 20
 
 ## Verificación realizada
 
+## Formularios y acceso
+
+La portada y `/register` reutilizan `RegistrationForm`; ambos envían los mismos campos al backend. Se normalizan usuario y teléfono, se comparan contraseñas y se impide el doble envío. El selector de rol funciona con teclado y los campos tienen etiquetas asociadas, autocompletado y mensajes accesibles. Se eliminaron las alertas de éxito simuladas y el registro de contraseñas en consola.
+
+`/auth/callback` procesa la confirmación, elimina los tokens de la URL, guarda la sesión real y consulta `/api/auth/me`. El login usa ese mismo acceso. `/dashboard` y `/vendedor` verifican sesión y perfil activo en el servidor; redirigen según el rol persistido. El panel comprador muestra el nombre real del titular y cierra la sesión de Supabase al salir. El comercio del comprador continúa siendo una demostración, sin pagos reales ni pedidos persistidos.
+
+## Pruebas
+
 Las pruebas HTTP del backend cubren ambos roles, confirmación, sesiones inmediatas, rechazo de roles privilegiados/campos extra, CAPTCHA, límites de Auth y lectura del perfil con token verificado. Las pruebas previas de vendedor se conservan.
 
 En la base real se ejecutó una transacción de prueba con `ROLLBACK`: alta de comprador/carrito, vendedor/plan, lectura de estado de vendedor, edición de tienda sin sobrescribir el nombre personal, rechazo de `admin` y modificación de metadatos sin elevación de permisos. No se conservaron cuentas de prueba ni se enviaron correos.

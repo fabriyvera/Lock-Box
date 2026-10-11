@@ -49,6 +49,7 @@ export default function ProfilePanel({ state, act }: PanelProps) {
             Nombre de tu tienda
             <input
               required
+              minLength={2}
               maxLength={80}
               value={profile.storeName}
               onChange={(e) => field('storeName', e.target.value)}

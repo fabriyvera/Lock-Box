@@ -1,6 +1,5 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import {
@@ -18,6 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { DecorativeIcon } from '@/components/ui/DecorativeIcon';
+import RegistrationForm from '@/components/auth/RegistrationForm';
 import styles from './page.module.css';
 
 type Role = 'comprador' | 'vendedor' | null;
@@ -37,29 +37,8 @@ const FLOW = [
 ];
 
 export default function Home() {
-  const router = useRouter();
   const [activeNav, setActiveNav] = useState<string>('inicio');
   const [role, setRole] = useState<Role>(null);
-  const [form, setForm] = useState({
-    nombre: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    telefono: '',
-    tienda: '',
-  });
-  const [submitted, setSubmitted] = useState(false);
-
- const handleSubmit = (e: FormEvent) => {
-  e.preventDefault();
-  setSubmitted(true);
-
-  // Te lleva al dashboard después de 1 segundo
-  setTimeout(() => {
-    router.push(role === 'vendedor' ? '/vendedor' : '/dashboard');
-  }, 1000);
-};
-
   const scrollTo = (id: string) => {
     setActiveNav(id);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -414,7 +393,7 @@ export default function Home() {
                   { r: 'comprador' as Role, icon: ShoppingCart, title: 'Comprador', desc: 'Compra en lives de TikTok con pago protegido y recoge en un Punto LockBox cercano.' },
                   { r: 'vendedor' as Role, icon: Store, title: 'Vendedor', desc: 'Vende durante tus lives con catálogo integrado y recibe pagos seguros en 48 horas.' },
                 ]).map(({ r, icon, title, desc }) => (
-                  <button key={r!} onClick={() => { setRole(r); setSubmitted(false); }} className={styles.roleCard} data-selected={role === r} aria-pressed={role === r} style={{
+                  <button key={r!} onClick={() => { setRole(r);  }} className={styles.roleCard} data-selected={role === r} aria-pressed={role === r} style={{
                     padding: '18px', textAlign: 'left', cursor: 'pointer',
                     transition: 'border-color 0.2s, background 0.2s', fontFamily: "'Inter', sans-serif",
                   }}
@@ -491,49 +470,8 @@ export default function Home() {
                     <div style={{ flex: 1, height: '1px', background: 'var(--color-border-strong)' }} />
                   </div>
                 </div>
-              ) : submitted ? (
-                <div style={{ textAlign: 'center', padding: '32px 0' }}>
-                  <div style={{ fontSize: '44px', marginBottom: '10px' }}><DecorativeIcon icon={CircleCheck} size={44} className={styles.icon} /></div>
-                  <div style={{ fontWeight: 800, fontSize: '18px', color: 'var(--color-accent)', marginBottom: '8px' }}>¡Registro exitoso!</div>
-                  <div style={{ fontSize: '13px', color: 'var(--color-foreground)', lineHeight: 1.6 }}>
-                    Te contactaremos a <strong style={{ color: 'var(--color-foreground)' }}>{form.email}</strong> para activar tu cuenta de {role}.
-                  </div>
-                  <button onClick={() => { setSubmitted(false); setForm({ nombre: '', email: '', password: '', confirmPassword: '', telefono: '', tienda: '' }); }}
-                    className={styles.secondaryButton} style={{ marginTop: '16px', background: 'transparent', padding: '8px 20px', cursor: 'pointer', fontSize: '11px', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.2s, color 0.2s' }}
-                  >Registrar otra cuenta</button>
-                </div>
               ) : (
-                <form onSubmit={e => {
-                  e.preventDefault();
-                  if (form.password !== form.confirmPassword) {
-                    alert('Las contraseñas no coinciden');
-                    return;
-                  }
-                  handleSubmit(e); // Llama a la función de envío existente de tu compañero
-                }}>
-                  <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--color-foreground)', marginBottom: '20px' }}>
-                    Registro como <span style={{ color: 'var(--color-accent)', textTransform: 'capitalize' }}>{role}</span>
-                  </div>
-                  {[
-                    { key: 'nombre', label: 'Nombre completo', type: 'text', placeholder: 'Ej. María Gonzáles' },
-                    { key: 'email', label: 'Correo electrónico', type: 'email', placeholder: 'tucorreo@gmail.com' },
-                    { key: 'password', label: 'Contraseña', type: 'password', placeholder: '••••••••' },
-                    { key: 'confirmPassword', label: 'Confirmar contraseña', type: 'password', placeholder: '••••••••' },
-                    { key: 'telefono', label: 'Número de celular', type: 'tel', placeholder: '+591 7xx-xxxxx' },
-                    ...(role === 'vendedor' ? [{ key: 'tienda', label: 'Tienda en TikTok', type: 'text', placeholder: '@mitienda' }] : []),
-                  ].map(field => (
-                    <div key={field.key} style={{ marginBottom: '11px' }}>
-                      <label style={{ display: 'block', fontWeight: 600, fontSize: '9px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '4px' }}>{field.label}</label>
-                      <input type={field.type} required placeholder={field.placeholder}
-                        value={form[field.key as keyof typeof form]}
-                        onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
-                        className={styles.formInput} style={{ width: '100%', padding: '9px 12px', fontSize: '13px', fontFamily: "'Inter', sans-serif", transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                  ))}
-                  <button type="submit" className={styles.primaryButton} style={{ width: '100%', fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', padding: '13px', border: 'none', cursor: 'pointer', textTransform: 'uppercase', marginTop: '6px',  }}
-                  >Crear mi cuenta de {role}</button>
-                </form>
+                <RegistrationForm key={role} role={role} />
               )}
             </div>
           </div>

@@ -4,7 +4,7 @@ import { useState, useRef, FormEvent } from "react";
 import Link from "next/link";
 import { Lock, Mail, ArrowRight } from "lucide-react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { createClient } from "@/lib/supabase/client";
+import { apiUrl, openAccount } from "@/lib/auth/account";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,15 +25,12 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: AbortSignal.timeout(20000),
-          body: JSON.stringify({ email, password, captchaToken }),
-        },
-      );
+      const res = await fetch(apiUrl("/api/auth/login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(20000),
+        body: JSON.stringify({ email, password, captchaToken }),
+      });
 
       const data = await res.json();
 
@@ -48,15 +45,18 @@ export default function LoginPage() {
       if (!data.session?.access_token || !data.session?.refresh_token) {
         throw new Error("El backend no devolvió una sesión de Supabase.");
       }
-      const { error: sessionError } = await createClient().auth.setSession({
+      await openAccount({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
       });
-      if (sessionError) throw sessionError;
-      window.location.href =
-        data.user?.role === "vendedor" ? "/vendedor" : "/dashboard";
-    } catch {
-      setError("Error de conexión con el servidor.");
+    } catch (err) {
+      setError(
+        err instanceof Error &&
+          err.name !== "TypeError" &&
+          err.name !== "TimeoutError"
+          ? err.message
+          : "Error de conexión con el servidor.",
+      );
       setLoading(false);
       setCaptchaToken(null);
       captcha.current?.reset();
@@ -151,19 +151,28 @@ export default function LoginPage() {
 
             {/* TURNSTILE */}
             <div className="flex justify-center">
-              <Turnstile
-                ref={captcha}
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                options={{ theme: "dark", size: "flexible" }}
-                onSuccess={(token) => setCaptchaToken(token)}
-                onExpire={() => setCaptchaToken(null)}
-                onError={() => setCaptchaToken(null)}
-              />
+              {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ? (
+                <Turnstile
+                  ref={captcha}
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  options={{ theme: "dark", size: "compact" }}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                  onError={() => setCaptchaToken(null)}
+                />
+              ) : (
+                <p role="alert" className="text-sm text-text-muted">
+                  El acceso necesita configurar la verificación de seguridad.
+                </p>
+              )}
             </div>
 
             {/* ERROR */}
             {error && (
-              <div className="text-danger-strong text-xs font-bold text-center bg-danger-strong/10 border border-danger-strong/30 rounded py-2">
+              <div
+                role="alert"
+                className="text-danger-strong text-xs font-bold text-center bg-danger-strong/10 border border-danger-strong/30 rounded py-2"
+              >
                 {error}
               </div>
             )}
