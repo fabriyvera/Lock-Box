@@ -1,108 +1,61 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowLeftRight, ArrowUpRight, CreditCard, Eye, Flame, Gem, KeyRound, Landmark, LoaderCircle, MapPin, Smartphone, Sparkles, Tag, UserRound, Video, Zap, type LucideIcon } from 'lucide-react';
 import { DecorativeIcon } from '@/components/ui/DecorativeIcon';
+
 /* ─── constants ─── */
 
 const SELLERS = [
   {
-    id: 1, handle: '@MarketLaPaz', name: 'Market La Paz', category: 'Moda & Accesorios', viewers: 3247,
+    id: '8fa90f54-3066-499f-944b-be2d34f9c435', handle: '@MarketLaPaz', name: 'Market La Paz', category: 'Moda & Accesorios', viewers: 3247,
     cover: 'https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=480&h=280&fit=crop&auto=format',
     avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&auto=format',
     country: 'Bolivia',
     products: [
-      { id: 101, name: 'Zapatillas Urban Run', price: 'Bs. 280', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 102, name: 'Mochila Explorer 30L', price: 'Bs. 195', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 103, name: 'Gorra Streetwear', price: 'Bs. 85', img: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
-      { id: 104, name: 'Cinturón Cuero Premium', price: 'Bs. 120', img: 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
+      { id: '10100000-0000-4000-a000-000000000101', name: 'Zapatillas Urban Run', price: 'Bs. 280', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
+      { id: '10200000-0000-4000-a000-000000000102', name: 'Mochila Explorer 30L', price: 'Bs. 195', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
+      { id: '10300000-0000-4000-a000-000000000103', name: 'Gorra Streetwear', price: 'Bs. 85', img: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
+      { id: '10400000-0000-4000-a000-000000000104', name: 'Cinturón Cuero Premium', price: 'Bs. 120', img: 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
     ],
   },
   {
-    id: 2, handle: '@TechShopCBBA', name: 'Tech Shop CBBA', category: 'Electrónica & Gadgets', viewers: 5821,
+    id: 'a57d7915-ce30-4a2c-8127-fa61af87ba2e', handle: '@TechShopCBBA', name: 'Tech Shop CBBA', category: 'Electrónica & Gadgets', viewers: 5821,
     cover: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=480&h=280&fit=crop&auto=format',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&auto=format',
     country: 'Bolivia',
     products: [
-      { id: 201, name: 'Auriculares BT Pro', price: 'Bs. 340', img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 202, name: 'Power Bank 20000mAh', price: 'Bs. 210', img: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 203, name: 'Smartwatch Sport X2', price: 'Bs. 480', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
-      { id: 204, name: 'Teclado Mecánico RGB', price: 'Bs. 390', img: 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
+      { id: '20100000-0000-4000-a000-000000000201', name: 'Auriculares BT Pro', price: 'Bs. 340', img: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
+      { id: '20200000-0000-4000-a000-000000000202', name: 'Power Bank 20000mAh', price: 'Bs. 210', img: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
+      { id: '20300000-0000-4000-a000-000000000203', name: 'Smartwatch Sport X2', price: 'Bs. 480', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
+      { id: '20400000-0000-4000-a000-000000000204', name: 'Teclado Mecánico RGB', price: 'Bs. 390', img: 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
     ],
   },
   {
-    id: 3, handle: '@BeautyBolivia', name: 'Beauty Bolivia', category: 'Belleza & Cuidado', viewers: 2134,
+    id: '5b40796d-56e0-4bd5-a08b-82d724283371', handle: '@BeautyBolivia', name: 'Beauty Bolivia', category: 'Belleza & Cuidado', viewers: 2134,
     cover: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=480&h=280&fit=crop&auto=format',
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&auto=format',
     country: 'Bolivia',
     products: [
-      { id: 301, name: 'Perfume Noche Árabe', price: 'Bs. 150', img: 'https://images.unsplash.com/photo-1541643600914-78b084683702?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
-      { id: 302, name: 'Set Maquillaje Pro', price: 'Bs. 220', img: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 303, name: 'Crema Hidratante K-Beauty', price: 'Bs. 95', img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 304, name: 'Sérum Vitamina C', price: 'Bs. 130', img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
+      { id: '30100000-0000-4000-a000-000000000301', name: 'Perfume Noche Árabe', price: 'Bs. 150', img: 'https://images.unsplash.com/photo-1541643600914-78b084683702?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
+      { id: '30200000-0000-4000-a000-000000000302', name: 'Set Maquillaje Pro', price: 'Bs. 220', img: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
+      { id: '30300000-0000-4000-a000-000000000303', name: 'Crema Hidratante K-Beauty', price: 'Bs. 95', img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
+      { id: '30400000-0000-4000-a000-000000000304', name: 'Sérum Vitamina C', price: 'Bs. 130', img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
     ],
   },
   {
-    id: 4, handle: '@CocinaFacil', name: 'Cocina Fácil', category: 'Hogar & Cocina', viewers: 1876,
+    id: '806a9ff7-b65d-4de9-91d6-1ec32f2b2573', handle: '@CocinaFacil', name: 'Cocina Fácil', category: 'Hogar & Cocina', viewers: 1876,
     cover: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=480&h=280&fit=crop&auto=format',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&auto=format',
     country: 'Bolivia',
     products: [
-      { id: 401, name: 'Sartén Antiadherente 28cm', price: 'Bs. 175', img: 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 402, name: 'Licuadora 1200W', price: 'Bs. 320', img: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 403, name: 'Set Cuchillos Chef', price: 'Bs. 240', img: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
-      { id: 404, name: 'Freidora de Aire 3.5L', price: 'Bs. 450', img: 'https://images.unsplash.com/photo-1612966809785-1f8ed7e33a3b?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
+      { id: '40100000-0000-4000-a000-000000000401', name: 'Sartén Antiadherente 28cm', price: 'Bs. 175', img: 'https://images.unsplash.com/photo-1585515320310-259814833e62?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
+      { id: '40200000-0000-4000-a000-000000000402', name: 'Licuadora 1200W', price: 'Bs. 320', img: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
+      { id: '40300000-0000-4000-a000-000000000403', name: 'Set Cuchillos Chef', price: 'Bs. 240', img: 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
+      { id: '40400000-0000-4000-a000-000000000404', name: 'Freidora de Aire 3.5L', price: 'Bs. 450', img: 'https://images.unsplash.com/photo-1612966809785-1f8ed7e33a3b?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
     ],
-  },
-  {
-    id: 5, handle: '@DeportesTotal', name: 'Deportes Total', category: 'Deportes & Fitness', viewers: 4102,
-    cover: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=480&h=280&fit=crop&auto=format',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&auto=format',
-    country: 'Bolivia',
-    products: [
-      { id: 501, name: 'Mancuernas Ajustables 20kg', price: 'Bs. 380', img: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 502, name: 'Cuerda para Saltar Pro', price: 'Bs. 65', img: 'https://images.unsplash.com/photo-1598289431512-b97b0917afb3?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 503, name: 'Banda Elástica Set x5', price: 'Bs. 90', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
-      { id: 504, name: 'Botella Térmica 1L', price: 'Bs. 110', img: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
-    ],
-  },
-  {
-    id: 6, handle: '@LibrosYMas', name: 'Libros y Más', category: 'Libros & Educación', viewers: 987,
-    cover: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=480&h=280&fit=crop&auto=format',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&auto=format',
-    country: 'Bolivia',
-    products: [
-      { id: 601, name: 'Pack Desarrollo Personal x3', price: 'Bs. 135', img: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 602, name: 'Agenda Ejecutiva 2026', price: 'Bs. 75', img: 'https://images.unsplash.com/photo-1518122139490-4b9f6c25b98e?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
-      { id: 603, name: 'Marcadores Profesionales', price: 'Bs. 55', img: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 604, name: 'Cuaderno Leuchtturm A5', price: 'Bs. 95', img: 'https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
-    ],
-  },
-  {
-    id: 7, handle: '@JuguetesKids', name: 'Juguetes Kids', category: 'Juguetes & Niños', viewers: 2650,
-    cover: 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=480&h=280&fit=crop&auto=format',
-    avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=80&h=80&fit=crop&auto=format',
-    country: 'Bolivia',
-    products: [
-      { id: 701, name: 'LEGO Creator 450 pzs', price: 'Bs. 290', img: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 702, name: 'Auto RC Turbo 4WD', price: 'Bs. 220', img: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 703, name: 'Kit Ciencias Experimentos', price: 'Bs. 145', img: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
-      { id: 704, name: 'Muñeca Articulada Deluxe', price: 'Bs. 165', img: 'https://images.unsplash.com/photo-1612404819070-b2cd5e496e5b?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
-    ],
-  },
-  {
-    id: 8, handle: '@MascotasFelices', name: 'Mascotas Felices', category: 'Mascotas & Accesorios', viewers: 1430,
-    cover: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=480&h=280&fit=crop&auto=format',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&auto=format',
-    country: 'Bolivia',
-    products: [
-      { id: 801, name: 'Cama Ortopédica Perro L', price: 'Bs. 195', img: 'https://images.unsplash.com/photo-1601758174493-7a76eeb83b17?w=300&h=220&fit=crop&auto=format', tag: 'Top' },
-      { id: 802, name: 'Arnés Antitirones Reflectivo', price: 'Bs. 110', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=220&fit=crop&auto=format', tag: 'Oferta' },
-      { id: 803, name: 'Rascador Gato Torre', price: 'Bs. 230', img: 'https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=300&h=220&fit=crop&auto=format', tag: 'Nuevo' },
-      { id: 804, name: 'Comedero Automático Smart', price: 'Bs. 285', img: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=300&h=220&fit=crop&auto=format', tag: 'Premium' },
-    ],
-  },
+  }
 ];
 
 const PAYMENT_METHODS = [
@@ -112,15 +65,15 @@ const PAYMENT_METHODS = [
   { id: 'card', label: 'Tarjeta', icon: CreditCard, desc: 'Visa / Mastercard' },
 ];
 
-const LOCKERS = [
+const INITIAL_LOCKERS = [
   { id: 'centro', name: 'Zona Centro', address: 'Av. 16 de Julio #1420', dist: '0.8 km', slots: 12 },
   { id: 'miraflores', name: 'Miraflores', address: 'Calle Antofagasta #340', dist: '2.1 km', slots: 8 },
   { id: 'sopocachi', name: 'Sopocachi', address: 'Av. 20 de Octubre #2340', dist: '3.4 km', slots: 5 },
   { id: 'calacoto', name: 'Calacoto', address: 'Calle 21 #8765', dist: '5.2 km', slots: 14 },
 ];
 
-type Product = { id: number; name: string; price: string; img: string; tag: string };
-type DigitalKey = { product: Product; seller: string; locker: typeof LOCKERS[0]; casillero: number; purchasedAt: string };
+type Product = { id: string; name: string; price: string; img: string; tag: string };
+type DigitalKey = { product: Product; seller: string; locker: typeof INITIAL_LOCKERS[0]; casillero: number; purchasedAt: string; qrToken?: string; orderId?: string };
 type ClientScreen = 1 | 2 | 3;
 
 function QRCode({ seed = 0 }: { seed?: number }) {
@@ -165,7 +118,7 @@ function QRCode({ seed = 0 }: { seed?: number }) {
   );
 }
 
-function MapPlaceholder({ locker }: { locker: typeof LOCKERS[0] }) {
+function MapPlaceholder({ locker }: { locker: typeof INITIAL_LOCKERS[0] }) {
   return (
     <div style={{ position: 'relative', background: 'var(--color-surface)', borderRadius: '10px', overflow: 'hidden', height: '150px', border: '1px solid var(--color-border-strong)' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
@@ -250,10 +203,16 @@ export default function ClientDashboard() {
   const [activeSeller, setActiveSeller] = useState<typeof SELLERS[0] | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
-  const [selectedLocker, setSelectedLocker] = useState(LOCKERS[0]);
+  const [lockers, setLockers] = useState(INITIAL_LOCKERS);
+  const [selectedLocker, setSelectedLocker] = useState(INITIAL_LOCKERS[0]);
   const [paying, setPaying] = useState(false);
   const [keys, setKeys] = useState<DigitalKey[]>([]);
   const MAX_KEYS = 4;
+
+  useEffect(() => {
+    // Espacio reservado: aquí llamaremos a la DB de Supabase para traer los 10 puntos de La Paz
+    // fetch('http://localhost:4000/lockbox-points')
+  }, []);
 
   const goTo = (s: ClientScreen) => setScreen(s);
 
@@ -264,24 +223,60 @@ export default function ClientDashboard() {
     goTo(2);
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     if (!selectedProduct || !selectedPayment || paying) return;
     setPaying(true);
-    setTimeout(() => {
+    
+    try {
+      const numericPrice = parseFloat(selectedProduct.price.replace('Bs. ', '').trim());
+
+      const response = await fetch('http://localhost:4000/orders/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // UUID real (usamos el perfil de MarketLaPaz temporalmente como comprador)
+          buyer_id: "8fa90f54-3066-499f-944b-be2d34f9c435", 
+          
+          // Datos 100% dinámicos sacados de tu arreglo SELLERS actualizado
+          seller_id: activeSeller?.id,
+          product_id: selectedProduct.id,
+          
+          // UUID real de tu tabla lockbox_points (el que ya usaste ayer)
+          lockbox_id: "089c131b-8e59-43b1-b21b-5ab0b03c21c7", 
+          
+          quantity: 1,
+          unit_price: numericPrice
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Fallo en la comunicación con el servidor");
+      }
+      
+      const backendData = await response.json();
+
       const newKey: DigitalKey = {
         product: selectedProduct,
         seller: activeSeller?.handle ?? '',
         locker: selectedLocker,
         casillero: Math.floor(Math.random() * 60) + 1,
         purchasedAt: new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' }),
+        qrToken: backendData.qr_code,
+        orderId: backendData.order_id
       };
+
       setKeys(prev => [newKey, ...prev].slice(0, MAX_KEYS));
-      setPaying(false);
       goTo(3);
-    }, 1800);
+
+    } catch (error) {
+      console.error("Fallo al procesar el checkout:", error);
+      alert("Hubo un problema procesando tu pago.");
+    } finally {
+      setPaying(false);
+    }
   };
 
- /* ════════ SCREEN 1 — Live Commerce ════════ */
+  /* ════════ SCREEN 1 — Live Commerce ════════ */
   if (screen === 1) return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--color-surface-deep)', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
       <BuyerNavBar screen={screen} keyCount={keys.length} maxKeys={MAX_KEYS} onExit={() => router.push('/')} onNavigate={goTo} />
@@ -340,7 +335,6 @@ export default function ClientDashboard() {
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: 'var(--color-surface-deep)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: 'var(--color-surface-deep)' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '6px' }}>Transmitiendo en</div>
                   <div style={{ fontWeight: 900, fontSize: '20px', color: 'var(--color-white)' }}>TikTok Live</div>
@@ -354,8 +348,6 @@ export default function ClientDashboard() {
                   <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)' }}>Ir al Live en TikTok</span>
                   <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}><DecorativeIcon icon={ArrowUpRight} size={12} /></span>
                 </a>
-              </div>
-                
               </div>
             </div>
 
@@ -418,7 +410,7 @@ export default function ClientDashboard() {
               <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '12px' }}>Smart Locker más cercano</div>
               <MapPlaceholder locker={selectedLocker} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
-                {LOCKERS.map(loc => (
+                {lockers.map(loc => (
                   <div key={loc.id} onClick={() => setSelectedLocker(loc)} style={{ padding: '10px 12px', borderRadius: '7px', border: `1px solid ${selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedLocker.id === loc.id ? 'var(--color-accent-soft)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                       <div style={{ width: '10px', height: '10px', borderRadius: '50%', border: `2px solid ${selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedLocker.id === loc.id ? 'var(--color-accent)' : 'transparent' }} />
@@ -496,7 +488,7 @@ export default function ClientDashboard() {
                 </div>
                 <div style={{ padding: '18px', display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
                   <div style={{ flexShrink: 0, padding: '10px', background: 'var(--color-white)', borderRadius: '10px', boxShadow: `0 0 0 3px var(--color-accent-muted)` }}>
-                    <QRCode seed={idx + key.product.id} />
+                    <QRCode seed={key.casillero} />
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'var(--color-surface-deep)', borderRadius: '8px', padding: '10px' }}>

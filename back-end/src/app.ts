@@ -12,6 +12,9 @@ import { verifyTurnstileToken } from "./services/turnstile.service.js";
 import { loginSchema } from "./schemas/auth.schema.js";
 import { actionRequestSchema } from "./schemas/seller.schema.js";
 
+// NUEVO: Importar tu enrutador de órdenes
+import ordersRouter from "./routes/orders.js";
+
 export interface Dependencies {
   createClient: (token?: string) => SupabaseClient<Database>;
   verifyCaptcha: typeof verifyTurnstileToken;
@@ -50,9 +53,14 @@ export function createApp(
   app.disable("x-powered-by");
   app.use(cors({ origin: config.FRONTEND_URL, credentials: true }));
   app.use(express.json({ limit: "64kb" }));
+
+  // NUEVO: Registrar las rutas de órdenes antes de tus otras rutas API
+  app.use("/orders", ordersRouter);
+
   app.get("/api/health", (_req, res) =>
     res.json({ status: "ok", timestamp: new Date().toISOString() }),
   );
+  
   app.post("/api/auth/login", async (req, res, next) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
@@ -114,7 +122,9 @@ export function createApp(
       next(error);
     }
   });
+
   const seller = express.Router();
+  
   seller.use(async (req, res, next) => {
     try {
       const match = /^Bearer\s+(\S+)$/i.exec(req.headers.authorization ?? "");
@@ -146,6 +156,7 @@ export function createApp(
       next(error);
     }
   });
+
   seller.get("/state", async (_req, res, next) => {
     try {
       const client = res.locals.client as SupabaseClient<Database>;
@@ -159,6 +170,7 @@ export function createApp(
       next(error);
     }
   });
+
   seller.post("/actions", async (req, res, next) => {
     try {
       const parsed = actionRequestSchema.safeParse(req.body);
@@ -184,10 +196,13 @@ export function createApp(
       next(error);
     }
   });
+
   app.use("/api/seller", seller);
+  
   app.use((_req, res) =>
     res.status(404).json({ message: "Ruta no encontrada" }),
   );
+  
   app.use(
     (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
       if (error instanceof SyntaxError) {
@@ -201,5 +216,6 @@ export function createApp(
       res.status(500).json({ message: "Error interno del servidor" });
     },
   );
+  
   return app;
 }
