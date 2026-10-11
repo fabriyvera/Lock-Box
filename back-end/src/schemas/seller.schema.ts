@@ -30,7 +30,7 @@ const product = z
   .strict();
 const profile = z
   .object({
-    storeName: z.string().trim().min(1).max(80),
+    storeName: z.string().trim().min(2).max(80),
     bio: z.string().max(500),
     handle: z
       .string()

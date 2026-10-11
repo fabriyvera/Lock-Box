@@ -1,4 +1,4 @@
-// Generated from LockBox's Project after the seller migrations. Do not hand edit.
+// Generated from LockBox's Project after registration migration. Do not hand edit.
 export type Json =
   | string
   | number
@@ -763,6 +763,7 @@ export type Database = {
           is_verified: boolean;
           phone: string | null;
           role: Database["public"]["Enums"]["user_role"];
+          store_name: string | null;
           updated_at: string;
           username: string;
         };
@@ -776,6 +777,7 @@ export type Database = {
           is_verified?: boolean;
           phone?: string | null;
           role?: Database["public"]["Enums"]["user_role"];
+          store_name?: string | null;
           updated_at?: string;
           username: string;
         };
@@ -789,6 +791,7 @@ export type Database = {
           is_verified?: boolean;
           phone?: string | null;
           role?: Database["public"]["Enums"]["user_role"];
+          store_name?: string | null;
           updated_at?: string;
           username?: string;
         };

@@ -9,7 +9,7 @@ import type { Database } from "./types/database.js";
 import type { Environment } from "./config/environment.js";
 import { clientFactory } from "./services/supabase-client.js";
 import { verifyTurnstileToken } from "./services/turnstile.service.js";
-import { loginSchema } from "./schemas/auth.schema.js";
+import { loginSchema, registerSchema } from "./schemas/auth.schema.js";
 import { actionRequestSchema } from "./schemas/seller.schema.js";
 
 export interface Dependencies {
@@ -53,6 +53,151 @@ export function createApp(
   app.get("/api/health", (_req, res) =>
     res.json({ status: "ok", timestamp: new Date().toISOString() }),
   );
+  app.post("/api/auth/register", async (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    try {
+      const parsed = registerSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res
+          .status(400)
+          .json({
+            message: "Revisa los datos del registro.",
+            errors: parsed.error.flatten().fieldErrors,
+          });
+        return;
+      }
+      if (!config.TURNSTILE_SECRET_KEY) {
+        res
+          .status(503)
+          .json({
+            message:
+              "El registro necesita configurar la verificación de seguridad.",
+          });
+        return;
+      }
+      const input = parsed.data;
+      const captcha = await dependencies.verifyCaptcha(
+        config.TURNSTILE_SECRET_KEY,
+        input.captchaToken,
+        req.socket.remoteAddress,
+      );
+      if (!captcha.success) {
+        res
+          .status(400)
+          .json({
+            message: "Verificación de seguridad fallida. Inténtalo nuevamente.",
+          });
+        return;
+      }
+      const client = dependencies.createClient();
+      const { data, error } = await client.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          emailRedirectTo: new URL("/auth/callback", config.FRONTEND_URL).href,
+          data: {
+            full_name: input.fullName,
+            username: input.username,
+            phone: input.phone,
+            role: input.role,
+            ...(input.role === "vendedor"
+              ? { store_name: input.storeName }
+              : {}),
+          },
+        },
+      });
+      if (error || !data.user) {
+        const status =
+          error?.status === 429
+            ? 429
+            : error?.code === "unexpected_failure"
+              ? 503
+              : 400;
+        res
+          .status(status)
+          .json({
+            message:
+              status === 429
+                ? "Demasiados intentos. Espera unos minutos antes de volver a registrarte."
+                : "No se pudo crear la cuenta. Revisa correo, usuario y celular; pueden estar registrados. Si continúa, contacta a LockBox.",
+          });
+        return;
+      }
+      // Supabase deliberately conceals existing accounts when confirmations are enabled.
+      // Never report a profile as active or reveal whether that email exists without a session.
+      if (!data.session) {
+        res
+          .status(202)
+          .json({
+            success: true,
+            requiresConfirmation: true,
+            message:
+              "Revisa tu correo para confirmar la cuenta. Si ya estabas registrado, inicia sesión.",
+          });
+        return;
+      }
+      const { data: profile, error: profileError } = await client
+        .from("profiles")
+        .select("id,role,is_active,full_name,username")
+        .eq("id", data.user.id)
+        .single();
+      if (
+        profileError ||
+        !profile?.is_active ||
+        !["comprador", "vendedor"].includes(profile.role)
+      ) {
+        res
+          .status(403)
+          .json({
+            message: "No se pudo habilitar tu perfil. Contacta a LockBox.",
+          });
+        return;
+      }
+      res
+        .status(201)
+        .json({
+          success: true,
+          requiresConfirmation: false,
+          user: {
+            id: profile.id,
+            role: profile.role,
+            name: profile.full_name,
+            username: profile.username,
+          },
+          session: data.session,
+        });
+    } catch (error) {
+      next(error);
+    }
+  });
+  app.get("/api/auth/me", async (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    try {
+      const match = /^Bearer\s+(\S+)$/i.exec(req.headers.authorization ?? "");
+      if (!match) {
+        res.status(401).json({ message: "Inicia sesión." });
+        return;
+      }
+      const client = dependencies.createClient(match[1]);
+      const { data, error } = await client.auth.getUser(match[1]);
+      if (error || !data.user) {
+        res.status(401).json({ message: "Sesión inválida o vencida." });
+        return;
+      }
+      const { data: profile, error: profileError } = await client
+        .from("profiles")
+        .select("id,username,role,is_active,full_name,phone,store_name")
+        .eq("id", data.user.id)
+        .single();
+      if (profileError || !profile?.is_active) {
+        res.status(403).json({ message: "Tu perfil no está habilitado." });
+        return;
+      }
+      res.json({ user: profile });
+    } catch (error) {
+      next(error);
+    }
+  });
   app.post("/api/auth/login", async (req, res, next) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
