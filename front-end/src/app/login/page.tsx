@@ -79,7 +79,7 @@ export default function LoginPage() {
         </div>
 
         {/* CARD */}
-        <div className="relative bg-surface border border-border p-8 shadow-2xl">
+        <div className="relative bg-surface border border-border p-5 sm:p-8 shadow-2xl">
           <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
 
           <div className="mb-8 pl-2">
@@ -113,14 +113,14 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tucorreo@gmail.com"
-                  className="w-full h-12 bg-canvas border border-border focus:border-accent focus:ring-1 focus:ring-accent text-white text-sm pl-12 pr-4 rounded outline-none transition-colors placeholder:text-text-disabled"
+                  className="w-full h-12 bg-canvas border border-border focus:border-accent focus:ring-1 focus:ring-accent text-white text-base pl-12 pr-4 rounded outline-none transition-colors placeholder:text-text-disabled"
                 />
               </div>
             </div>
 
             {/* PASSWORD */}
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex flex-wrap gap-2 justify-between items-center mb-2">
                 <label
                   htmlFor="login-password"
                   className="block text-xs font-bold text-text-secondary uppercase tracking-wider"
@@ -144,7 +144,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-12 bg-canvas border border-border focus:border-accent focus:ring-1 focus:ring-accent text-white text-sm pl-12 pr-4 rounded outline-none transition-colors placeholder:text-text-disabled"
+                  className="w-full h-12 bg-canvas border border-border focus:border-accent focus:ring-1 focus:ring-accent text-white text-base pl-12 pr-4 rounded outline-none transition-colors placeholder:text-text-disabled"
                 />
               </div>
             </div>

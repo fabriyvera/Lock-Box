@@ -92,6 +92,17 @@ a { text-decoration: none; color: inherit; }
 button { font-family: inherit; cursor: pointer; }
 input { font-family: inherit; }
 
+/* Contenido y controles legibles con zoom, teclado y pantallas pequeñas. */
+img, video { max-width: 100%; }
+button, input, select, textarea { max-width: 100%; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@media (max-width: 720px) {
+  input, select, textarea { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
 /* Evita que el autocompletado cambie el tema del formulario. */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

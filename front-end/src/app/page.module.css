@@ -3,6 +3,122 @@
   color: var(--color-foreground);
 }
 
+.hero {
+  min-height: calc(100svh - 68px);
+  scroll-margin-top: 76px;
+}
+.heroPanel {
+  padding: clamp(32px, 5vw, 64px) clamp(16px, 4vw, 40px);
+  min-width: 0;
+}
+.section {
+  min-height: calc(100svh - 68px);
+  padding: clamp(48px, 7vw, 80px) clamp(16px, 4vw, 40px);
+  scroll-margin-top: 76px;
+}
+.twoColumns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.threeColumns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.fourColumns {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.footerColumns {
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+}
+:is(.twoColumns, .threeColumns, .fourColumns, .footerColumns) > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.wrappingRow {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.registrationCard {
+  min-width: 0;
+  padding: clamp(16px, 4vw, 32px);
+}
+.footerSocial {
+  text-align: right;
+}
+.siteNav {
+  position: sticky;
+  display: flex;
+  min-height: 68px;
+  padding: 10px clamp(16px, 4vw, 40px);
+  gap: 16px;
+}
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.navLinks :is(button, a) {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.menuToggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-accent);
+  background: transparent;
+}
+
+@media (max-width: 1100px) {
+  .threeColumns,
+  .fourColumns,
+  .footerColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .menuToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .siteNav {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+  .navLinks {
+    display: none;
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+  .navLinks.navOpen {
+    display: flex;
+  }
+  .twoColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero {
+    min-height: auto;
+  }
+}
+@media (max-width: 600px) {
+  .threeColumns,
+  .footerColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fourColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .footerSocial {
+    text-align: left;
+  }
+  .section {
+    min-height: auto;
+  }
+}
+
 .page :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;

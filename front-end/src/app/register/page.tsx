@@ -13,7 +13,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-canvas text-white flex flex-col">
       {/* Barra de navegación superior */}
-      <header className="border-b border-border px-6 py-4 flex justify-between items-center">
+      <header className="border-b border-border px-4 sm:px-6 py-4 flex flex-wrap gap-4 justify-between items-center">
         <div className="flex items-center">
           <span className="bg-accent text-black font-black px-2 py-1 text-sm rounded-l">
             LOCK
@@ -80,7 +80,7 @@ export default function RegisterPage() {
                 type="button"
                 aria-pressed={role === "vendedor"}
                 onClick={() => setRole("vendedor")}
-                className={`cursor-pointer p-5 rounded-lg border transition-all duration-300 relative ${
+                className={`text-left cursor-pointer p-5 rounded-lg border transition-all duration-300 relative ${
                   role === "vendedor"
                     ? "border-accent bg-surface"
                     : "border-border bg-surface-deep hover:border-border-strong"
@@ -154,7 +154,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Derecha: Formulario con el borde izquierdo estilo Login */}
-          <div className="lg:col-span-7 bg-surface-deep border border-border rounded-xl p-6 md:p-8 relative shadow-2xl overflow-hidden">
+          <div className="min-w-0 lg:col-span-7 bg-surface-deep border border-border rounded-xl p-6 md:p-8 relative shadow-2xl overflow-hidden">
             {/* Barra lateral verde distintiva idéntica al diseño del Login */}
             <div className="absolute top-0 left-0 w-1.5 h-full bg-accent"></div>
 

@@ -1,0 +1,94 @@
+.dashboard {
+  min-height: 100svh;
+}
+.dashboard :focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.dashboard button {
+  min-height: 44px;
+}
+.navigation {
+  position: sticky;
+  min-height: 64px;
+  padding: 10px clamp(16px, 3vw, 36px);
+  gap: 16px;
+}
+.navigation > * {
+  min-width: 0;
+}
+.navigation button {
+  min-height: 44px;
+}
+.tabs {
+  flex-wrap: wrap;
+}
+.content {
+  padding: 28px clamp(16px, 3vw, 36px);
+}
+.content img {
+  max-width: 100%;
+}
+.twoColumns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.twoColumns > :only-child {
+  grid-column: 1 / -1;
+}
+.fourColumns {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+:is(.twoColumns, .fourColumns) > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.wrappingRow {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.wrappingRow > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.emptyCheckout {
+  padding: clamp(24px, 6vw, 48px);
+}
+.demoNotice {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px clamp(16px, 3vw, 36px);
+  color: var(--color-warning);
+  background: var(--color-warning-faint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+  .fourColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tabs {
+    width: 100%;
+    order: 3;
+  }
+  .tabs button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+@media (max-width: 720px) {
+  .twoColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .navigation {
+    position: static;
+  }
+}
+@media (max-width: 480px) {
+  .fourColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tabs {
+    flex-direction: column;
+  }
+}

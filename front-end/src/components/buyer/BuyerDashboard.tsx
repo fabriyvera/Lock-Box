@@ -1,5 +1,6 @@
 'use client';
 
+import styles from './buyer.module.css';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, ArrowLeftRight, ArrowUpRight, CreditCard, Eye, Flame, Gem, KeyRound, Landmark, LoaderCircle, MapPin, Smartphone, Sparkles, Tag, UserRound, Video, Zap, type LucideIcon } from 'lucide-react';
@@ -204,9 +205,9 @@ function BuyerNavBar({ screen, keyCount, maxKeys, onExit, onNavigate, name }: {
   onNavigate: (screen: ClientScreen) => void;
 }) {
   return (
-    <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--color-surface-deep-opaque)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 36px', height: '54px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <button onClick={onExit} style={{ background: 'var(--color-surface-raised)', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-secondary)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', fontFamily: "'Inter',sans-serif", transition: 'border-color 0.2s, color 0.2s' }}
+    <div style={{top: 0, zIndex: 10, background: 'var(--color-surface-deep-opaque)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}} className={styles.navigation + ' ' + styles.wrappingRow}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }} className={styles.wrappingRow}>
+        <button onClick={onExit} style={{ background: 'var(--color-surface-raised)', border: '1px solid var(--color-border-strong)', color: 'var(--color-text-secondary)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', fontFamily: "var(--font-inter), sans-serif", transition: 'border-color 0.2s, color 0.2s' }}
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.color = 'var(--color-white)'; }}
         onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border-strong)'; e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
         ><DecorativeIcon icon={ArrowLeft} size={14} /> Salir</button>
@@ -217,13 +218,13 @@ function BuyerNavBar({ screen, keyCount, maxKeys, onExit, onNavigate, name }: {
         <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 500, borderLeft: '1px solid var(--color-border-strong)', paddingLeft: '12px' }}>Vista Cliente</span>
       </div>
 
-      <div style={{ display: 'flex', gap: '4px', background: 'var(--color-surface-raised)', padding: '4px', borderRadius: '8px' }}>
+      <div style={{ display: 'flex', gap: '4px', background: 'var(--color-surface-raised)', padding: '4px', borderRadius: '8px' }} className={styles.tabs}>
         {([
           [1, Video, 'Live Commerce'],
           [2, CreditCard, 'Checkout Seguro'],
           [3, KeyRound, `Mis Llaves${keyCount > 0 ? ` (${keyCount})` : ''}`],
         ] as [ClientScreen, LucideIcon, string][]).map(([s, ico, label]) => (
-          <button key={s} onClick={() => onNavigate(s)} style={{ background: screen === s ? 'var(--color-accent)' : 'transparent', color: screen === s ? 'var(--color-surface-deep)' : 'var(--color-text-secondary)', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter',sans-serif", transition: 'background 0.2s, color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button key={s} onClick={() => onNavigate(s)} style={{ background: screen === s ? 'var(--color-accent)' : 'transparent', color: screen === s ? 'var(--color-surface-deep)' : 'var(--color-text-secondary)', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: "var(--font-inter), sans-serif", transition: 'background 0.2s, color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <DecorativeIcon icon={ico} size={16} /> {label}
           </button>
         ))}
@@ -292,11 +293,12 @@ export default function ClientDashboard({ name }: { name: string }) {
 
  /* ════════ SCREEN 1 — Live Commerce ════════ */
   if (screen === 1) return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--color-surface-deep)', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
+    <div style={{background: 'var(--color-surface-deep)', fontFamily: "var(--font-inter), sans-serif"}} className={styles.dashboard}>
       {logoutError && <p role="alert">{logoutError}</p>}
       <BuyerNavBar screen={screen} keyCount={keys.length} maxKeys={MAX_KEYS} name={name} onExit={() => void logout()} onNavigate={goTo} />
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '28px 36px' }}>
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <p className={styles.demoNotice}>Catálogo de demostración. Las compras y llaves de esta vista son simuladas; no se realizan cobros.</p>
+      <div style={{maxWidth: '1280px', margin: '0 auto'}} className={styles.content}>
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }} className={styles.wrappingRow}>
           <div>
             <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '4px' }}>DESCUBRIMIENTO</div>
             <h1 style={{ fontWeight: 900, fontSize: '26px', color: 'var(--color-white)', margin: 0 }}>Lives en este momento</h1>
@@ -306,7 +308,7 @@ export default function ClientDashboard({ name }: { name: string }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '28px' }}>
+        <div style={{display: 'grid', gap: '12px', marginBottom: '28px'}} className={styles.fourColumns}>
           {SELLERS.map(seller => (
             <div key={seller.id} onClick={() => setActiveSeller(activeSeller?.id === seller.id ? null : seller)}
               style={{ background: 'var(--color-surface-raised)', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer', border: `2px solid ${activeSeller?.id === seller.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, transition: 'border-color 0.2s, transform 0.2s' }}
@@ -337,7 +339,7 @@ export default function ClientDashboard({ name }: { name: string }) {
 
         {activeSeller && (
           <div style={{ background: 'var(--color-surface-raised)', borderRadius: '12px', border: `2px solid var(--color-accent)`, overflow: 'hidden' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 0 }}>
+            <div style={{display: 'grid', gap: 0}} className={styles.twoColumns}>
               <div style={{ position: 'relative' }}>
                 <img src={activeSeller.cover} alt={activeSeller.name} style={{ width: '100%', height: '240px', objectFit: 'cover', display: 'block' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, var(--color-surface-deep-glass))' }} />
@@ -349,13 +351,13 @@ export default function ClientDashboard({ name }: { name: string }) {
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: 'var(--color-surface-deep)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: 'var(--color-surface-deep)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px', padding: '28px', background: 'var(--color-surface-deep)' }} className={styles.wrappingRow}>
+
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '6px' }}>Transmitiendo en</div>
                   <div style={{ fontWeight: 900, fontSize: '20px', color: 'var(--color-white)' }}>TikTok Live</div>
                 </div>
-                
+
                 <a href={`https://www.tiktok.com/${activeSeller.handle}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'var(--color-black)', borderRadius: '10px', padding: '14px 28px', textDecoration: 'none', border: '2px solid var(--color-border-strong)', transition: 'border-color 0.2s', width: '100%', boxSizing: 'border-box' }}
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-accent)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-border-strong)')}
@@ -364,16 +366,16 @@ export default function ClientDashboard({ name }: { name: string }) {
                   <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)' }}>Ir al Live en TikTok</span>
                   <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}><DecorativeIcon icon={ArrowUpRight} size={12} /></span>
                 </a>
-              </div>
-                
+
+
               </div>
             </div>
 
             <div style={{ padding: '20px', borderTop: '1px solid var(--color-border-strong)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }} className={styles.wrappingRow}>
                 <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-white)' }}>Productos disponibles</div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+              <div style={{display: 'grid', gap: '10px'}} className={styles.fourColumns}>
                 {activeSeller.products.map(p => {
                   const full = keys.length >= MAX_KEYS;
                   return (
@@ -402,16 +404,17 @@ export default function ClientDashboard({ name }: { name: string }) {
 
   /* ════════ SCREEN 2 — Checkout ════════ */
   if (screen === 2 && selectedProduct) return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--color-surface-deep)', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
+    <div style={{background: 'var(--color-surface-deep)', fontFamily: "var(--font-inter), sans-serif"}} className={styles.dashboard}>
       {logoutError && <p role="alert">{logoutError}</p>}
       <BuyerNavBar screen={screen} keyCount={keys.length} maxKeys={MAX_KEYS} name={name} onExit={() => void logout()} onNavigate={goTo} />
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '28px 36px' }}>
+      <p className={styles.demoNotice}>Catálogo de demostración. Las compras y llaves de esta vista son simuladas; no se realizan cobros.</p>
+      <div style={{maxWidth: '1100px', margin: '0 auto'}} className={styles.content}>
         <div style={{ marginBottom: '20px' }}>
           <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '4px' }}>PAGO ESCROW</div>
           <h1 style={{ fontWeight: 900, fontSize: '26px', color: 'var(--color-white)', margin: 0 }}>Checkout Seguro</h1>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
+        <div style={{display: 'grid', gap: '20px', alignItems: 'start'}} className={styles.twoColumns}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: 'var(--color-surface-raised)', borderRadius: '12px', padding: '18px', border: '1px solid var(--color-border-strong)' }}>
               <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '12px' }}>Resumen del pedido</div>
@@ -430,7 +433,7 @@ export default function ClientDashboard({ name }: { name: string }) {
               <MapPlaceholder locker={selectedLocker} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
                 {LOCKERS.map(loc => (
-                  <div key={loc.id} onClick={() => setSelectedLocker(loc)} style={{ padding: '10px 12px', borderRadius: '7px', border: `1px solid ${selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedLocker.id === loc.id ? 'var(--color-accent-soft)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div key={loc.id} onClick={() => setSelectedLocker(loc)} style={{ padding: '10px 12px', borderRadius: '7px', border: `1px solid ${selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedLocker.id === loc.id ? 'var(--color-accent-soft)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className={styles.wrappingRow}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                       <div style={{ width: '10px', height: '10px', borderRadius: '50%', border: `2px solid ${selectedLocker.id === loc.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedLocker.id === loc.id ? 'var(--color-accent)' : 'transparent' }} />
                       <div>
@@ -447,7 +450,7 @@ export default function ClientDashboard({ name }: { name: string }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ background: 'var(--color-surface-raised)', borderRadius: '12px', padding: '18px', border: '1px solid var(--color-border-strong)' }}>
               <div style={{ fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '14px' }}>Método de pago</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+              <div style={{display: 'grid', gap: '8px', marginBottom: '16px'}} className={styles.twoColumns}>
                 {PAYMENT_METHODS.map(m => (
                   <div key={m.id} onClick={() => setSelectedPayment(m.id)} style={{ padding: '11px 12px', borderRadius: '8px', border: `2px solid ${selectedPayment === m.id ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, background: selectedPayment === m.id ? 'var(--color-accent-soft)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div>
@@ -473,11 +476,12 @@ export default function ClientDashboard({ name }: { name: string }) {
 
   /* ════════ SCREEN 3 — Mis Llaves ════════ */
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'var(--color-surface-deep)', overflowY: 'auto', fontFamily: "'Inter',sans-serif" }}>
+    <div style={{background: 'var(--color-surface-deep)', fontFamily: "var(--font-inter), sans-serif"}} className={styles.dashboard}>
       {logoutError && <p role="alert">{logoutError}</p>}
       <BuyerNavBar screen={screen} keyCount={keys.length} maxKeys={MAX_KEYS} name={name} onExit={() => void logout()} onNavigate={goTo} />
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '28px 36px' }}>
-        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <p className={styles.demoNotice}>Catálogo de demostración. Las compras y llaves de esta vista son simuladas; no se realizan cobros.</p>
+      <div style={{maxWidth: '1100px', margin: '0 auto'}} className={styles.content}>
+        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }} className={styles.wrappingRow}>
           <div>
             <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.35em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '4px' }}>RETIRO EN CASILLERO</div>
             <h1 style={{ fontWeight: 900, fontSize: '26px', color: 'var(--color-white)', margin: 0 }}>Mis Llaves Digitales</h1>
@@ -496,17 +500,17 @@ export default function ClientDashboard({ name }: { name: string }) {
             <button onClick={() => goTo(1)} style={{ background: 'var(--color-accent)', border: 'none', borderRadius: '8px', color: 'var(--color-surface-deep)', fontWeight: 700, fontSize: '13px', padding: '13px 32px', cursor: 'pointer', marginTop: '10px' }}>Ver Lives</button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: keys.length === 1 ? '1fr' : 'repeat(2, 1fr)', gap: '16px' }}>
+          <div style={{display: 'grid', gap: '16px'}} className={styles.twoColumns}>
             {keys.map((key, idx) => (
               <div key={idx} style={{ background: 'var(--color-surface-raised)', borderRadius: '14px', border: `2px solid var(--color-accent)`, overflow: 'hidden' }}>
-                <div style={{ background: 'linear-gradient(135deg, var(--color-success-surface), var(--color-surface-raised))', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border-strong)' }}>
+                <div style={{ background: 'linear-gradient(135deg, var(--color-success-surface), var(--color-surface-raised))', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border-strong)' }} className={styles.wrappingRow}>
                   <div>
                     <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '2px' }}>Llave #{idx + 1}</div>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-white)' }}>{key.product.name}</div>
                   </div>
                   <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-warning-strong)' }}>En espera</div>
                 </div>
-                <div style={{ padding: '18px', display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                <div style={{ padding: '18px', display: 'flex', gap: '20px', alignItems: 'flex-start' }} className={styles.wrappingRow}>
                   <div style={{ flexShrink: 0, padding: '10px', background: 'var(--color-white)', borderRadius: '10px', boxShadow: `0 0 0 3px var(--color-accent-muted)` }}>
                     <QRCode seed={idx + key.product.id} />
                   </div>

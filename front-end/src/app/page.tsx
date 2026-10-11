@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
 import {
+  Menu,
+  X,
   ChartColumnIncreasing,
   ChevronDown,
   CircleCheck,
@@ -37,31 +38,22 @@ const FLOW = [
 ];
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<string>('inicio');
   const [role, setRole] = useState<Role>(null);
   const scrollTo = (id: string) => {
     setActiveNav(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    setMenuOpen(false);
+    document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
 
   return (
     <>
-      <Head>
-        <title>LockBox · Comercio Social Seguro</title>
-        <meta name="description" content="Plataforma Phygital para vendedores de TikTok Live con pagos en garantía y entrega verificada por QR." />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-      </Head>
 
-      <div className={styles.page} style={{ background: 'var(--color-surface-deep)', fontFamily: "'Inter', sans-serif", overflowX: 'hidden' }}>
+
+      <div className={styles.page} style={{ background: 'var(--color-surface-deep)', fontFamily: "var(--font-inter), sans-serif" }}>
         {/* ── NAV ── */}
-        <nav style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-          background: 'var(--color-surface-deep)', borderBottom: `2px solid var(--color-accent)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 40px', height: '52px',
-        }}>
+        <nav style={{top: 0, zIndex: 50, background: 'var(--color-surface-deep)', borderBottom: `2px solid var(--color-accent)`, alignItems: 'center', justifyContent: 'space-between'}} className={styles.siteNav}>
           <button onClick={() => scrollTo('inicio')} style={{
             display: 'flex', background: 'none', border: 'none', padding: 0, cursor: 'pointer',
           }}>
@@ -69,7 +61,8 @@ export default function Home() {
             <div style={{ background: 'var(--color-brand-secondary)', color: 'var(--color-foreground)', fontWeight: 900, fontSize: '15px', letterSpacing: '0.06em', padding: '4px 10px', lineHeight: 1 }}>BOX</div>
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <button className={styles.menuToggle} type="button" aria-expanded={menuOpen} aria-controls="home-navigation" aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuOpen(open => !open)}>{menuOpen ? <X aria-hidden="true" size={22} /> : <Menu aria-hidden="true" size={22} />}</button>
+          <div id="home-navigation" className={`${styles.navLinks} ${menuOpen ? styles.navOpen : ''}`}>
             {/* Enlaces Informativos Internos */}
             {[
               { id: 'inicio', label: 'inicio' },
@@ -80,7 +73,7 @@ export default function Home() {
             ].map(({ id, label }) => (
               <button key={id} onClick={() => scrollTo(id)} className={styles.navButton} data-active={activeNav === id} style={{
                 background: 'none', cursor: 'pointer', padding: 0,
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
                 fontWeight: 500, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase',
                 paddingBottom: '2px', transition: 'color 0.2s',
               }}
@@ -89,7 +82,7 @@ export default function Home() {
 
             <div style={{ width: '1px', height: '18px', background: 'var(--color-border-strong)', margin: '0 4px' }} />
             <Link href="/login" className={styles.accentLink} style={{
-              fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '11px',
+              fontFamily: "var(--font-inter), sans-serif", fontWeight: 700, fontSize: '11px',
               letterSpacing: '0.08em', textTransform: 'uppercase',
               textDecoration: 'none', transition: 'color 0.2s'
             }}
@@ -99,7 +92,7 @@ export default function Home() {
 
             <button onClick={() => scrollTo('registro')} className={styles.primaryButton} style={{
               border: 'none', padding: '7px 16px',
-              fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: '11px',
+              fontFamily: "var(--font-inter), sans-serif", fontWeight: 800, fontSize: '11px',
               letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
             }}
             >
@@ -109,11 +102,8 @@ export default function Home() {
         </nav>
 
         {/* ══════════════════════════════════════════ HERO ══════════════════════════════════════════ */}
-        <section id="inicio" style={{
-          height: '100vh', paddingTop: '52px',
-          display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden',
-        }}>
-          <div style={{ padding: '0 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px' }}>
+        <section id="inicio" style={{display: 'grid'}} className={styles.twoColumns + ' ' + styles.hero}>
+          <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '16px'}} className={styles.heroPanel}>
             <div style={{ background: 'var(--color-accent)', display: 'inline-block', width: 'fit-content', fontWeight: 700, fontSize: '9px', letterSpacing: '0.3em', color: 'var(--color-on-accent)', padding: '3px 10px' }}>
               PLATAFORMA PHYGITAL · 2026
             </div>
@@ -125,24 +115,24 @@ export default function Home() {
               Comercio social seguro para vendedores de TikTok Live.
               Pagos en garantía, entrega verificada por QR, red de tiendas aliadas.
             </p>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px' }} className={styles.wrappingRow}>
               <button onClick={() => scrollTo('registro')} className={styles.primaryButton} style={{
                 fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em',
                 padding: '11px 26px', border: 'none', cursor: 'pointer', textTransform: 'uppercase',
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
               }}
               >REGISTRARSE</button>
               <button onClick={() => scrollTo('nosotros')} className={`${styles.secondaryButton} ${styles.secondaryStrong}`} style={{
                 background: 'none',
                 fontWeight: 600, fontSize: '11px', letterSpacing: '0.1em', padding: '9px 26px',
-                cursor: 'pointer', textTransform: 'uppercase', fontFamily: "'Inter', sans-serif",
+                cursor: 'pointer', textTransform: 'uppercase', fontFamily: "var(--font-inter), sans-serif",
                 transition: 'border-color 0.2s, color 0.2s',
               }}
               >SABER MÁS</button>
             </div>
           </div>
 
-          <div style={{ position: 'relative', background: 'var(--color-surface)', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '32px 40px' }}>
+          <div style={{position: 'relative', background: 'var(--color-surface)', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center'}} className={styles.heroPanel}>
             <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(var(--color-accent-faint) 1px, transparent 1px), linear-gradient(90deg, var(--color-accent-faint) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
             <div style={{ position: 'absolute', top: '-20%', right: '-8%', width: '50%', height: '140%', background: `linear-gradient(135deg, var(--color-accent), var(--color-info-strong))`, transform: 'skewX(-10deg)', opacity: 0.06 }} />
 
@@ -170,7 +160,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', marginTop: '16px' }}>
+            <div style={{position: 'relative', zIndex: 1, display: 'grid', gap: '2px', marginTop: '16px'}} className={styles.threeColumns}>
               {[
                 { val: '100%', lbl: 'Protección' },
                 { val: '48H', lbl: 'Liquidación' },
@@ -190,10 +180,7 @@ export default function Home() {
           </div>
         </section>
         {/* ══════════════════════════════════════════ SOBRE NOSOTROS ══════════════════════════════════════════ */}
-        <section id="nosotros" style={{
-          height: '100vh', background: 'var(--color-surface-deep)', position: 'relative', overflow: 'hidden',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px',
-        }}>
+        <section id="nosotros" style={{background: 'var(--color-surface-deep)', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center'}} className={styles.section}>
           <div style={{ position: 'absolute', left: 0, top: '10%', bottom: '10%', width: '3px', background: `linear-gradient(to bottom, var(--color-accent), var(--color-brand-secondary))` }} />
 
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', marginBottom: '24px' }}>
@@ -206,7 +193,7 @@ export default function Home() {
             <div style={{ flex: 1, height: '2px', background: 'var(--color-border-strong)', marginBottom: '4px' }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '20px' }}>
+          <div style={{display: 'grid', gap: '40px', marginBottom: '20px'}} className={styles.twoColumns}>
             <div>
               <p style={{ fontSize: '14px', lineHeight: 1.7, color: 'var(--color-foreground)', margin: '0 0 12px 0', fontWeight: 300 }}>
                 <strong style={{ color: 'var(--color-foreground)', fontWeight: 600 }}>LockBox</strong> nació de una observación concreta: los comerciantes informales que venden por lives en TikTok enfrentan un ecosistema caótico donde el pago es inseguro y la entrega se coordina a mano.
@@ -225,7 +212,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '2px solid var(--color-border-strong)', borderBottom: '2px solid var(--color-border-strong)', marginBottom: '20px' }}>
+          <div style={{display: 'grid', borderTop: '2px solid var(--color-border-strong)', borderBottom: '2px solid var(--color-border-strong)', marginBottom: '20px'}} className={styles.fourColumns}>
             {[
               { value: 'PHYGITAL', label: 'Modelo de negocio' },
               { value: '48H', label: 'Liquidación de pagos' },
@@ -239,7 +226,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px' }}>
+          <div style={{display: 'grid', gap: '2px'}} className={styles.fourColumns}>
             {VALUES.map((v) => (
               <div key={v.number} className={styles.valueCard} style={{
                 padding: '18px',
@@ -255,10 +242,7 @@ export default function Home() {
         </section>
 
         {/* ══════════════════════════════════════════ SERVICIOS ══════════════════════════════════════════ */}
-        <section id="servicios" style={{
-          height: '100vh', background: 'var(--color-surface-raised)', position: 'relative', overflow: 'hidden',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px',
-        }}>
+        <section id="servicios" style={{background: 'var(--color-surface-raised)', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center'}} className={styles.section}>
           <div style={{ position: 'absolute', top: 0, right: 0, width: '32%', height: '100%', background: 'var(--color-surface-hover)', clipPath: 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)' }} />
 
           <div style={{ position: 'relative', zIndex: 1 }}>
@@ -272,7 +256,7 @@ export default function Home() {
               <div style={{ flex: 1, height: '2px', background: 'var(--color-border-strong)', marginBottom: '4px' }} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px' }}>
+            <div style={{display: 'grid', gap: '2px'}} className={styles.threeColumns}>
               {[
                 { icon: ShieldCheck, title: 'Pago en Garantía', desc: 'Tu dinero queda retenido hasta que confirmes haber recibido tu pedido. Sin estafas.', tag: 'COMPRADORES' },
                 { icon: Package, title: 'Puntos LockBox', desc: 'Red de tiendas aliadas que reciben los paquetes y los entregan contra escaneo de QR.', tag: 'ENTREGA' },
@@ -299,10 +283,7 @@ export default function Home() {
         </section>
 
         {/* ══════════════════════════════════════════ PLANES ══════════════════════════════════════════ */}
-        <section id="planes" style={{
-          height: '100vh', background: 'var(--color-surface-deep)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px', overflow: 'hidden',
-        }}>
+        <section id="planes" style={{background: 'var(--color-surface-deep)', display: 'flex', flexDirection: 'column', justifyContent: 'center'}} className={styles.section}>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', marginBottom: '32px' }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.4em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '6px' }}>— SECCIÓN 03</div>
@@ -313,7 +294,7 @@ export default function Home() {
             <div style={{ flex: 1, height: '2px', background: 'var(--color-border-strong)', marginBottom: '4px' }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', marginBottom: '24px' }}>
+          <div style={{display: 'grid', gap: '2px', marginBottom: '24px'}} className={styles.twoColumns}>
             {/* Plan Emprende */}
             <div style={{ background: 'var(--color-surface-raised)', padding: '40px', borderTop: '4px solid var(--color-brand-secondary-hover)', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '120px', height: '120px', border: '1px solid var(--color-border-strong)', borderRadius: '50%', opacity: 0.4 }} />
@@ -332,7 +313,7 @@ export default function Home() {
               </div>
               <button onClick={() => scrollTo('registro')} className={styles.planButton} style={{
                 border: '2px solid var(--color-brand-secondary-hover)',
-                fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '11px',
+                fontFamily: "var(--font-inter), sans-serif", fontWeight: 700, fontSize: '11px',
                 letterSpacing: '0.1em', padding: '11px 28px', cursor: 'pointer',
                 textTransform: 'uppercase', transition: 'background 0.2s, color 0.2s',
               }}
@@ -360,7 +341,7 @@ export default function Home() {
               </div>
               <button onClick={() => scrollTo('registro')} className={styles.primaryButton} style={{
                 border: 'none',
-                fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '11px',
+                fontFamily: "var(--font-inter), sans-serif", fontWeight: 700, fontSize: '11px',
                 letterSpacing: '0.1em', padding: '13px 28px', cursor: 'pointer',
                 textTransform: 'uppercase',
               }}
@@ -369,10 +350,7 @@ export default function Home() {
           </div>
         </section>
 {/* ══════════════════════════════════════════ REGISTRO ══════════════════════════════════════════ */}
-        <section id="registro" style={{
-          height: '100vh', background: 'var(--color-surface-raised)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px', overflow: 'hidden',
-        }}>
+        <section id="registro" style={{background: 'var(--color-surface-raised)', display: 'flex', flexDirection: 'column', justifyContent: 'center'}} className={styles.section}>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', marginBottom: '24px' }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.4em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '6px' }}>— SECCIÓN 04</div>
@@ -383,19 +361,19 @@ export default function Home() {
             <div style={{ flex: 1, height: '2px', background: 'var(--color-border-strong)', marginBottom: '4px' }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'start' }}>
+          <div style={{display: 'grid', gap: '40px', alignItems: 'start'}} className={styles.twoColumns}>
             <div>
               <p style={{ fontSize: '13px', lineHeight: 1.65, color: 'var(--color-foreground)', marginBottom: '16px', fontWeight: 400 }}>
                 Elige tu rol en la plataforma y empieza a operar con seguridad desde el primer día.
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', marginBottom: '20px' }}>
+              <div style={{display: 'grid', gap: '2px', marginBottom: '20px'}} className={styles.twoColumns}>
                 {([
                   { r: 'comprador' as Role, icon: ShoppingCart, title: 'Comprador', desc: 'Compra en lives de TikTok con pago protegido y recoge en un Punto LockBox cercano.' },
                   { r: 'vendedor' as Role, icon: Store, title: 'Vendedor', desc: 'Vende durante tus lives con catálogo integrado y recibe pagos seguros en 48 horas.' },
                 ]).map(({ r, icon, title, desc }) => (
                   <button key={r!} onClick={() => { setRole(r);  }} className={styles.roleCard} data-selected={role === r} aria-pressed={role === r} style={{
                     padding: '18px', textAlign: 'left', cursor: 'pointer',
-                    transition: 'border-color 0.2s, background 0.2s', fontFamily: "'Inter', sans-serif",
+                    transition: 'border-color 0.2s, background 0.2s', fontFamily: "var(--font-inter), sans-serif",
                   }}
                   >
                     <div style={{ fontSize: '20px', marginBottom: '6px' }}><DecorativeIcon icon={icon} size="1em" className={styles.icon} /></div>
@@ -437,7 +415,7 @@ export default function Home() {
             </div>
 
             {/* Form */}
-            <div style={{ background: 'var(--color-surface-deep)', padding: '32px', borderTop: `3px solid ${role ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, transition: 'border-color 0.3s' }}>
+            <div style={{background: 'var(--color-surface-deep)', borderTop: `3px solid ${role ? 'var(--color-accent)' : 'var(--color-border-strong)'}`, transition: 'border-color 0.3s'}} className={styles.registrationCard}>
               {!role ? (
                 <div style={{ padding: '16px 0' }}>
                   <div style={{ marginBottom: '20px' }}>
@@ -478,11 +456,8 @@ export default function Home() {
         </section>
 
         {/* ══════════════════════════════════════════ CONTACTO / FOOTER ══════════════════════════════════════════ */}
-        <footer id="contacto" style={{
-          height: '100vh', background: 'var(--color-canvas)', borderTop: `2px solid var(--color-accent)`,
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px', overflow: 'hidden',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '36px', paddingBottom: '24px', borderBottom: '1px solid var(--color-surface-raised)' }}>
+        <footer id="contacto" style={{background: 'var(--color-canvas)', borderTop: `2px solid var(--color-accent)`, display: 'flex', flexDirection: 'column', justifyContent: 'center'}} className={styles.section}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '36px', paddingBottom: '24px', borderBottom: '1px solid var(--color-surface-raised)' }} className={styles.wrappingRow}>
             <div>
               <div style={{ display: 'flex', marginBottom: '10px' }}>
                 <div style={{ background: 'var(--color-accent)', color: 'var(--color-on-accent)', fontWeight: 900, fontSize: '18px', letterSpacing: '0.06em', padding: '4px 10px', lineHeight: 1 }}>LOCK</div>
@@ -492,7 +467,7 @@ export default function Home() {
                 Plataforma Phygital de Comercio Social Seguro. Pagos en garantía, entrega verificada por QR y red de tiendas aliadas en Bolivia.
               </p>
             </div>
-            <div style={{ textAlign: 'right' }}>
+            <div style={{}} className={styles.footerSocial}>
               <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginBottom: '10px' }}>Est. La Paz, Bolivia · 2026</div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                 {[
@@ -511,7 +486,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '48px', marginBottom: '36px' }}>
+          <div style={{display: 'grid', gap: '48px', marginBottom: '36px'}} className={styles.footerColumns}>
             <div>
               <div style={{ fontWeight: 700, fontSize: '9px', letterSpacing: '0.3em', color: 'var(--color-accent)', textTransform: 'uppercase', marginBottom: '14px' }}>CONTACTO DIRECTO</div>
               {[
@@ -553,13 +528,13 @@ export default function Home() {
                 border: `1px solid var(--color-accent)`,
                 fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em',
                 padding: '8px 16px', cursor: 'pointer', textTransform: 'uppercase',
-                fontFamily: "'Inter', sans-serif", transition: 'background 0.2s, color 0.2s',
+                fontFamily: "var(--font-inter), sans-serif", transition: 'background 0.2s, color 0.2s',
               }}
               >AFILIARSE</button>
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--color-border-strong)', paddingTop: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ borderTop: '1px solid var(--color-border-strong)', paddingTop: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className={styles.wrappingRow}>
             <div style={{ fontWeight: 500, fontSize: '10px', letterSpacing: '0.1em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
               © 2026 LockBox — Todos los derechos reservados
             </div>

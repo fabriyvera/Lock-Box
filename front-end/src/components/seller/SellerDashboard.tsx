@@ -173,12 +173,14 @@ export default function SellerDashboard() {
               className={styles.textButton}
               disabled={saving}
               onClick={() =>
-                void logout().catch(() =>
-                  setToast({
-                    message: "No se pudo cerrar sesión.",
-                    error: true,
-                  }),
-                )
+                void logout()
+                  .then(() => window.location.replace("/login"))
+                  .catch(() =>
+                    setToast({
+                      message: "No se pudo cerrar sesión.",
+                      error: true,
+                    }),
+                  )
               }
             >
               Cerrar sesión

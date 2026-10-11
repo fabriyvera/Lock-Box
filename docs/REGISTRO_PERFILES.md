@@ -12,9 +12,7 @@ Proyecto: **LockBox's Project** (`anprldvvagovpyyenrif`). El 11 de octubre de 20
 - `GET /api/auth/me`: verifica el token con Auth y devuelve exclusivamente el perfil activo del titular. El rol proviene de la base de datos.
 - Los tipos TypeScript se regeneraron desde el proyecto real. No se añadió ninguna clave administrativa.
 
-`database/registration-rls.sql` reactiva RLS en `orders` y `order_items`: el asesor detectó que estaba deshabilitado pese a conservar políticas de vendedores. Añade lectura del carrito propio para compradores. No concede escritura directa de pedidos, perfiles o carritos.
-
-## Verificación realizada
+`database/registration-rls.sql` corresponde a `restore_order_rls_and_buyer_cart_read` (versión `20261011220313`). Reactiva RLS en `orders` y `order_items`: el asesor detectó que estaba deshabilitado pese a conservar políticas de vendedores. Añade lectura del carrito propio para compradores. No concede escritura directa de pedidos, perfiles o carritos.
 
 ## Formularios y acceso
 
@@ -26,12 +24,14 @@ La portada y `/register` reutilizan `RegistrationForm`; ambos envían los mismos
 
 Las pruebas HTTP del backend cubren ambos roles, confirmación, sesiones inmediatas, rechazo de roles privilegiados/campos extra, CAPTCHA, límites de Auth y lectura del perfil con token verificado. Las pruebas previas de vendedor se conservan.
 
-En la base real se ejecutó una transacción de prueba con `ROLLBACK`: alta de comprador/carrito, vendedor/plan, lectura de estado de vendedor, edición de tienda sin sobrescribir el nombre personal, rechazo de `admin` y modificación de metadatos sin elevación de permisos. No se conservaron cuentas de prueba ni se enviaron correos.
+Resultado: **12 pruebas de backend y 16 de frontend aprobadas**, TypeScript sin errores y build de Next.js de producción aprobado con `--webpack`. El servicio real de Auth confirmó que el registro por correo está habilitado y requiere confirmación (`mailer_autoconfirm=false`). La entrega de un correo y el regreso al callback no se probaron con una dirección real.
+
+En la base real se ejecutó `database/registration-checks.sql` con `ROLLBACK`: alta de comprador/carrito, vendedor/plan, rechazo de usuarios duplicados y `admin`, modificación de metadatos sin elevación de permisos, lectura de estado y edición de tienda sin sobrescribir el nombre personal. Se verificó RLS usando `SET LOCAL ROLE authenticated`: solo perfil/carrito propios, sin lectura de pedidos ajenos, sin escritura directa de perfiles y sin acceso de compradores al módulo vendedor. Las 15 cuentas iniciales se conservaron. No se conservaron cuentas de prueba ni se enviaron correos.
 
 ## Configuración para ejecutar el flujo completo
 
 1. Completar las variables públicas de Supabase en `front-end/.env.local` y las del mismo proyecto en `back-end/.env`, usando sus ejemplos. Nunca colocar una clave secret/service-role en el frontend.
-2. Configurar el par de claves Turnstile para los dominios utilizados. La aplicación muestra un aviso si faltan; no omite CAPTCHA.
+2. Configurar el par de claves Turnstile para los dominios utilizados. La aplicación muestra un aviso si faltan; no omite CAPTCHA. Los archivos locales inspeccionados tienen claves oficiales de prueba: usar claves reales para producción. Ver [pruebas de Turnstile](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
 3. Configurar `FRONTEND_URL` con el origen real del frontend y `NEXT_PUBLIC_API_URL` con la URL pública del backend. En producción no usar `localhost`.
 4. En Supabase Auth → URL Configuration, agregar `<FRONTEND_URL>/auth/callback` a las URL de redirección permitidas y configurar Site URL. La confirmación enviada por el backend utiliza flujo implícito; la página callback guarda la sesión en cookies, limpia la URL y consulta el perfil verificado. También admite enlaces PKCE generados por otros clientes.
 5. Configurar SMTP/plantillas de confirmación en Auth para correos reales. El formulario no redirige a un panel sin confirmación cuando Auth la requiere. El envío y recepción de correos requieren una prueba con una dirección controlada por el equipo.
@@ -41,3 +41,5 @@ Referencias: [registro y confirmación](https://supabase.com/docs/guides/auth/pa
 ## Observaciones de seguridad preexistentes
 
 Además de RLS deshabilitado en pedidos (corregido), el asesor detectó tablas con RLS pero sin políticas (`cart_items`, `disputes`, `notifications`, `reviews`, `transactions`) y protección de contraseñas filtradas deshabilitada. No se abrieron esas tablas para completar el registro. Ver [políticas faltantes](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) y [protección de contraseñas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+
+Tras las migraciones no quedaron errores de RLS en el asesor de seguridad. El asesor de rendimiento mantiene 4 avisos de claves foráneas sin índice y 9 de índices sin uso; no se eliminaron índices por una muestra tan temprana de actividad. Ver [índices de claves foráneas](https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys).

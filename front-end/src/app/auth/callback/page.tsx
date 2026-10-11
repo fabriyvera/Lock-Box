@@ -13,7 +13,6 @@ export default function AuthCallback() {
     started.current = true;
     async function confirm() {
       try {
-        const client = createClient();
         const hash = new URLSearchParams(window.location.hash.slice(1));
         const query = new URLSearchParams(window.location.search);
         // Capture then remove credentials from the address bar before any navigation.
@@ -22,6 +21,9 @@ export default function AuthCallback() {
           throw new Error(
             "El enlace de confirmación venció o ya fue utilizado. Inicia sesión o solicita uno nuevo.",
           );
+        // Initialize after clearing the URL: SSR clients use PKCE and must not
+        // auto-process the implicit confirmation issued by the backend.
+        const client = createClient();
         const access_token = hash.get("access_token");
         const refresh_token = hash.get("refresh_token");
         if (access_token && refresh_token) {

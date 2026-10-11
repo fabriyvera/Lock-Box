@@ -7,3 +7,5 @@ Consulta [BACKEND_SELLERS.md](docs/BACKEND_SELLERS.md) para los datos de prueba,
 - [Frontend: instalación y variables](front-end/README.md).
 - [Backend: API y pruebas](back-end/README.md).
 - [Esquema original](docs/db_structure.md).
+- [Registro real de compradores y vendedores](docs/REGISTRO_PERFILES.md).
+- [Adaptación responsive y verificación](docs/RESPONSIVE.md).

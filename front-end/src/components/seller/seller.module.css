@@ -235,6 +235,8 @@
   align-items: center;
   margin-bottom: 30px;
 }
+.pageHeading > div { min-width: 0; }
+.pageHeading h1, .hero h2 { overflow-wrap: anywhere; }
 .eyebrow {
   color: var(--color-accent);
   font-size: 9px;
@@ -989,6 +991,8 @@
   max-width: 620px;
   width: calc(100% - 32px);
   max-height: 90dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   box-shadow: 0 24px 100px var(--color-black-strong);
   font-family: var(--font-inter), sans-serif;
   border-radius: 5px;
@@ -1473,6 +1477,14 @@
   }
 }
 @media (max-width: 720px) {
+  .shell { min-width: 0; }
+  .main, .content { min-width: 0; }
+  .topbar { flex-wrap: wrap; gap: 10px; }
+  .topbarRight { flex-wrap: wrap; }
+  .sidebar nav button { min-height: 44px; }
+  .toolbar, .walletLine, .cardHeading { flex-wrap: wrap; gap: 12px; }
+  .dialogHeader h2 { overflow-wrap: anywhere; }
+  .formGrid > *, .metricGrid > *, .planGrid > * { min-width: 0; }
   .shell {
     flex-direction: column;
   }
@@ -1520,8 +1532,9 @@
     margin-left: 0;
   }
   .topbar {
-    height: 66px;
-    padding: 0 18px;
+    height: auto;
+    min-height: 66px;
+    padding: 12px 18px;
   }
   .topbarRight {
     gap: 10px;

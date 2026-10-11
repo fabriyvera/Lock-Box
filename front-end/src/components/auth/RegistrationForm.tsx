@@ -160,9 +160,9 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
       </h3>
       <fieldset disabled={busy} className={styles.fields}>
         <legend className="sr-only">Datos de tu cuenta</legend>
-        {fields.map((field) => (
+        {fields.map(({ label, ...field }) => (
           <div key={field.name}>
-            <label htmlFor={`${id}-${field.name}`}>{field.label}</label>
+            <label htmlFor={`${id}-${field.name}`}>{label}</label>
             <input
               {...field}
               id={`${id}-${field.name}`}

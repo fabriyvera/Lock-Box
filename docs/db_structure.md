@@ -63,6 +63,7 @@ Datos públicos del usuario. Vinculada a `auth.users` de Supabase.
 | `username` | `citext` | NOT NULL, UNIQUE, formato `^[a-z0-9._]{3,30}$` | Handle público (@fabricio_vera) |
 | `role` | `user_role` | NOT NULL, default `comprador` | Rol del usuario |
 | `full_name` | `text` | | Nombre completo |
+| `store_name` | `text` | NULL o 2–80 caracteres | Nombre comercial del vendedor; independiente del nombre personal |
 | `bio` | `text` | | Biografía corta |
 | `phone` | `text` | UNIQUE | Teléfono de contacto |
 | `avatar_url` | `text` | | URL del avatar |
