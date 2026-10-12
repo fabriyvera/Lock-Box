@@ -12,3 +12,4 @@ Consulta [BACKEND_SELLERS.md](docs/BACKEND_SELLERS.md) para los datos de prueba,
 - [Acceso directo y CAPTCHA después de completar formularios](docs/ACCESO_DIRECTO_Y_CAPTCHA.md).
 - [Celular de 8 dígitos en el registro](docs/CELULAR_BOLIVIA.md).
 - [Integración del administrador del punto de recojo](docs/INTEGRACION_COLLECTION_POINT.md).
+- [Integración del módulo comprador y verificación en Vercel](docs/INTEGRACION_BUYERS.md).
