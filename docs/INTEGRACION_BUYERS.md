@@ -34,8 +34,20 @@ TypeScript del frontend y ESLint de los archivos del comprador sin errores. `nex
 
 El proyecto de la URL previamente compartida es `lock-box-d9wa` (`prj_RST8Gf9wBhZhVzxlNwwAMbwr8uKB`), conectado a `fabriyvera/Lock-Box`. Su alias de producción es [lock-box-d9wa.vercel.app](https://lock-box-d9wa.vercel.app).
 
-Después de subir el merge, se debe comprobar que el despliegue de **ese SHA**, con rama `main` y target `production`, llegue a `READY`, y visitar inicio, login y las rutas protegidas. La portada del despliegue anterior respondió correctamente en el navegador durante la revisión inicial.
+El merge publicado es `cbdd8ad804213abbdbb3456227fda1e0fcfdd61b`. Su primer despliegue falló al prerenderizar `/comprador`: en el proyecto frontend solo se habían agregado variables del backend (`SUPABASE_*` y `TURNSTILE_SECRET_KEY`).
 
-El conector permite consultar metadatos, pero devolvió 403 al acceder a los logs y al bypass de protección del equipo `fabriyveras-projects`; se solicitó autorizar la conexión para esos recursos. No se desactivó Deployment Protection. El resultado final del nuevo despliegue se informa junto al commit y su URL; `READY` no implica que se hayan probado pagos o recorridos de una cuenta real.
+Se agregaron en el entorno **Production** de `lock-box-d9wa` los nombres que realmente consume Next.js: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `NEXT_PUBLIC_TURNSTILE_SITE_KEY`. La URL raíz y la clave publicable corresponden al mismo proyecto Supabase existente; la site key es la usada por el frontend local. No se expuso `service_role` ni el secreto de Cloudflare.
+
+El redeploy del mismo commit, `dpl_AVpKJXqfgejxZyF7EAM3gYrVYGgk`, terminó en **READY**, target **production**, sin errores al asignar aliases. URL exacta: [lock-box-d9wa-h7p38btnb-fabriyveras-projects.vercel.app](https://lock-box-d9wa-h7p38btnb-fabriyveras-projects.vercel.app). La compilación duró aproximadamente 54 segundos.
+
+Se comprobó en el navegador que el alias de producción carga la portada, `/comprador` redirige a `/login` sin sesión y `/register` muestra el formulario, celular de 8 dígitos y CAPTCHA pendiente hasta completar los datos. No aparecieron errores de consola en estas comprobaciones.
+
+El conector permite consultar metadatos, pero devolvió 403 al acceder a los logs y al bypass de protección del equipo `fabriyveras-projects`. Se pudo leer el fallo de compilación desde el panel web con la sesión existente y corregir la configuración. No se desactivó Deployment Protection. `READY` no implica que se hayan probado pagos o recorridos de una cuenta real.
 
 Existe además un proyecto distinto llamado `lock-box` (`prj_X1m39iADjusqDqthwpgD7TqiJaOB`) con errores anteriores al merge. No se cambió su configuración ni se lo confundió con el frontend de `lock-box-d9wa`.
+
+## Backend pendiente de hosting
+
+El usuario confirmó que el backend todavía no tiene hosting. Por ello no se configuró una URL ficticia ni `localhost` como `NEXT_PUBLIC_API_URL` de producción. La página está publicada, pero el login, registro y módulos que llaman a Express necesitan que la API se publique y luego se configure esa variable. El comprador integrado continúa siendo una demo local.
+
+Una opción para el siguiente paso es un proyecto separado de Vercel con raíz `back-end`, framework Express y variables privadas del backend, como describe la [documentación oficial de Express en Vercel](https://vercel.com/docs/frameworks/backend/express). Después debe configurarse `FRONTEND_URL` con el alias real del frontend y `NEXT_PUBLIC_API_URL` con la URL HTTPS de la API, verificar `/api/health` y probar una sesión completa.
