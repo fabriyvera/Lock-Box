@@ -151,6 +151,9 @@ export default function SellerDashboard() {
           <Link href="/" prefetch={false} className={styles.backLink}>
             <ArrowLeft size={16} /> Volver al inicio
           </Link>
+          <Link href="/admin" prefetch={false} className={styles.backLink}>
+            <Package size={16} /> Administrar punto
+          </Link>
         </div>
       </aside>
       <div className={styles.main}>

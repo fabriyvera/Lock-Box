@@ -11,6 +11,7 @@ import { clientFactory } from "./services/supabase-client.js";
 import { verifyTurnstileToken } from "./services/turnstile.service.js";
 import { loginSchema, registerSchema } from "./schemas/auth.schema.js";
 import { actionRequestSchema } from "./schemas/seller.schema.js";
+import { createOrdersRouter } from "./routes/orders.js";
 
 export interface Dependencies {
   createClient: (token?: string) => SupabaseClient<Database>;
@@ -330,6 +331,9 @@ export function createApp(
     }
   });
   app.use("/api/seller", seller);
+  const orders = createOrdersRouter(dependencies);
+  app.use("/api/collection-point", orders);
+  app.use("/orders", orders);
   app.use((_req, res) =>
     res.status(404).json({ message: "Ruta no encontrada" }),
   );
