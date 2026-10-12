@@ -1,6 +1,6 @@
 import express from "express";
 import { env } from "./config/env.js";
-import { createApp } from "./app.js";
+import { createApp } from "./create-app.js";
 
 const app = express();
 app.disable("x-powered-by");

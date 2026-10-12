@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "../types/database.js";
-import type { Dependencies } from "../app.js";
+import type { Dependencies } from "../create-app.js";
 
 const qrCode = z
   .string()

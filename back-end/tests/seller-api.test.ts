@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../src/types/database.js";
-import { createApp, type Dependencies } from "../src/app.js";
+import { createApp, type Dependencies } from "../src/create-app.js";
 import { parseEnvironment } from "../src/config/environment.js";
 
 const config = parseEnvironment({
