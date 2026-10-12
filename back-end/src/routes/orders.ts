@@ -1,11 +1,12 @@
 import { Router, type Request, type Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { env } from '../config/env.js';
-import { clientFactory } from '../services/supabase-client.js';
+// Importamos getAdminClient junto a clientFactory
+import { clientFactory, getAdminClient } from '../services/supabase-client.js';
 
 const router = Router();
 
-// Instanciamos el creador de clientes con tus variables de entorno
+// Instanciamos el creador de clientes con tus variables de entorno para peticiones normales
 const getSupabaseClient = clientFactory(env);
 
 // ==========================================
@@ -146,10 +147,11 @@ router.patch('/:order_id/status', async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const supabase = getSupabaseClient(); 
+    // AQUÍ ESTÁ LA MAGIA: Usamos el cliente Admin que tiene la Service Role Key
+    const supabaseAdmin = getAdminClient(); 
 
-    // Actualizamos solo la columna status de la orden correspondiente
-    const { data, error } = await supabase
+    // Actualizamos usando supabaseAdmin en lugar del cliente normal para evadir el RLS
+    const { data, error } = await supabaseAdmin
       .from('orders')
       .update({ status: status })
       .eq('id' as any, order_id)
@@ -173,4 +175,5 @@ router.patch('/:order_id/status', async (req: Request, res: Response): Promise<v
     res.status(500).json({ error: "Error interno al procesar la actualización" });
   }
 });
+
 export default router;
