@@ -26,13 +26,13 @@ Antes del ajuste se comprobaron **15 perfiles activos de comprador/vendedor y 0 
 
 1. Mientras faltan campos, solo muestra un aviso. El widget no se monta ni inicia la verificación.
 2. En login requiere correo con formato válido y contraseña presente, conservando compatibilidad con contraseñas anteriores más cortas.
-3. En registro requiere nombre, usuario válido, correo, celular internacional, contraseña de 8–128 caracteres y confirmación coincidente. El vendedor además debe completar el nombre de la tienda.
+3. En registro requiere nombre, usuario válido, correo, celular de exactamente 8 dígitos sin código de país, contraseña de 8–128 caracteres y confirmación coincidente. El vendedor además debe completar el nombre de la tienda. El backend añade `+591` al guardar el celular; ver [CELULAR_BOLIVIA.md](CELULAR_BOLIVIA.md).
 4. Tras completar los datos, espera 500 ms sin cambios antes de montar el widget. Esto evita iniciar un desafío por cada tecla durante la escritura.
 5. Cada modificación invalida el token previo y recrea el componente con una nueva revisión. Los callbacks de un componente desmontado no pueden entregar un token a la siguiente revisión.
 6. Los botones de envío quedan deshabilitados hasta tener formulario completo y token válido; tampoco permiten doble envío mientras hay una solicitud pendiente.
 7. Una expiración elimina el token. Ante errores se ofrece **Reintentar verificación**. El backend continúa validando el token con el servicio `siteverify`.
 
-La validación de preparación se concentra en `front-end/src/lib/auth/form-readiness.ts`. El registro normaliza teléfono y usuario igual que al enviar los datos. Solo los cambios de los campos de la cuenta reinician el CAPTCHA: se ignoran los campos internos que agrega Cloudflare.
+La validación de preparación se concentra en `front-end/src/lib/auth/form-readiness.ts`. El registro normaliza el usuario y exige 8 dígitos para el teléfono, igual que al enviar los datos. Solo los cambios de los campos de la cuenta reinician el CAPTCHA: se ignoran los campos internos que agrega Cloudflare.
 
 ## Archivos principales
 

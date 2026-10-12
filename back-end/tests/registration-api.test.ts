@@ -16,7 +16,7 @@ const input = {
   password: "StrongPassword1",
   fullName: "Persona de prueba",
   username: "persona",
-  phone: "+59171234567",
+  phone: "71234567",
   role: "comprador",
   captchaToken: "token",
 };
@@ -82,7 +82,10 @@ async function withServer(
     },
     {
       createClient: () => client,
-      verifyCaptcha: async () => options.captcha === false ? { success: false, errorCodes: ['invalid-input-response'] } : { success: true },
+      verifyCaptcha: async () =>
+        options.captcha === false
+          ? { success: false, errorCodes: ["invalid-input-response"] }
+          : { success: true },
     },
   ).listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -126,6 +129,7 @@ test("signup accepts both roles, sends validated metadata and handles email conf
         "http://localhost:3000/auth/callback",
       );
       assert.equal(body.options.data.role, role);
+      assert.equal(body.options.data.phone, "+59171234567");
       assert.equal(body.options.data.is_verified, undefined);
       assert.equal(
         body.options.data.store_name,
@@ -141,7 +145,11 @@ test("signup rejects privileged roles, injected fields, invalid data and missing
       { role: "despachador" },
       { is_verified: true },
       { username: "bad..user" },
-      { phone: "71234567" },
+      { phone: "7123456" },
+      { phone: "712345678" },
+      { phone: "+59171234567" },
+      { phone: "7123a567" },
+      { phone: "7123 567" },
       { password: "short" },
       { role: "vendedor" },
     ]) {

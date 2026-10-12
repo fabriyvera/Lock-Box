@@ -23,7 +23,7 @@ const valid = {
   fullName: "María Gonzáles",
   username: "@Maria.Gonzales",
   email: "maria@example.invalid",
-  phone: "+591 (712) 345-67",
+  phone: "71234567",
   password: "Password1",
   confirmPassword: "Password1",
 };
@@ -69,7 +69,7 @@ test("mismatched or short passwords cannot start registration verification", () 
     false,
   );
 });
-test("registration verifies normalized handles and international phones before CAPTCHA", () => {
+test("registration verifies normalized handles and eight-digit phones before CAPTCHA", () => {
   for (const username of [
     "a..b",
     ".maria",
@@ -79,7 +79,33 @@ test("registration verifies normalized handles and international phones before C
     "bad handle",
   ])
     assert.equal(registrationComplete(form({ username }), "comprador"), false);
-  for (const phone of ["71234567", "+000000000", "not-a-phone"])
+  for (const phone of [
+    "7123456",
+    "712345678",
+    "+59171234567",
+    "7123 567",
+    "7123a567",
+    "not-a-phone",
+  ])
     assert.equal(registrationComplete(form({ phone }), "comprador"), false);
   assert.equal(registrationComplete(form(), "comprador"), true);
+});
+
+test("both account roles accept exactly eight phone digits before CAPTCHA", () => {
+  for (const role of ["comprador", "vendedor"]) {
+    assert.equal(
+      registrationComplete(
+        form({ storeName: "Mi tienda", phone: "71234567" }),
+        role,
+      ),
+      true,
+    );
+    assert.equal(
+      registrationComplete(
+        form({ storeName: "Mi tienda", phone: "+59171234567" }),
+        role,
+      ),
+      false,
+    );
+  }
 });

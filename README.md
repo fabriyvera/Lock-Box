@@ -10,3 +10,4 @@ Consulta [BACKEND_SELLERS.md](docs/BACKEND_SELLERS.md) para los datos de prueba,
 - [Registro real de compradores y vendedores](docs/REGISTRO_PERFILES.md).
 - [Adaptación responsive y verificación](docs/RESPONSIVE.md).
 - [Acceso directo y CAPTCHA después de completar formularios](docs/ACCESO_DIRECTO_Y_CAPTCHA.md).
+- [Celular de 8 dígitos en el registro](docs/CELULAR_BOLIVIA.md).

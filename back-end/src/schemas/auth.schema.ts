@@ -26,8 +26,11 @@ export const registerSchema = z
       .refine((value) => !/^\.|\.$|\.\.|__/.test(value), "Usuario inválido"),
     phone: z
       .string()
-      .trim()
-      .regex(/^\+[1-9]\d{7,14}$/),
+      .regex(
+        /^[0-9]{8}$/,
+        "El celular debe tener exactamente 8 dígitos, sin código de país",
+      )
+      .transform((value) => `+591${value}`),
     role: z.enum(["comprador", "vendedor"]),
     storeName: z.string().trim().min(2).max(80).optional(),
     captchaToken: z.string().min(1).max(4096),

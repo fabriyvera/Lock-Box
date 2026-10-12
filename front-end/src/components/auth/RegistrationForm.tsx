@@ -34,11 +34,11 @@ const fields = [
   },
   {
     name: "phone",
-    label: "Celular con código de país",
+    label: "Celular (8 dígitos)",
     type: "tel",
-    autoComplete: "tel",
-    maxLength: 25,
-    placeholder: "+591 71234567",
+    autoComplete: "tel-national",
+    maxLength: 8,
+    placeholder: "71234567",
   },
   {
     name: "password",
@@ -119,7 +119,7 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
           password: value("password"),
           fullName: value("fullName").trim(),
           username: value("username").trim().replace(/^@/, "").toLowerCase(),
-          phone: value("phone").replace(/[\s()-]/g, ""),
+          phone: value("phone"),
           role,
           captchaToken: token,
           ...(role === "vendedor"
@@ -198,20 +198,45 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
               {...field}
               id={`${id}-${field.name}`}
               required
+              inputMode={field.name === "phone" ? "numeric" : undefined}
+              onInput={
+                field.name === "phone"
+                  ? (event) => {
+                      event.currentTarget.value = event.currentTarget.value
+                        .replace(/[^0-9]/g, "")
+                        .slice(0, 8);
+                    }
+                  : undefined
+              }
               minLength={
                 field.type === "password"
                   ? 8
                   : field.name === "fullName"
                     ? 2
-                    : undefined
+                    : field.name === "phone"
+                      ? 8
+                      : undefined
               }
               pattern={
-                field.name === "username" ? "@?[a-zA-Z0-9._]{3,30}" : undefined
+                field.name === "username"
+                  ? "@?[a-zA-Z0-9._]{3,30}"
+                  : field.name === "phone"
+                    ? "[0-9]{8}"
+                    : undefined
               }
               aria-describedby={
-                field.name === "username" ? `${id}-username-hint` : undefined
+                field.name === "username"
+                  ? `${id}-username-hint`
+                  : field.name === "phone"
+                    ? `${id}-phone-hint`
+                    : undefined
               }
             />
+            {field.name === "phone" && (
+              <small id={`${id}-phone-hint`}>
+                Ingresa 8 dígitos, sin código de país.
+              </small>
+            )}
             {field.name === "username" && (
               <small id={`${id}-username-hint`}>
                 3–30 letras, números, puntos o guiones bajos. Sin puntos
