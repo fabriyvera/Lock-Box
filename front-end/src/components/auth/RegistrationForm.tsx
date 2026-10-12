@@ -2,7 +2,8 @@
 
 import { useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import DeferredCaptcha from "./DeferredCaptcha";
+import { registrationComplete } from "@/lib/auth/form-readiness";
 import { apiUrl, openAccount, type AccountRole } from "@/lib/auth/account";
 import styles from "./registration.module.css";
 
@@ -59,13 +60,33 @@ const fields = [
 
 export default function RegistrationForm({ role }: { role: AccountRole }) {
   const id = useId();
-  const captcha = useRef<TurnstileInstance>(undefined);
   const [token, setToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [confirmation, setConfirmation] = useState(false);
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
+  const [complete, setComplete] = useState(false);
+  const [revision, setRevision] = useState(0);
   const pending = useRef(false);
+
+  function changed(event: FormEvent<HTMLFormElement>) {
+    if (
+      !(event.target instanceof HTMLInputElement) ||
+      ![
+        "fullName",
+        "username",
+        "email",
+        "phone",
+        "password",
+        "confirmPassword",
+        "storeName",
+      ].includes(event.target.name)
+    )
+      return;
+    setComplete(registrationComplete(new FormData(event.currentTarget), role));
+    setToken(null);
+    setRevision((value) => value + 1);
+    setError("");
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,6 +94,10 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
     const form = event.currentTarget;
     const data = new FormData(form);
     const value = (name: string) => String(data.get(name) || "");
+    if (!registrationComplete(data, role)) {
+      setError("Revisa los datos y la confirmación de la contraseña.");
+      return;
+    }
     if (value("password") !== value("confirmPassword")) {
       setError("Las contraseñas no coinciden.");
       return;
@@ -112,6 +137,7 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
         );
       }
       form.reset();
+      setComplete(false);
       if (result.requiresConfirmation) setConfirmation(true);
       else if (result.session?.access_token && result.session?.refresh_token)
         await openAccount(result.session);
@@ -128,7 +154,7 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
       pending.current = false;
       setBusy(false);
       setToken(null);
-      captcha.current?.reset();
+      setRevision((value) => value + 1);
     }
   }
 
@@ -154,7 +180,12 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
     );
 
   return (
-    <form onSubmit={submit} className={styles.form} aria-busy={busy}>
+    <form
+      onSubmit={submit}
+      onChange={changed}
+      className={styles.form}
+      aria-busy={busy}
+    >
       <h3>
         Registro como <span>{role}</span>
       </h3>
@@ -205,31 +236,22 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
         )}
       </fieldset>
       <div className={styles.captcha}>
-        {siteKey ? (
-          <Turnstile
-            ref={captcha}
-            siteKey={siteKey}
-            options={{ theme: "dark", size: "compact" }}
-            onSuccess={setToken}
-            onExpire={() => setToken(null)}
-            onError={() => {
-              setToken(null);
-              setError("No se pudo cargar la verificación. Recarga la página.");
-            }}
-          />
-        ) : (
-          <p role="alert">
-            El registro estará disponible cuando se configure la verificación de
-            seguridad.
-          </p>
-        )}
+        <DeferredCaptcha
+          key={revision}
+          ready={complete && !busy}
+          onToken={setToken}
+        />
       </div>
       {error && (
         <p className={styles.error} role="alert">
           {error}
         </p>
       )}
-      <button disabled={busy || !token} type="submit" className={styles.submit}>
+      <button
+        disabled={busy || !complete || !token}
+        type="submit"
+        className={styles.submit}
+      >
         {busy ? "Creando tu cuenta…" : `Crear mi cuenta de ${role}`}
       </button>
       <p className={styles.signIn}>

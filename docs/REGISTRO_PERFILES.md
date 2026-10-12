@@ -1,5 +1,7 @@
 # Registro real de compradores y vendedores
 
+**Modo vigente de desarrollo:** acceso con correo y contraseña sin confirmar el correo. Ver [ACCESO_DIRECTO_Y_CAPTCHA.md](ACCESO_DIRECTO_Y_CAPTCHA.md) para la configuración actual y el CAPTCHA que se activa después de completar los formularios. La compatibilidad con confirmación descrita abajo se conserva para una futura reactivación.
+
 ## Base de datos y API
 
 Proyecto: **LockBox's Project** (`anprldvvagovpyyenrif`). El 11 de octubre de 2026 se aplicó `registration_profiles_and_store_identity` (versión `20261011215727`), conservando las 15 cuentas existentes.
@@ -24,7 +26,7 @@ La portada y `/register` reutilizan `RegistrationForm`; ambos envían los mismos
 
 Las pruebas HTTP del backend cubren ambos roles, confirmación, sesiones inmediatas, rechazo de roles privilegiados/campos extra, CAPTCHA, límites de Auth y lectura del perfil con token verificado. Las pruebas previas de vendedor se conservan.
 
-Resultado: **12 pruebas de backend y 16 de frontend aprobadas**, TypeScript sin errores y build de Next.js de producción aprobado con `--webpack`. El servicio real de Auth confirmó que el registro por correo está habilitado y requiere confirmación (`mailer_autoconfirm=false`). La entrega de un correo y el regreso al callback no se probaron con una dirección real.
+Verificación inicial: **12 pruebas de backend y 16 de frontend aprobadas**, TypeScript sin errores y build de Next.js de producción aprobado con `--webpack`. En esa verificación Auth tenía confirmación activada (`mailer_autoconfirm=false`). Posteriormente se solicitó acceso directo para desarrollo; su configuración actual se documenta en [ACCESO_DIRECTO_Y_CAPTCHA.md](ACCESO_DIRECTO_Y_CAPTCHA.md).
 
 En la base real se ejecutó `database/registration-checks.sql` con `ROLLBACK`: alta de comprador/carrito, vendedor/plan, rechazo de usuarios duplicados y `admin`, modificación de metadatos sin elevación de permisos, lectura de estado y edición de tienda sin sobrescribir el nombre personal. Se verificó RLS usando `SET LOCAL ROLE authenticated`: solo perfil/carrito propios, sin lectura de pedidos ajenos, sin escritura directa de perfiles y sin acceso de compradores al módulo vendedor. Las 15 cuentas iniciales se conservaron. No se conservaron cuentas de prueba ni se enviaron correos.
 

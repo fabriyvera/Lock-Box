@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import Link from "next/link";
-import { Lock, Mail, ArrowRight } from "lucide-react";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { Lock, Mail, ArrowRight, ArrowLeft } from "lucide-react";
+import DeferredCaptcha from "@/components/auth/DeferredCaptcha";
+import { loginComplete } from "@/lib/auth/form-readiness";
 import { apiUrl, openAccount } from "@/lib/auth/account";
 
 export default function LoginPage() {
@@ -12,15 +13,29 @@ export default function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const captcha = useRef<TurnstileInstance>(undefined);
+  const [revision, setRevision] = useState(0);
+  const pending = useRef(false);
+  const complete = loginComplete(email, password);
+
+  function changed() {
+    setCaptchaToken(null);
+    setRevision((value) => value + 1);
+    setError(null);
+  }
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
+    if (!complete) {
+      setError("Completa un correo válido y tu contraseña.");
+      return;
+    }
     if (!captchaToken) {
       setError("Completa la verificación de seguridad.");
       return;
     }
 
+    pending.current = true;
     setLoading(true);
     setError(null);
 
@@ -29,16 +44,13 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: AbortSignal.timeout(20000),
-        body: JSON.stringify({ email, password, captchaToken }),
+        body: JSON.stringify({ email: email.trim(), password, captchaToken }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
         setError(data.message || "Error al iniciar sesión.");
-        setLoading(false);
-        setCaptchaToken(null);
-        captcha.current?.reset();
         return;
       }
 
@@ -57,15 +69,23 @@ export default function LoginPage() {
           ? err.message
           : "Error de conexión con el servidor.",
       );
+    } finally {
+      pending.current = false;
       setLoading(false);
       setCaptchaToken(null);
-      captcha.current?.reset();
+      setRevision((value) => value + 1);
     }
   };
 
   return (
     <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        <Link
+          href="/"
+          className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm text-text-muted hover:text-accent"
+        >
+          <ArrowLeft size={18} aria-hidden="true" /> Volver al inicio
+        </Link>
         {/* LOGO */}
         <div className="mb-8 flex justify-center">
           <div className="flex">
@@ -94,7 +114,11 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form
+            onSubmit={handleLogin}
+            className="space-y-5"
+            aria-busy={loading}
+          >
             {/* EMAIL */}
             <div>
               <label
@@ -110,8 +134,12 @@ export default function LoginPage() {
                   autoComplete="email"
                   type="email"
                   required
+                  disabled={loading}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    changed();
+                  }}
                   placeholder="tucorreo@gmail.com"
                   className="w-full h-12 bg-canvas border border-border focus:border-accent focus:ring-1 focus:ring-accent text-white text-base pl-12 pr-4 rounded outline-none transition-colors placeholder:text-text-disabled"
                 />
@@ -141,8 +169,12 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   type="password"
                   required
+                  disabled={loading}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    changed();
+                  }}
                   placeholder="••••••••"
                   className="w-full h-12 bg-canvas border border-border focus:border-accent focus:ring-1 focus:ring-accent text-white text-base pl-12 pr-4 rounded outline-none transition-colors placeholder:text-text-disabled"
                 />
@@ -151,20 +183,11 @@ export default function LoginPage() {
 
             {/* TURNSTILE */}
             <div className="flex justify-center">
-              {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ? (
-                <Turnstile
-                  ref={captcha}
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                  options={{ theme: "dark", size: "compact" }}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                  onExpire={() => setCaptchaToken(null)}
-                  onError={() => setCaptchaToken(null)}
-                />
-              ) : (
-                <p role="alert" className="text-sm text-text-muted">
-                  El acceso necesita configurar la verificación de seguridad.
-                </p>
-              )}
+              <DeferredCaptcha
+                key={revision}
+                ready={complete && !loading}
+                onToken={setCaptchaToken}
+              />
             </div>
 
             {/* ERROR */}
@@ -180,7 +203,7 @@ export default function LoginPage() {
             {/* BOTÓN */}
             <button
               type="submit"
-              disabled={!captchaToken || loading}
+              disabled={!complete || !captchaToken || loading}
               className={`w-full h-14 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 rounded transition-colors mt-2 ${
                 captchaToken && !loading
                   ? "bg-accent hover:bg-accent-hover text-canvas cursor-pointer"
