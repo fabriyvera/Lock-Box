@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test:seller": "node scripts/test-seller.mjs",
     "test:config": "node scripts/test-supabase-config.mjs",
-    "test:auth": "node scripts/test-auth.mjs"
+    "test:auth": "node scripts/test-auth.mjs",
+    "test:point": "node scripts/test-point.mjs",
+    "test:buyer": "node scripts/test-buyer.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",

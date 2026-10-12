@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export type AccountRole = "comprador" | "vendedor";
 export function accountPath(role: string): string {
+  if (role === "admin" || role === "despachador") return "/admin";
   if (role === "vendedor") return "/vendedor";
   if (role === "comprador") return "/dashboard";
   throw new Error("Tu perfil no tiene acceso a estos módulos.");

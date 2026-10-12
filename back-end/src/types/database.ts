@@ -1,4 +1,4 @@
-// Generated from LockBox's Project after registration migration. Do not hand edit.
+// Generated from LockBox's Project after collection point integration. Do not hand edit.
 export type Json =
   | string
   | number
@@ -11,7 +11,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5";
+    PostgrestVersion: "14.15";
   };
   public: {
     Tables: {
@@ -990,6 +990,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      collection_point_action: { Args: { action: Json }; Returns: Json };
       seller_action: {
         Args: { action: Json; request_id: string };
         Returns: undefined;
