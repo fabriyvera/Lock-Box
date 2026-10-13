@@ -2,6 +2,8 @@
 
 Fecha: 12 de octubre de 2026.
 
+**Ampliación vigente:** la vista principal está en `/punto-recojo`; `/admin` redirige allí para conservar los enlaces anteriores. `/register` permite crear una cuenta `operador_punto` y su nuevo punto asociado. Los responsables ya asignados conservan acceso y rol. Ver [REGISTRO_PUNTOS_LOCKBOX.md](REGISTRO_PUNTOS_LOCKBOX.md).
+
 Se integra `collection-point` (`b1758be`) sobre `main` (`904e595`) mediante un commit de merge que conserva ambos historiales. El aporte de la vista del compañero se mantiene en `/admin`, adaptado a los componentes, estilos, autenticación y base de datos actuales.
 
 ## Interfaz y acceso
@@ -26,11 +28,11 @@ Se integra `collection-point` (`b1758be`) sobre `main` (`904e595`) mediante un c
 
 Todas estas rutas usan `Authorization: Bearer <access_token>` y `Cache-Control: no-store`. Express verifica el token con Supabase Auth y el perfil activo. El cliente Supabase de cada petición transporta ese mismo JWT.
 
-| Método | Ruta | Resultado |
-| --- | --- | --- |
-| GET | `/api/collection-point/state` | Puntos autorizados, pedidos y actividad |
-| GET | `/api/collection-point/scan/:qrCode` | Pedido asociado a un QR vigente del punto |
-| PATCH | `/api/collection-point/:orderId/status` | Confirma la siguiente transición; acepta únicamente `qrCode` y `status` |
+| Método | Ruta                                    | Resultado                                                               |
+| ------ | --------------------------------------- | ----------------------------------------------------------------------- |
+| GET    | `/api/collection-point/state`           | Puntos autorizados, pedidos y actividad                                 |
+| GET    | `/api/collection-point/scan/:qrCode`    | Pedido asociado a un QR vigente del punto                               |
+| PATCH  | `/api/collection-point/:orderId/status` | Confirma la siguiente transición; acepta únicamente `qrCode` y `status` |
 
 Ejemplo de cuerpo válido para confirmar una entrega: `{ "qrCode": "LBX-codigo-del-pedido", "status": "delivered" }`.
 

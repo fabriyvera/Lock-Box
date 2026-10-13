@@ -40,5 +40,6 @@ test("login preserves buyer and seller paths and routes staff to the point", () 
   assert.equal(accountPath("vendedor"), "/vendedor");
   assert.equal(accountPath("admin"), "/admin");
   assert.equal(accountPath("despachador"), "/admin");
+  assert.equal(accountPath("operador_punto"), "/punto-recojo");
   assert.throws(() => accountPath("unknown"));
 });

@@ -69,6 +69,35 @@ test("mismatched or short passwords cannot start registration verification", () 
     false,
   );
 });
+
+test("point verification waits for complete location and an integer capacity", () => {
+  const validPoint = {
+    pointName: "Punto Central",
+    pointAddress: "Av. Central 123, La Paz",
+    pointCapacity: "40",
+  };
+  assert.equal(registrationComplete(form(validPoint), "operador_punto"), true);
+  for (const invalid of [
+    { pointName: "" },
+    { pointName: "X" },
+    { pointAddress: "corto" },
+    { pointCapacity: "" },
+    { pointCapacity: "0" },
+    { pointCapacity: "501" },
+    { pointCapacity: "2.5" },
+    { pointCapacity: "texto" },
+    { phone: "+59171234567" },
+  ])
+    assert.equal(
+      registrationComplete(
+        form({ ...validPoint, ...invalid }),
+        "operador_punto",
+      ),
+      false,
+    );
+  assert.equal(registrationComplete(form(validPoint), "comprador"), true);
+  assert.equal(registrationComplete(form(validPoint), "vendedor"), false);
+});
 test("registration verifies normalized handles and eight-digit phones before CAPTCHA", () => {
   for (const username of [
     "a..b",

@@ -17,6 +17,7 @@ export async function requireProfile(role: AccountRole) {
     .single();
   if (profileError || !profile?.is_active) redirect("/login?error=profile");
   if (profile.role !== role) {
+    if (profile.role === "operador_punto") redirect("/punto-recojo");
     if (profile.role === "vendedor") redirect("/vendedor");
     if (profile.role === "comprador") redirect("/dashboard");
     if (profile.role === "admin" || profile.role === "despachador")

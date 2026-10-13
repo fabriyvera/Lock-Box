@@ -1,8 +1,14 @@
 import type { Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 
-export type AccountRole = "comprador" | "vendedor";
+export type AccountRole = "comprador" | "vendedor" | "operador_punto";
+export const ACCOUNT_LABELS: Record<AccountRole, string> = {
+  comprador: "comprador",
+  vendedor: "vendedor",
+  operador_punto: "responsable de Punto LockBox",
+};
 export function accountPath(role: string): string {
+  if (role === "operador_punto") return "/punto-recojo";
   if (role === "admin" || role === "despachador") return "/admin";
   if (role === "vendedor") return "/vendedor";
   if (role === "comprador") return "/dashboard";

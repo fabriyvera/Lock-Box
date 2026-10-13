@@ -17,6 +17,8 @@ También se acepta `NEXT_PUBLIC_SUPABASE_ANON_KEY` si usas la clave legacy. Publ
 
 Inicia el backend y ejecuta `npm run dev`. Abre `/login` y entra con una cuenta de Supabase cuyo perfil sea `vendedor` y esté activo. Serás dirigido a `/vendedor`. El comprador de los fixtures no tiene acceso de login.
 
+En `/register` puedes crear un perfil de comprador, vendedor o responsable de **Punto LockBox**. El rol `operador_punto` registra un nuevo punto asociado a su titular y entra a `/punto-recojo`. La ruta `/admin` redirige a esa vista. Consulta [el registro de puntos](../docs/REGISTRO_PUNTOS_LOCKBOX.md) para las migraciones y pruebas.
+
 La portada y el shell `/vendedor` son públicos; los datos requieren una sesión validada por Express. El proxy de Next reemplaza la convención antigua `middleware.ts`. Las demás rutas devuelven un mensaje 503 claro cuando falta la configuración de Supabase.
 
 ## Verificación
