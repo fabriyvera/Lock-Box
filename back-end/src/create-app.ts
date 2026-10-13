@@ -59,21 +59,17 @@ export function createApp(
     try {
       const parsed = registerSchema.safeParse(req.body);
       if (!parsed.success) {
-        res
-          .status(400)
-          .json({
-            message: "Revisa los datos del registro.",
-            errors: parsed.error.flatten().fieldErrors,
-          });
+        res.status(400).json({
+          message: "Revisa los datos del registro.",
+          errors: parsed.error.flatten().fieldErrors,
+        });
         return;
       }
       if (!config.TURNSTILE_SECRET_KEY) {
-        res
-          .status(503)
-          .json({
-            message:
-              "El registro necesita configurar la verificación de seguridad.",
-          });
+        res.status(503).json({
+          message:
+            "El registro necesita configurar la verificación de seguridad.",
+        });
         return;
       }
       const input = parsed.data;
@@ -83,11 +79,9 @@ export function createApp(
         req.socket.remoteAddress,
       );
       if (!captcha.success) {
-        res
-          .status(400)
-          .json({
-            message: "Verificación de seguridad fallida. Inténtalo nuevamente.",
-          });
+        res.status(400).json({
+          message: "Verificación de seguridad fallida. Inténtalo nuevamente.",
+        });
         return;
       }
       const client = dependencies.createClient();
@@ -104,6 +98,13 @@ export function createApp(
             ...(input.role === "vendedor"
               ? { store_name: input.storeName }
               : {}),
+            ...(input.role === "operador_punto"
+              ? {
+                  point_name: input.pointName,
+                  point_address: input.pointAddress,
+                  point_capacity: input.pointCapacity,
+                }
+              : {}),
           },
         },
       });
@@ -114,27 +115,23 @@ export function createApp(
             : error?.code === "unexpected_failure"
               ? 503
               : 400;
-        res
-          .status(status)
-          .json({
-            message:
-              status === 429
-                ? "Demasiados intentos. Espera unos minutos antes de volver a registrarte."
-                : "No se pudo crear la cuenta. Revisa correo, usuario y celular; pueden estar registrados. Si continúa, contacta a LockBox.",
-          });
+        res.status(status).json({
+          message:
+            status === 429
+              ? "Demasiados intentos. Espera unos minutos antes de volver a registrarte."
+              : "No se pudo crear la cuenta. Revisa correo, usuario y celular; pueden estar registrados. Si continúa, contacta a LockBox.",
+        });
         return;
       }
       // Supabase deliberately conceals existing accounts when confirmations are enabled.
       // Never report a profile as active or reveal whether that email exists without a session.
       if (!data.session) {
-        res
-          .status(202)
-          .json({
-            success: true,
-            requiresConfirmation: true,
-            message:
-              "Revisa tu correo para confirmar la cuenta. Si ya estabas registrado, inicia sesión.",
-          });
+        res.status(202).json({
+          success: true,
+          requiresConfirmation: true,
+          message:
+            "Revisa tu correo para confirmar la cuenta. Si ya estabas registrado, inicia sesión.",
+        });
         return;
       }
       const { data: profile, error: profileError } = await client
@@ -145,28 +142,24 @@ export function createApp(
       if (
         profileError ||
         !profile?.is_active ||
-        !["comprador", "vendedor"].includes(profile.role)
+        !["comprador", "vendedor", "operador_punto"].includes(profile.role)
       ) {
-        res
-          .status(403)
-          .json({
-            message: "No se pudo habilitar tu perfil. Contacta a LockBox.",
-          });
+        res.status(403).json({
+          message: "No se pudo habilitar tu perfil. Contacta a LockBox.",
+        });
         return;
       }
-      res
-        .status(201)
-        .json({
-          success: true,
-          requiresConfirmation: false,
-          user: {
-            id: profile.id,
-            role: profile.role,
-            name: profile.full_name,
-            username: profile.username,
-          },
-          session: data.session,
-        });
+      res.status(201).json({
+        success: true,
+        requiresConfirmation: false,
+        user: {
+          id: profile.id,
+          role: profile.role,
+          name: profile.full_name,
+          username: profile.username,
+        },
+        session: data.session,
+      });
     } catch (error) {
       next(error);
     }

@@ -105,14 +105,21 @@ const post = (url: string, body: unknown) =>
     body: JSON.stringify(body),
   });
 
-test("signup accepts both roles, sends validated metadata and handles email confirmation", async () => {
-  for (const role of ["comprador", "vendedor"]) {
+test("signup accepts all public roles, sends validated metadata and handles email confirmation", async () => {
+  for (const role of ["comprador", "vendedor", "operador_punto"]) {
     await withServer({}, async (url, calls) => {
       const response = await post(url, {
         ...input,
         role,
         email: " PERSON@example.invalid ",
         ...(role === "vendedor" ? { storeName: "Mi tienda" } : {}),
+        ...(role === "operador_punto"
+          ? {
+              pointName: "Punto Central",
+              pointAddress: "Av. Central 123, La Paz",
+              pointCapacity: 40,
+            }
+          : {}),
       });
       assert.equal(response.status, 202);
       assert.equal(response.headers.get("cache-control"), "no-store");
@@ -135,6 +142,19 @@ test("signup accepts both roles, sends validated metadata and handles email conf
         body.options.data.store_name,
         role === "vendedor" ? "Mi tienda" : undefined,
       );
+      assert.equal(
+        body.options.data.point_name,
+        role === "operador_punto" ? "Punto Central" : undefined,
+      );
+      assert.equal(
+        body.options.data.point_address,
+        role === "operador_punto" ? "Av. Central 123, La Paz" : undefined,
+      );
+      assert.equal(
+        body.options.data.point_capacity,
+        role === "operador_punto" ? 40 : undefined,
+      );
+      assert.equal(body.options.data.manager_id, undefined);
     });
   }
 });
@@ -152,11 +172,60 @@ test("signup rejects privileged roles, injected fields, invalid data and missing
       { phone: "7123 567" },
       { password: "short" },
       { role: "vendedor" },
+      { role: "operador_punto" },
+      { pointName: "Punto ajeno" },
     ]) {
       assert.equal((await post(url, { ...input, ...invalid })).status, 400);
     }
     assert.equal(calls.length, 0);
   });
+});
+
+test("point registration validates location and capacity before creating an Auth account", async () => {
+  await withServer({}, async (url, calls) => {
+    const point = {
+      ...input,
+      role: "operador_punto",
+      pointName: "Punto Central",
+      pointAddress: "Av. Central 123, La Paz",
+      pointCapacity: 40,
+    };
+    for (const invalid of [
+      { pointName: "X" },
+      { pointAddress: "corto" },
+      { pointCapacity: 0 },
+      { pointCapacity: 501 },
+      { pointCapacity: 2.5 },
+      { pointCapacity: "40" },
+      { managerId: "other-user" },
+      { pointId: "existing-point" },
+      { storeName: "Tienda" },
+    ])
+      assert.equal((await post(url, { ...point, ...invalid })).status, 400);
+    assert.equal(calls.length, 0);
+  });
+});
+
+test("point signup returns its persisted role and immediate session", async () => {
+  await withServer(
+    { confirmation: false, role: "operador_punto" },
+    async (url) => {
+      const response = await post(url, {
+        ...input,
+        role: "operador_punto",
+        pointName: "Punto Central",
+        pointAddress: "Av. Central 123, La Paz",
+        pointCapacity: 40,
+      });
+      assert.equal(response.status, 201);
+      const body = (await response.json()) as {
+        user: { role: string };
+        session: { access_token: string };
+      };
+      assert.equal(body.user.role, "operador_punto");
+      assert.equal(body.session.access_token, "real-token");
+    },
+  );
 });
 test("signup never bypasses captcha and handles Auth rate limits and database failures", async () => {
   for (const [options, status] of [
