@@ -4,7 +4,12 @@ import { useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import DeferredCaptcha from "./DeferredCaptcha";
 import { registrationComplete } from "@/lib/auth/form-readiness";
-import { apiUrl, openAccount, type AccountRole } from "@/lib/auth/account";
+import {
+  ACCOUNT_LABELS,
+  apiUrl,
+  openAccount,
+  type AccountRole,
+} from "@/lib/auth/account";
 import styles from "./registration.module.css";
 
 const fields = [
@@ -79,6 +84,9 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
         "password",
         "confirmPassword",
         "storeName",
+        "pointName",
+        "pointAddress",
+        "pointCapacity",
       ].includes(event.target.name)
     )
       return;
@@ -124,6 +132,13 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
           captchaToken: token,
           ...(role === "vendedor"
             ? { storeName: value("storeName").trim() }
+            : {}),
+          ...(role === "operador_punto"
+            ? {
+                pointName: value("pointName").trim(),
+                pointAddress: value("pointAddress").trim(),
+                pointCapacity: Number(value("pointCapacity")),
+              }
             : {}),
         }),
       });
@@ -187,7 +202,7 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
       aria-busy={busy}
     >
       <h3>
-        Registro como <span>{role}</span>
+        Registro como <span>{ACCOUNT_LABELS[role]}</span>
       </h3>
       <fieldset disabled={busy} className={styles.fields}>
         <legend className="sr-only">Datos de tu cuenta</legend>
@@ -259,6 +274,66 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
             />
           </div>
         )}
+        {role === "operador_punto" && (
+          <div className={styles.pointFields}>
+            <h4>Tu Punto LockBox</h4>
+            <p>
+              Crearemos un punto nuevo asociado a tu cuenta para recibir y
+              entregar pedidos.
+            </p>
+            <div>
+              <label htmlFor={`${id}-pointName`}>Nombre del punto</label>
+              <input
+                id={`${id}-pointName`}
+                name="pointName"
+                required
+                minLength={2}
+                maxLength={80}
+                autoComplete="organization"
+                placeholder="Punto LockBox Central"
+              />
+            </div>
+            <div>
+              <label htmlFor={`${id}-pointAddress`}>
+                Dirección completa del punto
+              </label>
+              <input
+                id={`${id}-pointAddress`}
+                name="pointAddress"
+                required
+                minLength={10}
+                maxLength={240}
+                autoComplete="street-address"
+                placeholder="Av. Central 123, zona Centro, La Paz"
+                aria-describedby={`${id}-point-address-help`}
+              />
+              <small id={`${id}-point-address-help`}>
+                Incluye zona, localidad y una referencia para encontrar el
+                punto.
+              </small>
+            </div>
+            <div>
+              <label htmlFor={`${id}-pointCapacity`}>
+                Capacidad de paquetes
+              </label>
+              <input
+                id={`${id}-pointCapacity`}
+                name="pointCapacity"
+                type="number"
+                inputMode="numeric"
+                required
+                min={1}
+                max={500}
+                step={1}
+                placeholder="50"
+                aria-describedby={`${id}-point-capacity-help`}
+              />
+              <small id={`${id}-point-capacity-help`}>
+                Entre 1 y 500 paquetes. Tu celular será el contacto del punto.
+              </small>
+            </div>
+          </div>
+        )}
       </fieldset>
       <div className={styles.captcha}>
         <DeferredCaptcha
@@ -277,7 +352,11 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
         type="submit"
         className={styles.submit}
       >
-        {busy ? "Creando tu cuenta…" : `Crear mi cuenta de ${role}`}
+        {busy
+          ? "Creando tu cuenta…"
+          : role === "operador_punto"
+            ? "Crear mi Punto LockBox"
+            : `Crear mi cuenta de ${role}`}
       </button>
       <p className={styles.signIn}>
         ¿Ya tienes una cuenta? <Link href="/login">Inicia sesión</Link>

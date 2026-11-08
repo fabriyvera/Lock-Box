@@ -1,3 +1,5 @@
+import type { AccountRole } from "./account";
+
 function validEmail(email: string) {
   return (
     email.trim().length <= 254 &&
@@ -9,16 +11,27 @@ export function loginComplete(email: string, password: string) {
   return validEmail(email) && password.length > 0;
 }
 
-export function registrationComplete(
-  data: FormData,
-  role: "comprador" | "vendedor",
-) {
+export function registrationComplete(data: FormData, role: AccountRole) {
   const value = (name: string) => String(data.get(name) || "");
   const name = value("fullName").trim();
   const username = value("username").trim().replace(/^@/, "").toLowerCase();
   const phone = value("phone");
   const password = value("password");
   const store = value("storeName").trim();
+  const pointName = value("pointName").trim();
+  const pointAddress = value("pointAddress").trim();
+  const capacity = Number(value("pointCapacity"));
+  const roleComplete =
+    role === "comprador" ||
+    (role === "vendedor" && store.length >= 2 && store.length <= 80) ||
+    (role === "operador_punto" &&
+      pointName.length >= 2 &&
+      pointName.length <= 80 &&
+      pointAddress.length >= 10 &&
+      pointAddress.length <= 240 &&
+      Number.isSafeInteger(capacity) &&
+      capacity >= 1 &&
+      capacity <= 500);
   return (
     name.length >= 2 &&
     name.length <= 80 &&
@@ -29,6 +42,6 @@ export function registrationComplete(
     password.length >= 8 &&
     password.length <= 128 &&
     password === value("confirmPassword") &&
-    (role === "comprador" || (store.length >= 2 && store.length <= 80))
+    roleComplete
   );
 }

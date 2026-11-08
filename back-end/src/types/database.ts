@@ -1,4 +1,3 @@
-// Generated from LockBox's Project after collection point integration. Do not hand edit.
 export type Json =
   | string
   | number
@@ -261,7 +260,7 @@ export type Database = {
         Row: {
           address: string;
           capacity: number;
-          city: string;
+          city: string | null;
           created_at: string;
           id: string;
           is_active: boolean;
@@ -274,7 +273,7 @@ export type Database = {
         Insert: {
           address: string;
           capacity?: number;
-          city: string;
+          city?: string | null;
           created_at?: string;
           id?: string;
           is_active?: boolean;
@@ -287,7 +286,7 @@ export type Database = {
         Update: {
           address?: string;
           capacity?: number;
-          city?: string;
+          city?: string | null;
           created_at?: string;
           id?: string;
           is_active?: boolean;
@@ -1026,7 +1025,12 @@ export type Database = {
         | "refund"
         | "payout"
         | "commission";
-      user_role: "comprador" | "vendedor" | "despachador" | "admin";
+      user_role:
+        | "comprador"
+        | "vendedor"
+        | "despachador"
+        | "admin"
+        | "operador_punto";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1188,7 +1192,13 @@ export const Constants = {
         "payout",
         "commission",
       ],
-      user_role: ["comprador", "vendedor", "despachador", "admin"],
+      user_role: [
+        "comprador",
+        "vendedor",
+        "despachador",
+        "admin",
+        "operador_punto",
+      ],
     },
   },
 } as const;

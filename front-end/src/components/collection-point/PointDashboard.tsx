@@ -265,7 +265,7 @@ export default function PointDashboard({ name }: { name: string }) {
                 </select>
                 <p className={styles.muted}>{point.address}</p>
               </div>
-              <span className={styles.tag}>Datos de Supabase</span>
+              <span className={styles.tag}>Punto activo</span>
             </section>
             <div className={styles.stats}>
               <div className={styles.card}>
@@ -293,6 +293,36 @@ export default function PointDashboard({ name }: { name: string }) {
                 </div>
               </div>
             </div>
+            <section
+              className={styles.workflow}
+              aria-label="Flujo de un pedido en el punto"
+            >
+              {[
+                {
+                  icon: Package,
+                  title: "Recibe",
+                  text: "Comprueba el paquete y su código.",
+                },
+                {
+                  icon: QrCode,
+                  title: "Prepara",
+                  text: "Márcalo listo para el retiro.",
+                },
+                {
+                  icon: CheckCheck,
+                  title: "Entrega",
+                  text: "Verifica el código del comprador y confirma.",
+                },
+              ].map(({ icon: Icon, title, text }) => (
+                <div key={title}>
+                  <Icon size={20} aria-hidden="true" />
+                  <div>
+                    <h2>{title}</h2>
+                    <p>{text}</p>
+                  </div>
+                </div>
+              ))}
+            </section>
             <div className={styles.columns}>
               <div className={styles.left}>
                 <section className={styles.panel} aria-labelledby="scan-title">
