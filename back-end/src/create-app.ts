@@ -12,6 +12,7 @@ import { verifyTurnstileToken } from "./services/turnstile.service.js";
 import { loginSchema, registerSchema } from "./schemas/auth.schema.js";
 import { actionRequestSchema } from "./schemas/seller.schema.js";
 import { createOrdersRouter } from "./routes/orders.js";
+import { createBuyerRouter } from "./routes/buyer.js";
 
 export interface Dependencies {
   createClient: (token?: string) => SupabaseClient<Database>;
@@ -327,6 +328,7 @@ export function createApp(
     }
   });
   app.use("/api/seller", seller);
+  app.use("/api/buyer", createBuyerRouter(dependencies));
   const orders = createOrdersRouter(dependencies);
   app.use("/api/collection-point", orders);
   app.use("/orders", orders);
