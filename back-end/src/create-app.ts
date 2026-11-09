@@ -49,7 +49,10 @@ export function createApp(
   };
   const app = express();
   app.disable("x-powered-by");
-  app.use(cors({ origin: config.FRONTEND_URL, credentials: true }));
+  app.use(cors({
+    origin: [new URL(config.FRONTEND_URL).origin, ...config.CORS_ALLOWED_ORIGINS],
+    credentials: true,
+  }));
   app.use(express.json({ limit: "64kb" }));
   app.get("/api/health", (_req, res) =>
     res.json({ status: "ok", timestamp: new Date().toISOString() }),
