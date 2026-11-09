@@ -19,16 +19,17 @@ export function calculateCartSubtotal(items: CartItem[]): number {
 
 export function canCancelOrder(order: BuyerOrder): boolean {
   // Solo se puede cancelar si fue pagado pero aún no ha sido despachado
-  return order.status === "paid";
+  return order.status === "paid" && order.isTest !== false;
 }
 
 export function canReviewOrder(order: BuyerOrder): boolean {
-  return order.status === "delivered" && !order.review;
+  return ["delivered", "released"].includes(order.status) && !order.review;
 }
 
 export function canDisputeOrder(order: BuyerOrder): boolean {
   return (
     (order.status === "dispatched" ||
+      order.status === "ready" ||
       order.status === "in_lockbox" ||
       order.status === "delivered") &&
     !order.dispute

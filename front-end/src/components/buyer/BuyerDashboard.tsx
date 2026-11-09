@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useBuyerStore } from "@/lib/buyer/store";
+import { BuyerStoreProvider, useBuyerStore } from "@/lib/buyer/connected-store";
 import { CatalogPanel } from "./CatalogPanel";
 import { CartDrawer } from "./CartDrawer";
 import { CheckoutModal } from "./CheckoutModal";
@@ -12,7 +12,15 @@ import { createClient } from "@/lib/supabase/client";
 import styles from "./workspace.module.css";
 
 export function BuyerDashboard({ name }: { name: string }) {
-  const [state, actions] = useBuyerStore();
+  return (
+    <BuyerStoreProvider>
+      <BuyerWorkspace name={name} />
+    </BuyerStoreProvider>
+  );
+}
+
+function BuyerWorkspace({ name }: { name: string }) {
+  const [state, actions, meta] = useBuyerStore();
   const [activeTab, setActiveTab] = useState<"catalog" | "orders">("catalog");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -93,9 +101,10 @@ export function BuyerDashboard({ name }: { name: string }) {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => actions.resetDemo()}
-            title="Reiniciar datos iniciales de demo"
-            aria-label="Reiniciar datos de demostración"
+            onClick={() => void actions.refresh()}
+            disabled={meta.busy || meta.loading}
+            title="Actualizar catálogo y pedidos"
+            aria-label="Actualizar catálogo y pedidos"
             className="p-2 text-text-subtle hover:text-white transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
@@ -128,12 +137,19 @@ export function BuyerDashboard({ name }: { name: string }) {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
         <div className="mb-5 rounded-lg border border-accent/25 bg-accent/5 p-4 text-sm text-text-secondary">
           <strong className="text-accent">
-            Hola, {name}. Entorno de demostración.
+            Hola, {name}. Compras de prueba conectadas.
           </strong>{" "}
-          El catálogo, carrito y pedidos se guardan en este navegador. Los
-          pagos, retiros, reseñas y disputas son simulados y no modifican
-          Supabase ni dinero real.
+          Tu catálogo, carrito y pedidos se sincronizan con el sistema. Las
+          compras de prueba llegan al vendedor y al punto de recojo; no se cobra
+          ni se mueve dinero real.
         </div>
+        {meta.error && (
+          <p role="alert" className="mb-4 text-danger">
+            {meta.error}
+          </p>
+        )}
+        {meta.loading && <p role="status">Cargando catálogo y pedidos…</p>}
+        {meta.busy && <p role="status">Guardando cambio…</p>}
         {logoutError && (
           <p role="alert" className="mb-4 text-danger">
             {logoutError}
