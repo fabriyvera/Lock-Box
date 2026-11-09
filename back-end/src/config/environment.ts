@@ -1,5 +1,30 @@
 import { z } from "zod";
 
+const corsOrigins = z
+  .string()
+  .default("")
+  .transform((value) =>
+    value.split(",").map((origin) => origin.trim()).filter(Boolean),
+  )
+  .pipe(
+    z.array(
+      z.string().url().refine((value) => {
+        try {
+          const url = new URL(value);
+          return (
+            ["http:", "https:"].includes(url.protocol) &&
+            !url.hostname.includes("*") &&
+            !url.username && !url.password &&
+            url.pathname === "/" && !url.search && !url.hash
+          );
+        } catch {
+          return false;
+        }
+      }, "Usa orígenes HTTP(S) completos, sin rutas, credenciales ni comodines.")
+        .transform((value) => new URL(value).origin),
+    ),
+  );
+
 const schema = z
   .object({
     PORT: z.coerce.number().int().min(1).max(65535).default(4000),
@@ -7,6 +32,7 @@ const schema = z
       .enum(["development", "production", "test"])
       .default("development"),
     FRONTEND_URL: z.string().url().default("http://localhost:3000"),
+    CORS_ALLOWED_ORIGINS: corsOrigins,
     TURNSTILE_SECRET_KEY: z.string().optional(),
     SUPABASE_URL: z.string().url(),
     SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
