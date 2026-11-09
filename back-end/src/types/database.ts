@@ -989,6 +989,8 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      buyer_state: { Args: never; Returns: Json };
+      buyer_action: { Args: { action: Json; request_id: string }; Returns: Json };
       collection_point_action: { Args: { action: Json }; Returns: Json };
       seller_action: {
         Args: { action: Json; request_id: string };

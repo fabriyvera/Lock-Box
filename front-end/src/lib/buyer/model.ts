@@ -3,9 +3,11 @@ export type OrderStatus =
   | "paid"
   | "dispatched"
   | "in_lockbox"
+  | "ready"
   | "delivered"
   | "released"
   | "cancelled"
+  | "refunded"
   | "disputed";
 
 export interface BuyerProduct {
@@ -38,6 +40,7 @@ export interface LockBoxPoint {
 }
 
 export interface BuyerOrder {
+  isTest?: boolean;
   id: string;
   orderNumber: string;
   items: CartItem[];

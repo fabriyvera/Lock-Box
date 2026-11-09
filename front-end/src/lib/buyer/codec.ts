@@ -70,9 +70,11 @@ function order(value: unknown) {
       "paid",
       "dispatched",
       "in_lockbox",
+      "ready",
       "delivered",
       "released",
       "cancelled",
+      "refunded",
       "disputed",
     ].includes(String(value.status))
   )

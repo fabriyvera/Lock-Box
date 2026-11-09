@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useBuyerStore } from "@/lib/buyer/store";
+import { QRCodeSVG } from "qrcode.react";
+import { useBuyerStore } from "@/lib/buyer/connected-store";
 import {
   formatBOB,
   formatBuyerDate,
@@ -24,7 +25,7 @@ import {
 } from "lucide-react";
 
 export function OrdersPanel() {
-  const [state, actions] = useBuyerStore();
+  const [state, actions, meta] = useBuyerStore();
   const [activeQRModalOrder, setActiveQRModalOrder] =
     useState<BuyerOrder | null>(null);
   const [reviewOrderTarget, setReviewOrderTarget] = useState<BuyerOrder | null>(
@@ -44,25 +45,35 @@ export function OrdersPanel() {
   );
   const [disputeDesc, setDisputeDesc] = useState("");
 
-  const confirmCancelOrder = () => {
+  const confirmCancelOrder = async () => {
     if (orderToCancel) {
-      actions.cancelOrder(orderToCancel.id);
+      if (!(await actions.cancelOrder(orderToCancel.id))) return;
       setOrderToCancel(null);
     }
   };
 
-  const submitReview = (e: React.FormEvent) => {
+  const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewOrderTarget) return;
-    actions.reviewOrder(reviewOrderTarget.id, rating, reviewComment);
+    if (
+      !(await actions.reviewOrder(reviewOrderTarget.id, rating, reviewComment))
+    )
+      return;
     setReviewOrderTarget(null);
     setReviewComment("");
   };
 
-  const submitDispute = (e: React.FormEvent) => {
+  const submitDispute = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!disputeOrderTarget) return;
-    actions.openDispute(disputeOrderTarget.id, disputeReason, disputeDesc);
+    if (
+      !(await actions.openDispute(
+        disputeOrderTarget.id,
+        disputeReason,
+        disputeDesc,
+      ))
+    )
+      return;
     setDisputeOrderTarget(null);
     setDisputeDesc("");
   };
@@ -72,7 +83,7 @@ export function OrdersPanel() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-border pb-4">
         <div>
           <h2 className="text-lg font-black text-white uppercase tracking-wider">
-            Mis pedidos de demostración
+            Mis pedidos
           </h2>
           <p className="text-xs text-text-muted mt-0.5">
             Historial de compras en lives y retiros en Puntos LockBox de La Paz.
@@ -131,7 +142,9 @@ export function OrdersPanel() {
                           width={40}
                           height={40}
                           unoptimized
-                          src={item.product.imageUrl}
+                          src={
+                            item.product.imageUrl || "/product-placeholder.svg"
+                          }
                           alt={item.product.title}
                           className="w-10 h-10 object-cover rounded bg-surface"
                         />
@@ -159,7 +172,7 @@ export function OrdersPanel() {
                       {order.lockBoxPoint.address}
                     </p>
                     <div className="pt-2 border-t border-border flex justify-between font-mono">
-                      <span className="text-text-muted">Total retenido:</span>
+                      <span className="text-text-muted">Total del pedido:</span>
                       <span className="font-bold text-accent">
                         {formatBOB(order.totalCents)}
                       </span>
@@ -213,17 +226,11 @@ export function OrdersPanel() {
                     )}
                   </div>
 
-                  {/* Simulación para demo: marcar como entregado */}
-                  {order.status !== "delivered" &&
-                    order.status !== "cancelled" &&
-                    order.status !== "disputed" && (
-                      <button
-                        onClick={() => actions.simulateDelivery(order.id)}
-                        className="text-[11px] text-accent/80 hover:text-accent underline cursor-pointer"
-                      >
-                        [Simular validación QR y entrega]
-                      </button>
-                    )}
+                  {order.isTest && (
+                    <span className="text-xs text-text-muted">
+                      Pedido de prueba · sin cobro real
+                    </span>
+                  )}
                 </div>
 
                 {/* Reseña desplegada si existe */}
@@ -260,7 +267,7 @@ export function OrdersPanel() {
       <Modal
         isOpen={!!orderToCancel}
         onClose={() => setOrderToCancel(null)}
-        title="Cancelar pedido de demostración"
+        title="Cancelar pedido de prueba"
       >
         <div className="space-y-4">
           <div className="bg-danger-strong/10 border border-danger-strong/20 rounded-lg p-3.5 flex items-start gap-3">
@@ -272,8 +279,8 @@ export function OrdersPanel() {
                 <span className="font-mono text-white font-bold">
                   {orderToCancel?.orderNumber}
                 </span>
-                ? Se restaurará el inventario de demostración; no se mueve
-                dinero real.
+                ? Se devolverán las unidades al inventario del vendedor; no se
+                mueve dinero real.
               </p>
             </div>
           </div>
@@ -288,12 +295,18 @@ export function OrdersPanel() {
             </button>
             <button
               type="button"
-              onClick={confirmCancelOrder}
+              disabled={meta.busy}
+              onClick={() => void confirmCancelOrder()}
               className="px-4 py-2.5 rounded text-xs font-bold text-white bg-danger-strong hover:bg-danger-strong transition-colors cursor-pointer"
             >
-              Sí, Cancelar y Reembolsar
+              Confirmar cancelación de prueba
             </button>
           </div>
+          {meta.error && (
+            <p role="alert" className="text-sm text-danger">
+              {meta.error}
+            </p>
+          )}
         </div>
       </Modal>
 
@@ -301,22 +314,30 @@ export function OrdersPanel() {
       <Modal
         isOpen={!!activeQRModalOrder}
         onClose={() => setActiveQRModalOrder(null)}
-        title="Código de demostración"
+        title="Código de retiro del pedido"
       >
         {activeQRModalOrder && (
           <div className="text-center space-y-4">
-            <div className="bg-white p-6 rounded-xl inline-block mx-auto border-4 border-accent">
-              <div className="w-48 h-48 bg-foreground flex flex-col items-center justify-center rounded">
-                <QrCode className="w-28 h-28 text-canvas" />
-                <span className="font-mono text-[10px] text-text-subtle mt-2 font-bold tracking-wider">
-                  {activeQRModalOrder.qrCode}
-                </span>
-              </div>
+            <div className="bg-white p-4 rounded-xl inline-block mx-auto border-4 border-accent">
+              <QRCodeSVG
+                value={activeQRModalOrder.qrCode}
+                size={192}
+                marginSize={4}
+                bgColor="var(--color-white)"
+                fgColor="var(--color-black)"
+                title="Código QR de retiro"
+              />
             </div>
+            <p
+              className="font-mono text-sm text-foreground break-all select-all"
+              aria-label="Código de retiro"
+            >
+              {activeQRModalOrder.qrCode}
+            </p>
 
             <div className="text-xs space-y-1">
               <p className="font-bold text-white text-sm">
-                Este código no permite retirar paquetes reales
+                Presenta este código en el punto cuando el pedido esté listo
               </p>
               <p className="text-text-muted">
                 Punto:{" "}
@@ -348,6 +369,7 @@ export function OrdersPanel() {
                 <button
                   type="button"
                   key={star}
+                  aria-label={`${star} estrellas`}
                   onClick={() => setRating(star)}
                   className="p-1 text-warning hover:scale-110 transition-transform cursor-pointer"
                 >
@@ -364,6 +386,8 @@ export function OrdersPanel() {
               Comentario sobre la entrega
             </label>
             <textarea
+              aria-label="Comentario sobre la entrega"
+              maxLength={1000}
               required
               rows={3}
               value={reviewComment}
@@ -375,10 +399,16 @@ export function OrdersPanel() {
 
           <button
             type="submit"
+            disabled={meta.busy}
             className="w-full py-2.5 bg-accent text-canvas font-black text-xs uppercase tracking-wider rounded cursor-pointer"
           >
             Enviar Reseña
           </button>
+          {meta.error && (
+            <p role="alert" className="text-sm text-danger">
+              {meta.error}
+            </p>
+          )}
         </form>
       </Modal>
 
@@ -386,7 +416,7 @@ export function OrdersPanel() {
       <Modal
         isOpen={!!disputeOrderTarget}
         onClose={() => setDisputeOrderTarget(null)}
-        title="Abrir Disputa / Reclamo Escrow"
+        title="Abrir reclamo del pedido"
       >
         <form onSubmit={submitDispute} className="space-y-4">
           <div>
@@ -394,6 +424,7 @@ export function OrdersPanel() {
               Motivo del reclamo
             </label>
             <select
+              aria-label="Motivo del reclamo"
               value={disputeReason}
               onChange={(e) => setDisputeReason(e.target.value)}
               className="w-full bg-canvas border border-border rounded p-2.5 text-xs text-white outline-none focus:border-accent"
@@ -410,21 +441,29 @@ export function OrdersPanel() {
               Detalle del problema
             </label>
             <textarea
+              aria-label="Detalle del problema"
+              maxLength={2000}
               required
               rows={3}
               value={disputeDesc}
               onChange={(e) => setDisputeDesc(e.target.value)}
-              placeholder="Explica qué sucedió para que el equipo administrativo congele los fondos..."
+              placeholder="Explica qué sucedió para que el equipo revise tu reclamo."
               className="w-full bg-canvas border border-border rounded p-2.5 text-xs text-white outline-none focus:border-accent"
             />
           </div>
 
           <button
             type="submit"
+            disabled={meta.busy}
             className="w-full py-2.5 bg-warning-strong text-white font-black text-xs uppercase tracking-wider rounded cursor-pointer"
           >
-            Presentar Disputa y Retener Fondos
+            Registrar reclamo
           </button>
+          {meta.error && (
+            <p role="alert" className="text-sm text-danger">
+              {meta.error}
+            </p>
+          )}
         </form>
       </Modal>
     </div>

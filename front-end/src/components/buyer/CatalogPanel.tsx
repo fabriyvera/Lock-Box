@@ -2,12 +2,12 @@
 
 import React from "react";
 import Image from "next/image";
-import { useBuyerStore } from "@/lib/buyer/store";
+import { useBuyerStore } from "@/lib/buyer/connected-store";
 import { formatBOB } from "@/lib/buyer/domain";
 import { Search, Radio, ShoppingCart, Check } from "lucide-react";
 
 export function CatalogPanel() {
-  const [state, actions] = useBuyerStore();
+  const [state, actions, meta] = useBuyerStore();
   const [addedId, setAddedId] = React.useState<string | null>(null);
 
   // Extraer categorías únicas
@@ -36,8 +36,8 @@ export function CatalogPanel() {
     return matchesSearch && matchesCategory && matchesLive;
   });
 
-  const handleAddToCart = (product: (typeof state.catalog)[0]) => {
-    actions.addToCart(product, 1);
+  const handleAddToCart = async (product: (typeof state.catalog)[0]) => {
+    if (!(await actions.addToCart(product, 1))) return;
     setAddedId(product.id);
     setTimeout(() => setAddedId(null), 1200);
   };
@@ -54,15 +54,15 @@ export function CatalogPanel() {
           <div>
             <div className="flex items-center gap-2">
               <span className="bg-danger-strong text-white font-black text-[10px] px-2 py-0.5 rounded tracking-wider uppercase">
-                TikTok Live Activo
+                Catálogo LockBox
               </span>
               <h2 className="text-sm sm:text-base font-black text-white">
-                Transmisión Oficial LockBox La Paz
+                Productos de nuestras tiendas
               </h2>
             </div>
             <p className="text-xs text-text-muted mt-0.5">
-              Productos exclusivos comprados durante el streaming con entrega
-              garantizada.
+              Explora productos publicados y filtra los destacados en un live de
+              prueba.
             </p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export function CatalogPanel() {
           <Radio className="w-4 h-4" />
           {state.activeLiveSession
             ? "Mostrando productos en directo"
-            : "Ver todos los productos"}
+            : "Filtrar productos en live"}
         </button>
       </div>
 
@@ -149,7 +149,7 @@ export function CatalogPanel() {
                       width={500}
                       height={280}
                       unoptimized
-                      src={product.imageUrl}
+                      src={product.imageUrl || "/product-placeholder.svg"}
                       alt={product.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -192,7 +192,7 @@ export function CatalogPanel() {
 
                   <button
                     onClick={() => handleAddToCart(product)}
-                    disabled={isOutOfStock}
+                    disabled={isOutOfStock || meta.busy || meta.loading}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-bold transition-all cursor-pointer ${
                       isOutOfStock
                         ? "bg-border text-text-subtle cursor-not-allowed"

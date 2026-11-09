@@ -16,7 +16,7 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
       border: "border-warning-strong/30",
     },
     paid: {
-      label: "Pago en Garantía (Escrow)",
+      label: "Por despachar",
       bg: "bg-accent/10",
       text: "text-accent",
       border: "border-accent/30",
@@ -28,6 +28,12 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
       border: "border-info-strong/30",
     },
     in_lockbox: {
+      label: "Recibido en el punto",
+      bg: "bg-info-strong/10",
+      text: "text-info",
+      border: "border-info-strong/30",
+    },
+    ready: {
       label: "Listo para Recojo",
       bg: "bg-info-strong/10",
       text: "text-info",
@@ -46,7 +52,13 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
       border: "border-accent/30",
     },
     cancelled: {
-      label: "Cancelado y Reembolsado",
+      label: "Cancelado",
+      bg: "bg-danger-strong/10",
+      text: "text-danger",
+      border: "border-danger-strong/30",
+    },
+    refunded: {
+      label: "Reembolsado",
       bg: "bg-danger-strong/10",
       text: "text-danger",
       border: "border-danger-strong/30",

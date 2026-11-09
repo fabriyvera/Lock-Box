@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useBuyerStore } from "@/lib/buyer/store";
+import { useBuyerStore } from "@/lib/buyer/connected-store";
 import { calculateCartSubtotal, formatBOB } from "@/lib/buyer/domain";
 import { Modal } from "./ui";
 import {
@@ -22,7 +22,7 @@ export function CheckoutModal({
   onClose: () => void;
   onOrderSuccess: (order: BuyerOrder) => void;
 }) {
-  const [state, actions] = useBuyerStore();
+  const [state, actions, meta] = useBuyerStore();
   const [selectedPointId, setSelectedPointId] = useState<string>(
     state.lockBoxPoints[0]?.id || "",
   );
@@ -30,23 +30,35 @@ export function CheckoutModal({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = calculateCartSubtotal(state.cart);
+  const pointId = state.lockBoxPoints.some(
+    (point) => point.id === selectedPointId,
+  )
+    ? selectedPointId
+    : (state.lockBoxPoints[0]?.id ?? "");
 
-  const handleConfirmPayment = () => {
-    if (!selectedPointId) return;
-
+  const handleConfirmPayment = async () => {
+    if (!pointId || isProcessing) return;
     setIsProcessing(true);
-    setTimeout(() => {
-      const order = actions.checkout(selectedPointId, paymentMethod);
+    try {
+      const order = await actions.checkout(pointId, paymentMethod);
       setIsProcessing(false);
       if (order) {
         onClose();
         onOrderSuccess(order);
       }
-    }, 1000);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Checkout de demostración">
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        if (!isProcessing) onClose();
+      }}
+      title="Compra de prueba conectada"
+    >
       <div className="space-y-5">
         {/* Banner de protección Escrow */}
         <div className="bg-accent/10 border border-accent/30 rounded-lg p-3.5 flex items-start gap-3">
@@ -56,8 +68,8 @@ export function CheckoutModal({
               Simulación de pago protegido
             </p>
             <p className="text-text-secondary leading-relaxed">
-              Esta compra es de prueba. No retiene fondos ni crea un pedido en
-              la base de datos.
+              Se creará un pedido de prueba en el sistema para que el vendedor
+              lo despache y el punto confirme la entrega. No se retienen fondos.
             </p>
           </div>
         </div>
@@ -65,14 +77,14 @@ export function CheckoutModal({
         {/* Selección de Punto LockBox */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">
-            1. Selecciona tu Punto LockBox de entrega (La Paz)
+            1. Selecciona tu Punto LockBox de entrega
           </label>
           <div className="space-y-2">
             {state.lockBoxPoints.map((point) => (
               <label
                 key={point.id}
                 className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                  selectedPointId === point.id
+                  pointId === point.id
                     ? "border-accent bg-surface-raised"
                     : "border-border bg-canvas hover:border-border-strong"
                 }`}
@@ -80,7 +92,7 @@ export function CheckoutModal({
                 <input
                   type="radio"
                   name="lockbox_point"
-                  checked={selectedPointId === point.id}
+                  checked={pointId === point.id}
                   onChange={() => setSelectedPointId(point.id)}
                   className="mt-1 accent-accent"
                 />
@@ -102,7 +114,7 @@ export function CheckoutModal({
         {/* Método de Pago */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">
-            2. Método de pago en garantía
+            2. Método de pago simulado
           </label>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -151,17 +163,25 @@ export function CheckoutModal({
             <span className="text-accent font-bold">Gratis</span>
           </div>
           <div className="flex justify-between text-sm font-bold text-white pt-1 border-t border-border/60">
-            <span>Total a Retener</span>
+            <span>Total de prueba</span>
             <span className="text-accent font-mono text-base">
               {formatBOB(subtotal)}
             </span>
           </div>
         </div>
 
+        {meta.error && (
+          <p role="alert" className="text-sm text-danger">
+            {meta.error}
+          </p>
+        )}
+        {!pointId && <p role="alert">No hay puntos de recojo disponibles.</p>}
         {/* Botón de Confirmación */}
         <button
           type="button"
-          disabled={isProcessing || state.cart.length === 0}
+          disabled={
+            isProcessing || meta.busy || !pointId || state.cart.length === 0
+          }
           onClick={handleConfirmPayment}
           className="w-full bg-accent hover:bg-accent-hover text-canvas font-black text-xs uppercase tracking-wider py-3.5 rounded flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
         >

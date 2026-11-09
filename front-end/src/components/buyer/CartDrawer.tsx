@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import styles from "./workspace.module.css";
-import { useBuyerStore } from "@/lib/buyer/store";
+import { useBuyerStore } from "@/lib/buyer/connected-store";
 import { calculateCartSubtotal, formatBOB } from "@/lib/buyer/domain";
 import {
   Trash2,
@@ -24,7 +24,7 @@ export function CartDrawer({
   onClose: () => void;
   onOpenCheckout: () => void;
 }) {
-  const [state, actions] = useBuyerStore();
+  const [state, actions, meta] = useBuyerStore();
   const subtotal = calculateCartSubtotal(state.cart);
   const dialogRef = React.useRef<HTMLDialogElement>(null);
   React.useEffect(() => {
@@ -93,7 +93,7 @@ export function CartDrawer({
                   width={64}
                   height={64}
                   unoptimized
-                  src={product.imageUrl}
+                  src={product.imageUrl || "/product-placeholder.svg"}
                   alt={product.title}
                   className="w-16 h-16 object-cover rounded bg-surface"
                 />
@@ -124,7 +124,7 @@ export function CartDrawer({
                         actions.updateCartQuantity(product.id, quantity + 1)
                       }
                       aria-label={`Aumentar cantidad de ${product.title}`}
-                      disabled={quantity >= product.stock}
+                      disabled={meta.busy || quantity >= product.stock}
                       className="p-1 rounded bg-surface-raised border border-border text-text-secondary hover:text-white disabled:opacity-40"
                     >
                       <Plus className="w-3 h-3" />
@@ -155,8 +155,8 @@ export function CartDrawer({
             <div className="flex items-center gap-2 text-[11px] text-text-muted bg-accent/10 border border-accent/20 p-2.5 rounded">
               <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
               <span>
-                Tu dinero se mantendrá protegido en garantía hasta que retires
-                el paquete en el Punto LockBox.
+                Compra de prueba: se registra el pedido sin cobrar ni retener
+                dinero.
               </span>
             </div>
 
@@ -170,13 +170,14 @@ export function CartDrawer({
             </div>
 
             <button
+              disabled={meta.busy}
               onClick={() => {
                 onClose();
                 onOpenCheckout();
               }}
               className="w-full bg-accent hover:bg-accent-hover text-canvas font-black text-xs uppercase tracking-wider py-3.5 rounded flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
-              Continuar al Pago Escrow
+              Continuar a la compra de prueba
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
