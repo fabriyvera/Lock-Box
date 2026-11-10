@@ -109,7 +109,7 @@ begin
     if not found then raise exception 'Punto no disponible' using errcode='22023'; end if;
     select count(distinct p.seller_id) into needed from public.cart_items i join public.products p on p.id=i.product_id where i.cart_id=v_cart_id;
     if needed=0 then raise exception 'El carrito está vacío' using errcode='22023'; end if;
-    if (select count(*) from public.orders o where o.lockbox_id=point.id and o.status in ('paid','dispatched','in_lockbox','ready'))+needed>point.capacity then raise exception 'El punto no tiene capacidad disponible' using errcode='P0001'; end if;
+    if (select count(*) from public.orders o where o.lockbox_id=point.id and (o.status in ('paid','dispatched','in_lockbox','ready') or (o.status='disputed' and o.delivered_at is null)))+needed>point.capacity then raise exception 'El punto no tiene capacidad disponible' using errcode='P0001'; end if;
     -- Same product lock order for every checkout; all prices/owners come from PostgreSQL.
     perform 1 from public.profiles s where s.id in (select p.seller_id from public.cart_items i join public.products p on p.id=i.product_id where i.cart_id=v_cart_id) order by s.id for share;
     perform 1 from public.products p join public.cart_items i on i.product_id=p.id where i.cart_id=v_cart_id order by p.id for update of p;

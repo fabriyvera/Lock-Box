@@ -447,9 +447,11 @@ export type Database = {
           delivered_at: string | null;
           dispatched_at: string | null;
           id: string;
+          is_test: boolean;
           lockbox_id: string;
           notes: string | null;
           paid_at: string | null;
+          payment_method: string | null;
           qr_code: string | null;
           qr_expires_at: string | null;
           released_at: string | null;
@@ -470,9 +472,11 @@ export type Database = {
           delivered_at?: string | null;
           dispatched_at?: string | null;
           id?: string;
+          is_test?: boolean;
           lockbox_id: string;
           notes?: string | null;
           paid_at?: string | null;
+          payment_method?: string | null;
           qr_code?: string | null;
           qr_expires_at?: string | null;
           released_at?: string | null;
@@ -493,9 +497,11 @@ export type Database = {
           delivered_at?: string | null;
           dispatched_at?: string | null;
           id?: string;
+          is_test?: boolean;
           lockbox_id?: string;
           notes?: string | null;
           paid_at?: string | null;
+          payment_method?: string | null;
           qr_code?: string | null;
           qr_expires_at?: string | null;
           released_at?: string | null;
