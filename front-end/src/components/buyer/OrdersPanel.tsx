@@ -41,7 +41,7 @@ export function OrdersPanel() {
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [disputeReason, setDisputeReason] = useState(
-    "Producto con fallas o incompleto",
+    "Producto no coincide con el live",
   );
   const [disputeDesc, setDisputeDesc] = useState("");
 
@@ -184,13 +184,18 @@ export function OrdersPanel() {
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border/70">
                   <div className="flex flex-wrap items-center gap-2">
                     {/* Botón QR (B6) */}
-                    <button
-                      onClick={() => setActiveQRModalOrder(order)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-raised border border-border text-foreground hover:text-white hover:border-accent text-xs font-bold transition-all cursor-pointer"
-                    >
-                      <QrCode className="w-3.5 h-3.5 text-accent" />
-                      Ver QR de Recojo
-                    </button>
+                    {order.qrCode &&
+                      ["paid", "dispatched", "in_lockbox", "ready"].includes(
+                        order.status,
+                      ) && (
+                        <button
+                          onClick={() => setActiveQRModalOrder(order)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-raised border border-border text-foreground hover:text-white hover:border-accent text-xs font-bold transition-all cursor-pointer"
+                        >
+                          <QrCode className="w-3.5 h-3.5 text-accent" />
+                          Ver QR de Recojo
+                        </button>
+                      )}
 
                     {/* Botón Cancelar (B7) - Abre modal en lugar de confirm() */}
                     {cancellable && (

@@ -14,6 +14,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { apiUrl } from "@/lib/auth/account";
 import { isBuyerStateValid } from "./codec";
+import { buyerErrorMessage, buyerRequest } from "./request";
 import type { BuyerProduct, BuyerState } from "./model";
 
 const emptyState: BuyerState = {
@@ -42,7 +43,7 @@ function useConnectedBuyer() {
     const session = await client.current.auth.getSession();
     if (session.error || !session.data.session)
       throw new Error("Tu sesión venció. Vuelve a entrar.");
-    const response = await fetch(apiUrl(`/api/buyer/${path}`), {
+    return buyerRequest(apiUrl(`/api/buyer/${path}`), {
       method: body ? "POST" : "GET",
       headers: {
         Authorization: `Bearer ${session.data.session.access_token}`,
@@ -50,12 +51,7 @@ function useConnectedBuyer() {
       },
       body: body ? JSON.stringify(body) : undefined,
       cache: "no-store",
-      signal: AbortSignal.timeout(20000),
     });
-    const result = await response.json();
-    if (!response.ok)
-      throw new Error(result.message || "No se pudo completar la operación.");
-    return result;
   }, []);
   const refresh = useCallback(async () => {
     const current = ++sequence.current;
@@ -85,9 +81,7 @@ function useConnectedBuyer() {
     const generationRef = generation;
     const report = (err: unknown) => {
       if (mounted.current) {
-        setError(
-          err instanceof Error ? err.message : "No se pudo cargar tu cuenta.",
-        );
+        setError(buyerErrorMessage(err));
         setLoading(false);
       }
     };
@@ -137,11 +131,7 @@ function useConnectedBuyer() {
           : null;
       } catch (err) {
         if (mounted.current && actor === generation.current)
-          setError(
-            err instanceof Error
-              ? err.message
-              : "No se pudo guardar el cambio.",
-          );
+          setError(buyerErrorMessage(err));
         return null;
       } finally {
         writing.current = false;
@@ -196,9 +186,7 @@ function useConnectedBuyer() {
           await refresh();
         } catch (err) {
           if (mounted.current) {
-            setError(
-              err instanceof Error ? err.message : "No se pudo actualizar.",
-            );
+            setError(buyerErrorMessage(err));
             setLoading(false);
           }
         }

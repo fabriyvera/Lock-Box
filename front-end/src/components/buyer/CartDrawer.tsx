@@ -108,6 +108,7 @@ export function CartDrawer({
 
                   <div className="flex items-center gap-2 mt-2">
                     <button
+                      disabled={meta.busy}
                       onClick={() =>
                         actions.updateCartQuantity(product.id, quantity - 1)
                       }
@@ -134,6 +135,7 @@ export function CartDrawer({
 
                 <div className="flex flex-col items-end justify-between self-stretch">
                   <button
+                    disabled={meta.busy}
                     onClick={() => actions.removeFromCart(product.id)}
                     aria-label={`Eliminar ${product.title} del carrito`}
                     className="text-text-subtle hover:text-danger transition-colors p-1"
