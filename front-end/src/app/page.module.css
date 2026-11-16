@@ -5,16 +5,17 @@
 
 .hero {
   min-height: calc(100svh - 68px);
-  scroll-margin-top: 76px;
+  scroll-margin-top: 68px;
 }
 .heroPanel {
-  padding: clamp(32px, 5vw, 64px) clamp(16px, 4vw, 40px);
+  padding: clamp(24px, 3.5vh, 48px) clamp(16px, 4vw, 40px);
   min-width: 0;
 }
 .section {
   min-height: calc(100svh - 68px);
-  padding: clamp(48px, 7vw, 80px) clamp(16px, 4vw, 40px);
-  scroll-margin-top: 76px;
+  padding: clamp(20px, 2.8vh, 36px) clamp(16px, 4vw, 40px);
+  scroll-margin-top: 68px;
+  box-sizing: border-box;
 }
 .twoColumns {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -38,7 +39,7 @@
 }
 .registrationCard {
   min-width: 0;
-  padding: clamp(16px, 4vw, 32px);
+  padding: clamp(16px, 2.5vh, 28px);
 }
 .footerSocial {
   text-align: right;
@@ -188,6 +189,20 @@
   border-left: 3px solid var(--color-border-strong);
 }
 
+.flowButton {
+  gap: clamp(6px, 1.5vw, 16px);
+  padding: 14px clamp(8px, 2vw, 20px);
+  overflow-wrap: anywhere;
+}
+
+.flowDetails {
+  padding: 12px clamp(12px, 4vw, 40px) 16px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  border-top: 1px solid var(--color-border-strong);
+}
+
 .flowCard[data-highlighted="true"],
 .flowCard:hover {
   border-left-color: var(--color-accent);
@@ -201,6 +216,61 @@
 .valueCard:hover {
   background: var(--color-surface-hover);
   border-left-color: var(--color-accent);
+}
+
+.aboutTrack {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.aboutControls {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .aboutTrack {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 14px) / 2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+  }
+
+  .aboutTrack > * {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .aboutControls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .aboutControls button {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--color-accent);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border-strong);
+    cursor: pointer;
+  }
+
+  .aboutControls button:hover {
+    border-color: var(--color-accent);
+  }
+}
+
+@media (max-width: 600px) {
+  .aboutTrack {
+    grid-auto-columns: 100%;
+  }
 }
 
 .serviceCard {
