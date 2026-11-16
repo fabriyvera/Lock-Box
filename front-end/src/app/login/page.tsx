@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, type FormEvent } from "react";
-import Link from "next/link";
 import {
   Lock,
   Mail,
@@ -15,7 +14,31 @@ import {
 } from "lucide-react";
 import DeferredCaptcha from "@/components/auth/DeferredCaptcha";
 import { loginComplete } from "@/lib/auth/form-readiness";
-import { apiUrl, openAccount } from "@/lib/auth/account";
+import { apiUrl, openAccount, type AccountRole } from "@/lib/auth/account";
+
+const loginModules = [
+  {
+    role: "comprador",
+    icon: ShoppingCart,
+    label: "Comprador",
+    tag: "COMPRA SEGURA",
+    features: ["Catálogo Live", "Pago Escrow", "Recogida con QR"],
+  },
+  {
+    role: "vendedor",
+    icon: Store,
+    label: "Vendedor",
+    tag: "LIQUIDACIÓN 48H",
+    features: ["Ventas en Vivo", "Cobro Garantizado", "Retiro Yape / BCP"],
+  },
+  {
+    role: "operador_punto",
+    icon: QrCode,
+    label: "Punto LockBox",
+    tag: "TIENDA ALIADA",
+    features: ["Recepción Paquetes", "Escaneo QR", "Liberación de Pago"],
+  },
+] as const;
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,8 +47,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
+  const [selectedRole, setSelectedRole] = useState<AccountRole | null>(null);
+  const emailField = useRef<HTMLInputElement>(null);
   const pending = useRef(false);
   const complete = loginComplete(email, password);
+  const selectedModule = loginModules.find(({ role }) => role === selectedRole);
+
+  function selectModule(role: AccountRole) {
+    setSelectedRole(role);
+    emailField.current?.focus();
+  }
 
   function changed() {
     setCaptchaToken(null);
@@ -87,41 +118,18 @@ export default function LoginPage() {
     }
   };
 
-  const rolesVisuales = [
-    {
-      num: "01",
-      icon: ShoppingCart,
-      rol: "COMPRADOR",
-      tag: "COMPRA SEGURA",
-      puntos: ["Catálogo Live", "Pago Escrow", "Recogida con QR"],
-    },
-    {
-      num: "02",
-      icon: Store,
-      rol: "VENDEDOR",
-      tag: "LIQUIDACIÓN 48H",
-      puntos: ["Ventas en Vivo", "Cobro Garantizado", "Retiro Yape / BCP"],
-    },
-    {
-      num: "03",
-      icon: QrCode,
-      rol: "PUNTO LOCKBOX",
-      tag: "TIENDA ALIADA",
-      puntos: ["Recepción Paquetes", "Escaneo QR", "Liberación de Pago"],
-    },
-  ];
-
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden w-full bg-canvas flex flex-col justify-between px-6 py-4 sm:px-10 lg:px-14 box-border">
+    <div className="min-h-screen w-full bg-canvas flex flex-col justify-between px-4 py-4 sm:px-10 lg:px-14 box-border">
       {/* BARRA SUPERIOR COMPACTA A ANCHO COMPLETO */}
       <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between mb-3 shrink-0">
-        <Link
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Public navigation should work while the App Router initializes. */}
+        <a
           href="/"
           className="inline-flex items-center gap-2.5 bg-surface border-2 border-border hover:border-accent px-4 py-2 text-base font-extrabold text-white hover:text-accent transition-all"
         >
           <ArrowLeft size={20} className="text-accent" aria-hidden="true" />
           VOLVER AL INICIO
-        </Link>
+        </a>
 
         <div className="flex shadow-lg">
           <span className="bg-accent text-canvas font-black text-xl sm:text-2xl px-3.5 py-1 tracking-wider">
@@ -155,51 +163,58 @@ export default function LoginPage() {
               ¿A QUÉ SISTEMA <span className="text-accent">INGRESAS?</span>
             </h2>
             <p className="text-base sm:text-lg text-white font-semibold mb-4">
-              Tu cuenta activa automáticamente tu panel de trabajo:
+              Selecciona el módulo al que quieres ingresar. Tu cuenta determina qué panel puedes abrir.
             </p>
 
             {/* 3 TARJETAS DIDÁCTICAS CALIBRADAS PARA ENTRAR COMPLETAS */}
             <div className="grid grid-cols-1 gap-3">
-              {rolesVisuales.map((item) => {
+              {loginModules.map((item, index) => {
                 const Icon = item.icon;
+                const selected = selectedRole === item.role;
                 return (
-                  <div
-                    key={item.num}
-                    className="group bg-canvas border-2 border-border hover:border-accent px-5 py-3.5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                  <button
+                    key={item.role}
+                    type="button"
+                    aria-label={item.label}
+                    aria-pressed={selected}
+                    aria-controls="login-form"
+                    disabled={loading}
+                    onClick={() => selectModule(item.role)}
+                    className={`text-left border-2 hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent px-3 sm:px-5 py-3.5 transition-colors flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 cursor-pointer disabled:cursor-wait ${selected ? "border-accent bg-accent/10" : "border-border bg-canvas"}`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-13 h-13 bg-accent/15 border-2 border-accent flex items-center justify-center shrink-0 p-2.5">
-                        <Icon className="w-7 h-7 text-accent" />
-                      </div>
+                    <span className="flex items-center gap-3 sm:gap-4 min-w-0">
+                      <span className="w-13 h-13 bg-accent/15 border-2 border-accent flex items-center justify-center shrink-0 p-2.5">
+                        <Icon className="w-7 h-7 text-accent" aria-hidden="true" />
+                      </span>
 
-                      <div>
-                        <div className="flex items-center gap-2.5 mb-0.5">
+                      <span className="min-w-0">
+                        <span className="flex flex-wrap items-center gap-2 mb-0.5">
                           <span className="text-xs sm:text-sm font-black text-accent tracking-widest uppercase">
-                            MÓDULO {item.num}
+                            MÓDULO 0{index + 1}
                           </span>
                           <span className="bg-surface-raised border border-accent/40 text-accent text-xs font-black px-2 py-0.5 uppercase tracking-wider">
                             {item.tag}
                           </span>
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight">
-                          {item.rol}
-                        </h3>
-                      </div>
-                    </div>
+                        </span>
+                        <span className="block text-xl sm:text-2xl font-black text-white tracking-tight leading-tight uppercase">
+                          {item.label}
+                        </span>
+                      </span>
+                    </span>
 
                     {/* Puntos clave alineados y legibles */}
-                    <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1 w-full sm:w-auto border-t sm:border-t-0 border-border pt-2 sm:pt-0">
-                      {item.puntos.map((p) => (
-                        <div
+                    <span className="flex flex-wrap xl:flex-col items-start xl:items-end gap-1 w-full xl:w-auto border-t xl:border-t-0 border-border pt-2 xl:pt-0">
+                      {item.features.map((p) => (
+                        <span
                           key={p}
                           className="flex items-center gap-1.5 text-sm sm:text-base font-bold text-white leading-snug"
                         >
-                          <span className="text-accent font-black">✔</span>
+                          <span aria-hidden="true" className="text-accent font-black">✔</span>
                           <span>{p}</span>
-                        </div>
+                        </span>
                       ))}
-                    </div>
-                  </div>
+                    </span>
+                  </button>
                 );
               })}
             </div>
@@ -242,14 +257,24 @@ export default function LoginPage() {
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl xl:text-5xl font-black text-white tracking-tight uppercase leading-none mb-2">
+            <h1 id="login-title" className="text-3xl sm:text-4xl xl:text-5xl font-black text-white tracking-tight uppercase leading-none mb-2">
               INICIAR <span className="text-accent">SESIÓN</span>
+              {selectedModule && (
+                <span className="block mt-2 text-xl sm:text-2xl normal-case tracking-normal">
+                  {selectedModule.label}
+                </span>
+              )}
             </h1>
-            <p className="text-base sm:text-lg text-white font-medium mb-5">
-              Ingresa tus datos para abrir tu panel.
+            <p id="login-destination" aria-live="polite" className="text-base sm:text-lg text-white font-medium mb-5">
+              {selectedModule
+                ? `Estás intentando ingresar al módulo ${selectedModule.label}.`
+                : "Ingresa tus datos para abrir tu panel."}
             </p>
 
             <form
+              id="login-form"
+              aria-labelledby="login-title"
+              aria-describedby="login-destination"
               onSubmit={handleLogin}
               className="space-y-4"
               aria-busy={loading}
@@ -269,6 +294,7 @@ export default function LoginPage() {
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent pointer-events-none" />
                   <input
                     id="login-email"
+                    ref={emailField}
                     autoComplete="email"
                     type="email"
                     required
@@ -296,12 +322,6 @@ export default function LoginPage() {
                       *
                     </span>
                   </label>
-                  <Link
-                    href="#"
-                    className="text-xs sm:text-sm font-extrabold text-accent hover:underline uppercase tracking-wide"
-                  >
-                    ¿OLVIDASTE TU CONTRASEÑA?
-                  </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent pointer-events-none" />
@@ -351,7 +371,7 @@ export default function LoginPage() {
                     : "bg-border text-white/50 cursor-not-allowed"
                 }`}
               >
-                {loading ? "VERIFICANDO ACCESO..." : "ENTRAR AL SISTEMA"}
+                {loading ? "VERIFICANDO ACCESO..." : selectedModule ? `ENTRAR A ${selectedModule.label}` : "ENTRAR AL SISTEMA"}
                 {!loading && <ArrowRight className="w-5 h-5" />}
               </button>
             </form>
@@ -361,12 +381,13 @@ export default function LoginPage() {
           <div className="mt-4 pt-3.5 border-t-2 border-border text-center">
             <p className="text-base sm:text-lg text-white font-semibold">
               ¿Aún no tienes cuenta?{" "}
-              <Link
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Use a document navigation to the registration section. */}
+              <a
                 href="/#registro"
-                className="text-accent font-black hover:underline uppercase ml-1"
+                className="inline-flex min-h-11 items-center px-1 text-accent font-black hover:underline uppercase"
               >
                 REGÍSTRATE GRATIS →
-              </Link>
+              </a>
             </p>
             <div className="mt-1.5 inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white/80">
               <ShieldCheck className="w-4 h-4 text-accent" />
