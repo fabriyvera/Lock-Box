@@ -1,11 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useRef } from 'react';
 import {
   Menu,
   X,
   ChartColumnIncreasing,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleCheck,
   CreditCard,
   Package,
@@ -24,9 +25,8 @@ import {
 } from 'lucide-react';
 import { DecorativeIcon } from '@/components/ui/DecorativeIcon';
 import RegistrationForm from '@/components/auth/RegistrationForm';
+import type { AccountRole } from '@/lib/auth/account';
 import styles from './page.module.css';
-
-type Role = 'comprador' | 'vendedor' | null;
 
 const VALUES = [
   {
@@ -144,8 +144,9 @@ const NAV_SECTIONS = ['inicio', 'nosotros', 'servicios', 'planes', 'registro', '
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<string>('inicio');
-  const [role, setRole] = useState<Role>(null);
+  const [role, setRole] = useState<AccountRole | null>(null);
   const [openFlowStep, setOpenFlowStep] = useState<number | null>(0);
+  const aboutTrack = useRef<HTMLDivElement>(null);
 
   // ScrollSpy: Detecta automáticamente en qué sección está el usuario al hacer scroll
   useEffect(() => {
@@ -184,13 +185,25 @@ export default function Home() {
     const element = document.getElementById(id);
     if (!element) return;
 
-    const navHeight = 68;
-    const targetTop = element.getBoundingClientRect().top + window.scrollY - navHeight;
-    window.scrollTo({
-      top: Math.max(0, targetTop),
+    element.scrollIntoView({
+      block: 'start',
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
     });
   };
+
+  function slideAbout(direction: -1 | 1) {
+    const track = aboutTrack.current;
+    const first = track?.firstElementChild;
+    const second = first?.nextElementSibling;
+    if (!track || !first || !second) return;
+    const step = second.getBoundingClientRect().left - first.getBoundingClientRect().left;
+    const last = track.scrollWidth - track.clientWidth;
+    const atEdge = direction === 1 ? track.scrollLeft >= last - 1 : track.scrollLeft <= 1;
+    track.scrollTo({
+      left: atEdge ? (direction === 1 ? 0 : last) : track.scrollLeft + step * direction,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  }
 
   const toggleFlowStep = (index: number) => {
     setOpenFlowStep(prev => (prev === index ? null : index));
@@ -294,7 +307,7 @@ export default function Home() {
             ))}
 
             <div style={{ width: '1px', height: '22px', background: 'var(--color-border-strong)', margin: '0 6px' }} />
-            <Link
+            <a
               href="/login"
               className={styles.accentLink}
               style={{
@@ -308,7 +321,7 @@ export default function Home() {
               }}
             >
               Iniciar Sesión
-            </Link>
+            </a>
 
             <button
               onClick={() => scrollTo('registro')}
@@ -499,7 +512,7 @@ export default function Home() {
                   <div
                     key={item.step}
                     className={styles.flowCard}
-                    data-highlighted={isOpen || i === 0 || i === FLOW.length - 1}
+                    data-highlighted={isOpen}
                     style={{
                       background: isOpen
                         ? 'var(--color-surface-hover)'
@@ -510,15 +523,15 @@ export default function Home() {
                     }}
                   >
                     <button
+                      className={styles.flowButton}
                       type="button"
                       onClick={() => toggleFlowStep(i)}
                       aria-expanded={isOpen}
+                      aria-controls={`flow-details-${item.step}`}
                       style={{
                         width: '100%',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '16px',
-                        padding: '14px 20px',
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
@@ -567,20 +580,13 @@ export default function Home() {
                       </div>
                     </button>
 
-                    {isOpen && (
-                      <div
-                        style={{
-                          padding: '12px 20px 16px 82px',
-                          fontSize: '18px',
-                          fontWeight: 600,
-                          lineHeight: 1.5,
-                          color: '#ffffff',
-                          borderTop: '1px solid var(--color-border-strong)',
-                        }}
-                      >
-                        {item.details}
-                      </div>
-                    )}
+                    <div
+                      id={`flow-details-${item.step}`}
+                      hidden={!isOpen}
+                      className={styles.flowDetails}
+                    >
+                      {item.details}
+                    </div>
                   </div>
                 );
               })}
@@ -818,8 +824,15 @@ export default function Home() {
             ))}
           </div>
 
-          {/* 4 Pilares con letras más grandes */}
-          <div style={{ display: 'grid', gap: '14px' }} className={styles.fourColumns}>
+          <div className={styles.aboutControls} aria-label="Controles de los pilares LockBox">
+            <button type="button" aria-label="Pilar anterior" aria-controls="about-values" onClick={() => slideAbout(-1)}>
+              <ChevronLeft size={22} aria-hidden="true" />
+            </button>
+            <button type="button" aria-label="Pilar siguiente" aria-controls="about-values" onClick={() => slideAbout(1)}>
+              <ChevronRight size={22} aria-hidden="true" />
+            </button>
+          </div>
+          <div id="about-values" ref={aboutTrack} className={styles.aboutTrack} role="region" aria-label="Pilares de LockBox">
             {VALUES.map(v => (
               <div
                 key={v.number}
@@ -1222,14 +1235,14 @@ export default function Home() {
 
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <p style={{ fontSize: '21px', lineHeight: 1.4, color: '#ffffff', margin: 0, fontWeight: 700 }}>
-              1. Selecciona tu perfil para habilitar el formulario de registro:
+              Selecciona tu perfil para abrir el formulario de registro.
             </p>
 
-            <div style={{ display: 'grid', gap: '20px' }} className={styles.twoColumns}>
+            <div style={{ display: 'grid', gap: '20px' }} className={styles.threeColumns}>
               {(
                 [
                   {
-                    r: 'comprador' as Role,
+                    r: 'comprador' as const,
                     icon: ShoppingCart,
                     title: 'Soy Comprador',
                     badge: 'SIN COMISIÓN · COMPRA PROTEGIDA',
@@ -1240,7 +1253,7 @@ export default function Home() {
                     ],
                   },
                   {
-                    r: 'vendedor' as Role,
+                    r: 'vendedor' as const,
                     icon: Store,
                     title: 'Soy Vendedor',
                     badge: 'COBRO SEGURO · LIQUIDACIÓN 48H',
@@ -1250,12 +1263,24 @@ export default function Home() {
                       'Pagos directos a tu Yape o cuenta BCP',
                     ],
                   },
+                  {
+                    r: 'operador_punto' as const,
+                    icon: QrCode,
+                    title: 'Soy Punto LockBox',
+                    badge: 'TIENDA ALIADA · RECOJO CON QR',
+                    desc: 'Afília tu tienda para recibir paquetes y entregarlos a los compradores.',
+                    benefits: [
+                      'Administra los pedidos y la capacidad de tu punto',
+                      'Verifica el código de retiro al entregar el paquete',
+                    ],
+                  },
                 ]
               ).map(({ r, icon, title, badge, desc, benefits }) => {
                 const isSelected = role === r;
                 return (
                   <button
-                    key={r!}
+                    key={r}
+                    type="button"
                     onClick={() => setRole(r)}
                     className={styles.roleCard}
                     data-selected={isSelected}
@@ -1349,8 +1374,7 @@ export default function Home() {
                     letterSpacing: '0.02em',
                   }}
                 >
-                  ↑ Haz clic arriba en <span style={{ color: 'var(--color-accent)' }}>Soy Comprador</span> o{' '}
-                  <span style={{ color: 'var(--color-accent)' }}>Soy Vendedor</span> para abrir tu formulario de registro.
+                  Elige Comprador, Vendedor o Punto LockBox.
                 </div>
               )}
             </div>
@@ -1568,7 +1592,10 @@ export default function Home() {
                 ¿Quieres ser un Punto LockBox oficial y ganar comisiones por paquete?
               </p>
               <button
-                onClick={() => scrollTo('registro')}
+                onClick={() => {
+                  setRole('operador_punto');
+                  scrollTo('registro');
+                }}
                 className={styles.affiliateButton}
                 style={{
                   border: `2px solid var(--color-accent)`,
