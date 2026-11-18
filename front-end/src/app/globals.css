@@ -25,6 +25,7 @@
   --color-accent-hover: #00c988;
   --color-accent-bright: #5cffcb;
   --color-on-accent: #060b14;
+  --color-home-canvas: #f5f8fa;
   --color-white: #ffffff;
   --color-black: #000000;
   --color-success: #00e59b;
@@ -76,6 +77,60 @@
 }
 
 * { box-sizing: border-box; }
+
+/* Portada clara. Los tokens semánticos se heredan también en el registro. */
+.home-theme {
+  color-scheme: light;
+  --color-canvas: var(--color-home-canvas);
+  --color-surface-deep: var(--color-home-canvas);
+  --color-surface: #ffffff;
+  --color-surface-raised: #f0f5f7;
+  --color-surface-hover: #e6eef2;
+  --color-foreground: #142b3b;
+  --color-text-secondary: #344f60;
+  --color-text-muted: #526879;
+  --color-text-subtle: #526879;
+  --color-text-disabled: #627487;
+  --color-border: #d9e3e9;
+  --color-border-strong: #8195a4;
+  --color-border-emphasis: #536f80;
+  --color-accent: #0b7469;
+  --color-accent-hover: #075b53;
+  --color-on-accent: #ffffff;
+  --color-accent-muted: #cae9e3;
+  --color-accent-soft: #e3f2ee;
+  --color-accent-subtle: #edf6f3;
+  --color-focus: #225bba;
+  --color-success: #176645;
+  --color-success-surface: #e8f5ed;
+  --color-on-success: #155638;
+  --color-info: #225bba;
+  --color-warning: #805300;
+  --color-warning-strong: #a66700;
+  --color-danger: #a32635;
+  --color-danger-strong: #a32635;
+  --color-danger-surface: #fceef0;
+  --color-danger-strong-border: #de9ca4;
+  --color-home-ink: #142f40;
+  --color-home-ink-raised: #234657;
+  --color-home-ink-border: #3d5b6a;
+  --color-home-on-ink: #ffffff;
+  --color-home-on-ink-muted: #c1d2dc;
+  --color-home-on-ink-accent: #8addbf;
+  --color-home-shadow: #142f401a;
+}
+html:has(.home-theme),
+body:has(.home-theme) {
+  color-scheme: light;
+  background: var(--color-home-canvas);
+}
+.home-theme input:-webkit-autofill,
+.home-theme input:-webkit-autofill:hover,
+.home-theme input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-foreground) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset !important;
+  caret-color: var(--color-foreground);
+}
 
 html,
 body {

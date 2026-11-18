@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import DeferredCaptcha from "./DeferredCaptcha";
 import {
@@ -68,7 +68,10 @@ const fields = [
   },
 ] as const;
 
-function isEssentialRegistrationReady(data: FormData, role: AccountRole): boolean {
+function isEssentialRegistrationReady(
+  data: FormData,
+  role: AccountRole,
+): boolean {
   const fullName = String(data.get("fullName") || "").trim();
   const email = String(data.get("email") || "").trim();
   const password = String(data.get("password") || "");
@@ -100,7 +103,24 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
   const [confirmation, setConfirmation] = useState(false);
   const [complete, setComplete] = useState(false);
   const [revision, setRevision] = useState(0);
+  const [dirty, setDirty] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const errorSummary = useRef<HTMLParagraphElement>(null);
   const pending = useRef(false);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  useEffect(() => {
+    if (error) errorSummary.current?.focus();
+  }, [error]);
 
   function changed(event: FormEvent<HTMLFormElement>) {
     if (
@@ -119,7 +139,11 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
       ].includes(event.target.name)
     )
       return;
-    setComplete(isEssentialRegistrationReady(new FormData(event.currentTarget), role));
+    setDirty(true);
+    setFieldErrors({});
+    setComplete(
+      isEssentialRegistrationReady(new FormData(event.currentTarget), role),
+    );
     setToken(null);
     setRevision((value) => value + 1);
     setError("");
@@ -131,8 +155,27 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
     const form = event.currentTarget;
     const data = new FormData(form);
     const value = (name: string) => String(data.get(name) || "");
+    const inputs = Array.from(form.querySelectorAll("input"));
+    const invalidFields = Object.fromEntries(
+      inputs
+        .filter((input) => !input.validity.valid)
+        .map((input) => [input.name, input.validationMessage]),
+    );
+    if (value("password") !== value("confirmPassword")) {
+      invalidFields.confirmPassword =
+        "Repite la misma contraseña en ambos campos.";
+    }
+    setFieldErrors(invalidFields);
+    const invalid = inputs.find((input) => invalidFields[input.name]);
+    if (invalid) {
+      setError("");
+      invalid.focus();
+      return;
+    }
     if (!isEssentialRegistrationReady(data, role)) {
-      setError("Completa los campos obligatorios (*) y verifica tu contraseña.");
+      setError(
+        "Completa los campos obligatorios (*) y verifica tu contraseña.",
+      );
       return;
     }
     if (value("password") !== value("confirmPassword")) {
@@ -153,7 +196,8 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
         .slice(0, 24) || "usuario.lbx";
 
     const finalUsername =
-      value("username").trim().replace(/^@/, "").toLowerCase() || fallbackUsername;
+      value("username").trim().replace(/^@/, "").toLowerCase() ||
+      fallbackUsername;
     const finalPhone = value("phone").trim() || "70000000";
 
     pending.current = true;
@@ -186,6 +230,19 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
       });
       const result = await response.json();
       if (!response.ok) {
+        const errorsByField: Record<string, string> = {};
+        for (const [name, messages] of Object.entries(result.errors ?? {})) {
+          if (inputs.some((input) => input.name === name)) {
+            errorsByField[name] = Array.isArray(messages)
+              ? messages.join(" ")
+              : String(messages);
+          }
+        }
+        if (Object.keys(errorsByField).length) {
+          setFieldErrors(errorsByField);
+          inputs.find((input) => errorsByField[input.name])?.focus();
+          return;
+        }
         const errors = Object.values(result.errors ?? {})
           .flat()
           .join(" ");
@@ -194,6 +251,7 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
         );
       }
       form.reset();
+      setDirty(false);
       setComplete(false);
       if (result.requiresConfirmation) setConfirmation(true);
       else if (result.session?.access_token && result.session?.refresh_token)
@@ -217,370 +275,219 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
 
   if (confirmation)
     return (
-      <div className={styles.notice} role="status" style={{ padding: "24px" }}>
-        <h3 style={{ fontSize: "26px", fontWeight: 900, color: "#ffffff", marginBottom: "10px" }}>
-          Revisa tu correo
-        </h3>
-        <p style={{ fontSize: "18px", color: "#f1f5f9", marginBottom: "20px" }}>
+      <div className={styles.notice} role="status">
+        <h3>Revisa tu correo</h3>
+        <p>
           Confirma tu cuenta con el enlace que envía LockBox. Si ya tienes una
           cuenta, inicia sesión.
         </p>
-        <Link
-          href="/login"
-          className={styles.submit}
-          style={{ fontSize: "17px", fontWeight: 900, padding: "14px 28px" }}
-        >
+        <Link href="/login" className={styles.submit}>
           Ir a iniciar sesión
         </Link>
         <button
           type="button"
           onClick={() => setConfirmation(false)}
           className={styles.back}
-          style={{ fontSize: "16px", marginTop: "12px" }}
         >
           Volver al formulario
         </button>
       </div>
     );
 
-  const labelStyle = {
-    display: "block",
-    fontSize: "17px",
-    fontWeight: 800,
-    color: "#ffffff",
-    marginBottom: "8px",
-    letterSpacing: "0.02em",
-  } as const;
+  const additionalFields =
+    role === "vendedor"
+      ? [
+          {
+            name: "storeName",
+            label: "Nombre de tu tienda",
+            type: "text",
+            autoComplete: "organization",
+            maxLength: 80,
+            minLength: 2,
+            placeholder: "Ej. Moda Urbana…",
+            required: true,
+          },
+        ]
+      : role === "operador_punto"
+        ? [
+            {
+              name: "pointName",
+              label: "Nombre del punto",
+              type: "text",
+              autoComplete: "organization",
+              maxLength: 80,
+              minLength: 2,
+              placeholder: "Ej. Punto LockBox Central…",
+              required: true,
+            },
+            {
+              name: "pointAddress",
+              label: "Dirección completa del punto",
+              type: "text",
+              autoComplete: "street-address",
+              maxLength: 240,
+              minLength: 10,
+              placeholder: "Ej. Av. Central 123, La Paz…",
+              required: true,
+            },
+            {
+              name: "pointCapacity",
+              label: "Capacidad de paquetes (opcional)",
+              type: "number",
+              autoComplete: "off",
+              placeholder: "Ej. 50…",
+              required: false,
+            },
+          ]
+        : [];
 
-  const inputStyle = {
-    width: "100%",
-    height: "54px",
-    padding: "0 16px",
-    fontSize: "18px",
-    fontWeight: 600,
-    color: "#ffffff",
-    background: "var(--color-surface-raised, #0f172a)",
-    border: "2px solid var(--color-border-strong, #334155)",
-    borderRadius: "4px",
-    outline: "none",
-    boxSizing: "border-box",
-  } as const;
-
-  const hintStyle = {
-    display: "block",
-    fontSize: "14px",
-    fontWeight: 500,
-    color: "#cbd5e1",
-    marginTop: "6px",
-    lineHeight: 1.4,
-  } as const;
+  const renderField = (field: {
+    name: string;
+    label: string;
+    type: string;
+    autoComplete: string;
+    placeholder: string;
+    required: boolean;
+    maxLength?: number;
+    minLength?: number;
+  }) => {
+    const fieldError = fieldErrors[field.name];
+    const hints: Record<string, string> = {
+      username: "Si lo dejas vacío, se creará con tu correo.",
+      phone: "8 dígitos sin código de país.",
+      pointAddress: "Incluye zona, localidad y una referencia clara.",
+      pointCapacity: "Capacidad predeterminada de 50 paquetes.",
+    };
+    const hint = hints[field.name];
+    return (
+      <div key={field.name} className={styles.field}>
+        <label htmlFor={`${id}-${field.name}`}>
+          {field.label}
+          {field.required && <span aria-hidden="true"> *</span>}
+        </label>
+        <input
+          {...field}
+          id={`${id}-${field.name}`}
+          placeholder={
+            field.placeholder.endsWith("…")
+              ? field.placeholder
+              : `${field.placeholder}…`
+          }
+          spellCheck={
+            !["email", "username", "password", "confirmPassword"].includes(
+              field.name,
+            )
+          }
+          autoCapitalize={
+            ["email", "username"].includes(field.name) ? "none" : undefined
+          }
+          inputMode={
+            field.name === "phone" || field.type === "number"
+              ? "numeric"
+              : undefined
+          }
+          min={field.type === "number" ? 1 : undefined}
+          max={field.type === "number" ? 500 : undefined}
+          step={field.type === "number" ? 1 : undefined}
+          minLength={
+            field.type === "password"
+              ? 8
+              : field.name === "fullName"
+                ? 2
+                : field.minLength
+          }
+          pattern={
+            field.name === "username"
+              ? "@?[a-zA-Z0-9._]{3,30}"
+              : field.name === "phone"
+                ? "[0-9]{8}"
+                : undefined
+          }
+          aria-invalid={!!fieldError}
+          aria-describedby={[
+            `${id}-${field.name}-error`,
+            hint ? `${id}-${field.name}-hint` : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        />
+        {hint && <small id={`${id}-${field.name}-hint`}>{hint}</small>}
+        <p
+          id={`${id}-${field.name}-error`}
+          className={styles.fieldError}
+          aria-live="polite"
+        >
+          {fieldError}
+        </p>
+      </div>
+    );
+  };
 
   return (
     <form
+      noValidate
       onSubmit={submit}
       onChange={changed}
       className={styles.form}
       aria-busy={busy}
-      style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+      aria-labelledby={`${id}-heading`}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "12px",
-          borderBottom: "1px solid var(--color-border-strong)",
-          paddingBottom: "14px",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "clamp(22px, 2.4vw, 28px)",
-            fontWeight: 900,
-            color: "#ffffff",
-            margin: 0,
-            textTransform: "uppercase",
-          }}
-        >
-          2. Registro como{" "}
-          <span style={{ color: "var(--color-accent)" }}>{ACCOUNT_LABELS[role]}</span>
+      <div className={styles.heading}>
+        <h3 id={`${id}-heading`}>
+          Registro como <span>{ACCOUNT_LABELS[role]}</span>
         </h3>
-        <span style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff" }}>
-          Los campos con{" "}
-          <span style={{ color: "var(--color-accent)", fontWeight: 900, fontSize: "20px" }}>
-            *
-          </span>{" "}
-          son obligatorios
-        </span>
+        <p>Los campos con * son obligatorios.</p>
       </div>
-
-      <fieldset
-        disabled={busy}
-        className={styles.fields}
-        style={{
-          border: "none",
-          padding: 0,
-          margin: 0,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "20px 24px",
-        }}
-      >
+      <fieldset disabled={busy} className={styles.fields}>
         <legend className="sr-only">Datos de tu cuenta</legend>
-        {fields.map(({ label, required, ...field }) => (
-          <div key={field.name}>
-            <label htmlFor={`${id}-${field.name}`} style={labelStyle}>
-              {label}
-              {required && (
-                <span
-                  style={{
-                    color: "var(--color-accent)",
-                    fontWeight: 900,
-                    fontSize: "20px",
-                    marginLeft: "6px",
-                  }}
-                  aria-hidden="true"
-                >
-                  *
-                </span>
-              )}
-            </label>
-            <input
-              {...field}
-              id={`${id}-${field.name}`}
-              required={required}
-              style={inputStyle}
-              inputMode={field.name === "phone" ? "numeric" : undefined}
-              onInput={
-                field.name === "phone"
-                  ? (event) => {
-                      event.currentTarget.value = event.currentTarget.value
-                        .replace(/[^0-9]/g, "")
-                        .slice(0, 8);
-                    }
-                  : undefined
-              }
-              minLength={
-                field.type === "password"
-                  ? 8
-                  : field.name === "fullName"
-                    ? 2
-                    : undefined
-              }
-              pattern={
-                field.name === "username"
-                  ? "@?[a-zA-Z0-9._]{3,30}"
-                  : field.name === "phone"
-                    ? "[0-9]{8}"
-                    : undefined
-              }
-              aria-describedby={
-                field.name === "username"
-                  ? `${id}-username-hint`
-                  : field.name === "phone"
-                    ? `${id}-phone-hint`
-                    : undefined
-              }
-            />
-            {field.name === "phone" && (
-              <small id={`${id}-phone-hint`} style={hintStyle}>
-                Opcional · 8 dígitos sin código de país.
-              </small>
-            )}
-            {field.name === "username" && (
-              <small id={`${id}-username-hint`} style={hintStyle}>
-                Opcional · Si lo dejas vacío, se creará con tu correo.
-              </small>
-            )}
-          </div>
-        ))}
-
-        {role === "vendedor" && (
-          <div style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor={`${id}-storeName`} style={labelStyle}>
-              Nombre de tu tienda{" "}
-              <span
-                style={{ color: "var(--color-accent)", fontWeight: 900, fontSize: "20px" }}
-                aria-hidden="true"
-              >
-                *
-              </span>
-            </label>
-            <input
-              id={`${id}-storeName`}
-              name="storeName"
-              required
-              minLength={2}
-              maxLength={80}
-              autoComplete="organization"
-              placeholder="Ej: Moda Urbana La Paz"
-              style={inputStyle}
-            />
-          </div>
-        )}
-
-        {role === "operador_punto" && (
-          <div
-            className={styles.pointFields}
-            style={{
-              gridColumn: "1 / -1",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "20px 24px",
-              paddingTop: "12px",
-              borderTop: "1px solid var(--color-border-strong)",
-            }}
-          >
-            <div style={{ gridColumn: "1 / -1" }}>
-              <h4 style={{ fontSize: "22px", fontWeight: 900, color: "#ffffff", margin: "0 0 4px 0" }}>
-                Datos de tu Punto LockBox
-              </h4>
-              <p style={{ fontSize: "16px", color: "#e2e8f0", margin: 0 }}>
-                Crearemos un punto nuevo asociado a tu cuenta para recibir y entregar pedidos.
-              </p>
-            </div>
-            <div>
-              <label htmlFor={`${id}-pointName`} style={labelStyle}>
-                Nombre del punto{" "}
-                <span style={{ color: "var(--color-accent)", fontWeight: 900, fontSize: "20px" }} aria-hidden="true">
-                  *
-                </span>
-              </label>
-              <input
-                id={`${id}-pointName`}
-                name="pointName"
-                required
-                minLength={2}
-                maxLength={80}
-                autoComplete="organization"
-                placeholder="Punto LockBox Central"
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label htmlFor={`${id}-pointAddress`} style={labelStyle}>
-                Dirección completa del punto{" "}
-                <span style={{ color: "var(--color-accent)", fontWeight: 900, fontSize: "20px" }} aria-hidden="true">
-                  *
-                </span>
-              </label>
-              <input
-                id={`${id}-pointAddress`}
-                name="pointAddress"
-                required
-                minLength={10}
-                maxLength={240}
-                autoComplete="street-address"
-                placeholder="Av. Central 123, zona Centro, La Paz"
-                aria-describedby={`${id}-point-address-help`}
-                style={inputStyle}
-              />
-              <small id={`${id}-point-address-help`} style={hintStyle}>
-                Incluye zona, localidad y una referencia clara.
-              </small>
-            </div>
-            <div>
-              <label htmlFor={`${id}-pointCapacity`} style={labelStyle}>
-                Capacidad de paquetes (opcional)
-              </label>
-              <input
-                id={`${id}-pointCapacity`}
-                name="pointCapacity"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={500}
-                step={1}
-                placeholder="50"
-                aria-describedby={`${id}-point-capacity-help`}
-                style={inputStyle}
-              />
-              <small id={`${id}-point-capacity-help`} style={hintStyle}>
-                Por defecto 50 paquetes si lo dejas en blanco.
-              </small>
-            </div>
-          </div>
-        )}
+        {fields.map(renderField)}
       </fieldset>
-
-      <div className={styles.captcha} style={{ margin: "4px 0" }}>
+      {additionalFields.length > 0 && (
+        <fieldset disabled={busy} className={styles.fields}>
+          <legend>
+            {role === "vendedor"
+              ? "Datos de tu tienda"
+              : "Datos de tu Punto LockBox"}
+          </legend>
+          {additionalFields.map(renderField)}
+        </fieldset>
+      )}
+      <div className={styles.captcha} id={`${id}-security`}>
         <DeferredCaptcha
           key={revision}
           ready={complete && !busy}
           onToken={setToken}
         />
       </div>
-
-      {error && (
-        <p
-          className={styles.error}
-          role="alert"
-          style={{
-            fontSize: "16px",
-            fontWeight: 700,
-            padding: "12px 16px",
-            margin: 0,
-          }}
-        >
-          {error}
-        </p>
-      )}
-
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "16px",
-          paddingTop: "8px",
-        }}
+      <p
+        ref={errorSummary}
+        className={error ? styles.error : styles.emptyError}
+        role="alert"
+        tabIndex={-1}
       >
+        {error}
+      </p>
+      <div className={styles.actions}>
         <button
-          disabled={busy || !complete || !token}
+          disabled={busy}
           type="submit"
           className={styles.submit}
-          style={{
-            height: "58px",
-            padding: "0 36px",
-            fontSize: "18px",
-            fontWeight: 900,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            cursor: busy || !complete || !token ? "not-allowed" : "pointer",
-          }}
+          aria-describedby={`${id}-security`}
         >
+          {busy && <span className={styles.spinner} aria-hidden="true" />}
           {busy
             ? "Creando tu cuenta…"
             : role === "operador_punto"
-              ? "Crear mi Punto LockBox →"
-              : `Crear mi cuenta de ${role} →`}
+              ? "Crear tu Punto LockBox"
+              : `Crear cuenta de ${role}`}
         </button>
-
-        <p
-          className={styles.signIn}
-          style={{
-            fontSize: "17px",
-            fontWeight: 600,
-            color: "#ffffff",
-            margin: 0,
-          }}
-        >
-          ¿Ya tienes una cuenta?{" "}
-          <Link
-            href="/login"
-            style={{
-              color: "var(--color-accent)",
-              fontWeight: 900,
-              textDecoration: "underline",
-              marginLeft: "4px",
-            }}
-          >
-            Inicia sesión aquí
-          </Link>
+        <p className={styles.signIn}>
+          ¿Ya tienes una cuenta? <Link href="/login">Inicia sesión</Link>.
         </p>
       </div>
+      <span role="status" className="sr-only">
+        {busy ? "Creando tu cuenta…" : ""}
+      </span>
     </form>
   );
 }
