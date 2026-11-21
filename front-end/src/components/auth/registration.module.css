@@ -13,12 +13,12 @@
   border-bottom: 1px solid var(--color-border);
   padding-bottom: 20px;
 }
-.heading h3 {
+.heading :is(h2, h3) {
   margin: 0;
   font-size: 1.35rem;
   line-height: 1.4;
 }
-.heading h3 span {
+.heading :is(h2, h3) span {
   color: var(--color-accent);
 }
 .heading p {

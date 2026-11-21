@@ -95,7 +95,14 @@ function isEssentialRegistrationReady(
   return true;
 }
 
-export default function RegistrationForm({ role }: { role: AccountRole }) {
+export default function RegistrationForm({
+  role,
+  headingLevel = 3,
+}: {
+  role: AccountRole;
+  headingLevel?: 2 | 3;
+}) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const id = useId();
   const [token, setToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -276,7 +283,7 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
   if (confirmation)
     return (
       <div className={styles.notice} role="status">
-        <h3>Revisa tu correo</h3>
+        <Heading>Revisa tu correo</Heading>
         <p>
           Confirma tu cuenta con el enlace que envía LockBox. Si ya tienes una
           cuenta, inicia sesión.
@@ -433,9 +440,9 @@ export default function RegistrationForm({ role }: { role: AccountRole }) {
       aria-labelledby={`${id}-heading`}
     >
       <div className={styles.heading}>
-        <h3 id={`${id}-heading`}>
+        <Heading id={`${id}-heading`}>
           Registro como <span>{ACCOUNT_LABELS[role]}</span>
-        </h3>
+        </Heading>
         <p>Los campos con * son obligatorios.</p>
       </div>
       <fieldset disabled={busy} className={styles.fields}>
