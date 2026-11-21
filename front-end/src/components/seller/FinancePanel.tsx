@@ -37,13 +37,14 @@ export function WalletPanel({ state, act, now }: PanelProps & { now: number }) {
             disabled={!balance.availableCents}
             onClick={() => setConfirm(true)}
           >
-            <ArrowDownToLine size={17} /> Solicitar liquidación simulada
+            <ArrowDownToLine aria-hidden="true" size={17} /> Solicitar
+            liquidación simulada
           </button>
         </section>
         <section className={styles.card}>
           <div className={styles.cardBody}>
             <div className={styles.walletLine}>
-              <ShieldCheck size={23} />
+              <ShieldCheck aria-hidden="true" size={23} />
               <div>
                 <span>En garantía</span>
                 <strong>{money(balance.heldCents)}</strong>
@@ -51,7 +52,7 @@ export function WalletPanel({ state, act, now }: PanelProps & { now: number }) {
               </div>
             </div>
             <div className={styles.walletLine}>
-              <Clock3 size={23} />
+              <Clock3 aria-hidden="true" size={23} />
               <div>
                 <span>En plazo de liquidación</span>
                 <strong>{money(balance.settlingCents)}</strong>
@@ -59,7 +60,7 @@ export function WalletPanel({ state, act, now }: PanelProps & { now: number }) {
               </div>
             </div>
             <div className={styles.walletLine}>
-              <ArrowDownToLine size={23} />
+              <ArrowDownToLine aria-hidden="true" size={23} />
               <div>
                 <span>Liquidaciones solicitadas</span>
                 <strong>{money(balance.reservedCents)}</strong>
@@ -70,7 +71,7 @@ export function WalletPanel({ state, act, now }: PanelProps & { now: number }) {
         </section>
       </div>
       <p className={styles.note}>
-        <Clock3 size={18} />
+        <Clock3 aria-hidden="true" size={18} />
         Emprende: 48 horas desde la liberación del pago. Pro: disponibilidad
         inmediata tras confirmar el QR. Cada pedido conserva el plan y comisión
         de su compra.
@@ -183,6 +184,7 @@ export function PlansPanel({ state, act }: PanelProps) {
               {code === state.plan && <Badge tone="green">Tu plan</Badge>}
             </div>
             <Crown
+              aria-hidden="true"
               size={28}
               className={code === "pro" ? styles.green : styles.muted}
             />
@@ -217,7 +219,7 @@ export function PlansPanel({ state, act }: PanelProps) {
                   ]
               ).map((feature) => (
                 <li key={feature}>
-                  <Check size={16} />
+                  <Check aria-hidden="true" size={16} />
                   {feature}
                 </li>
               ))}

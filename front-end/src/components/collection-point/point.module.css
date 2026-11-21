@@ -1,5 +1,7 @@
 .shell {
-  min-height: 100vh;
+  min-height: 100svh;
+  min-width: 0;
+  font-size: 14px;
   background: var(--color-canvas);
   color: var(--color-foreground);
 }
@@ -8,7 +10,8 @@
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
-  padding: 18px max(24px, calc((100vw - 1280px) / 2));
+  padding: max(18px, env(safe-area-inset-top))
+    max(24px, calc((100vw - 1280px) / 2));
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
@@ -28,7 +31,7 @@
 }
 .workspace,
 .eyebrow {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.16em;
   color: var(--color-text-muted);
@@ -41,11 +44,17 @@
   color: var(--color-text-secondary);
   font-size: 13px;
   overflow-wrap: anywhere;
+  min-width: 0;
+}
+.account svg {
+  flex-shrink: 0;
 }
 .content {
   max-width: 1280px;
   margin: auto;
-  padding: 24px;
+  padding: 24px 24px max(32px, env(safe-area-inset-bottom));
+  min-width: 0;
+  scroll-margin-top: 24px;
 }
 .back {
   display: inline-flex;
@@ -65,6 +74,12 @@
   justify-content: space-between;
   margin: 20px 0 24px;
 }
+.heading > div {
+  min-width: 0;
+}
+.heading > button {
+  flex-shrink: 0;
+}
 .heading h1 {
   margin: 8px 0;
   font-size: clamp(25px, 3vw, 34px);
@@ -72,7 +87,7 @@
 }
 .muted {
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 .primary,
@@ -86,6 +101,11 @@
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
+  transition:
+    background-color 160ms,
+    border-color 160ms,
+    color 160ms;
+  line-height: 1.5;
 }
 .primary {
   background: var(--color-accent);
@@ -102,6 +122,8 @@
 }
 .secondary:hover {
   border-color: var(--color-accent);
+  background: var(--color-surface-hover);
+  color: var(--color-foreground);
 }
 .shell button:disabled {
   opacity: 0.5;
@@ -127,7 +149,7 @@
 }
 .pointBar label {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--color-text-muted);
   margin-bottom: 6px;
 }
@@ -141,6 +163,8 @@
   border-radius: 7px;
   padding: 10px;
   font: inherit;
+  font-size: 16px;
+  min-height: 46px;
 }
 .pointBar p {
   margin: 8px 0 0;
@@ -151,9 +175,10 @@
   border-radius: 6px;
   background: var(--color-accent-subtle);
   color: var(--color-accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 .stats {
   display: grid;
@@ -180,14 +205,14 @@
   flex-shrink: 0;
   color: var(--color-accent);
 }
-.workflow h2 {
+.workflow h3 {
   margin: 0 0 4px;
-  font-size: 14px;
+  font-size: 16px;
 }
 .workflow p {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
 }
 .card {
@@ -198,6 +223,11 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 12px;
+  min-width: 0;
+  box-shadow: 0 3px 16px var(--color-home-shadow);
+}
+.card > div {
+  min-width: 0;
 }
 .card > svg {
   flex-shrink: 0;
@@ -211,9 +241,10 @@
   display: block;
   margin-top: 8px;
   font-size: 28px;
+  font-variant-numeric: tabular-nums;
 }
 .card small {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--color-text-muted);
 }
@@ -243,6 +274,7 @@
   border-radius: 14px;
   background: var(--color-surface);
   min-width: 0;
+  box-shadow: 0 3px 16px var(--color-home-shadow);
 }
 .panel h2 {
   display: flex;
@@ -263,7 +295,7 @@
 }
 .reader {
   min-height: 210px;
-  background: var(--color-surface-deep);
+  background: var(--color-accent-subtle);
   border: 1px solid var(--color-accent-border);
   border-radius: 10px;
   display: grid;
@@ -295,6 +327,17 @@
   background: var(--color-surface-raised);
   color: var(--color-foreground);
   font-size: 16px;
+  scroll-margin-block: 24px;
+}
+.form input::placeholder {
+  color: var(--color-text-disabled);
+}
+.form input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+.form .fieldError {
+  color: var(--color-danger);
+  font-size: 13px;
 }
 .form p {
   margin: 0 0 4px;
@@ -325,13 +368,17 @@
   border-radius: 10px;
   overflow-wrap: anywhere;
 }
-.order[data-status="dispatched"] .tag {
+.tag[data-status="dispatched"] {
   background: var(--color-warning-faint);
   color: var(--color-warning);
 }
-.order[data-status="in_lockbox"] .tag {
+.tag[data-status="in_lockbox"] {
   background: var(--color-info-strong-subtle);
   color: var(--color-info);
+}
+.tag[data-status="delivered"] {
+  background: var(--color-success-surface);
+  color: var(--color-on-success);
 }
 .order h3 {
   font-size: 14px;
@@ -356,6 +403,12 @@
   padding: 14px;
   background: var(--color-surface-raised);
   border-radius: 8px;
+  min-width: 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 84px;
+}
+.activity li > div {
+  min-width: 0;
 }
 .activity svg {
   flex-shrink: 0;
@@ -369,7 +422,7 @@
   overflow-wrap: anywhere;
 }
 .activity time {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-muted);
 }
 .error,
@@ -395,6 +448,87 @@
   line-height: 1.7;
   margin-top: 24px;
 }
+.empty {
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 14px;
+  text-align: center;
+  background: var(--color-surface);
+}
+.empty svg {
+  color: var(--color-accent);
+  margin: 0 auto 16px;
+}
+.empty h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+.empty p {
+  margin-top: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+.processing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block: 16px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.processing svg {
+  flex-shrink: 0;
+}
+.spinning {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.confirmBody {
+  padding: clamp(18px, 4vw, 28px);
+}
+.confirmBody > p {
+  line-height: 1.7;
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+.summary {
+  margin: 20px 0;
+  font-size: 14px;
+}
+.summary > div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 16px;
+  border-top: 1px solid var(--color-border);
+  padding: 12px 0;
+}
+.summary dt {
+  color: var(--color-text-muted);
+}
+.summary dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 20px;
+}
+.order {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 170px;
+}
+.order > small {
+  font-variant-numeric: tabular-nums;
+}
 @media (max-width: 1050px) {
   .workspace {
     display: none;
@@ -405,7 +539,7 @@
 }
 @media (max-width: 720px) {
   .header {
-    padding: 14px 16px;
+    padding: max(14px, env(safe-area-inset-top)) 16px 14px;
     gap: 12px;
   }
   .account {
@@ -413,7 +547,7 @@
     min-width: 100px;
   }
   .content {
-    padding: 16px;
+    padding: 16px 16px max(24px, env(safe-area-inset-bottom));
   }
   .heading {
     align-items: flex-start;
@@ -432,6 +566,7 @@
     justify-content: space-between;
     gap: 12px;
     flex: 1;
+    flex-wrap: wrap;
   }
   .card strong {
     margin: 0;
@@ -456,11 +591,32 @@
     min-height: 160px;
   }
 }
+@media (max-width: 520px) {
+  .orderGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .summary > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .actions > button {
+    width: 100%;
+  }
+}
 @media (max-width: 400px) {
   .orderGrid {
     grid-template-columns: 1fr;
   }
   .header .secondary {
     width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinning {
+    animation: none;
+  }
+  .primary,
+  .secondary {
+    transition: none;
   }
 }

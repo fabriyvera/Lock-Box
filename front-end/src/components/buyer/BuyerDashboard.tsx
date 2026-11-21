@@ -7,8 +7,15 @@ import { CatalogPanel } from "./CatalogPanel";
 import { CartDrawer } from "./CartDrawer";
 import { CheckoutModal } from "./CheckoutModal";
 import { OrdersPanel } from "./OrdersPanel";
-import { ShoppingBag, Package, RotateCcw, LogOut } from "lucide-react";
+import {
+  ShoppingBag,
+  Package,
+  RotateCcw,
+  LogOut,
+  LoaderCircle,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useWorkspaceView } from "@/components/workspace/useWorkspaceView";
 import styles from "./workspace.module.css";
 
 export function BuyerDashboard({ name }: { name: string }) {
@@ -21,7 +28,11 @@ export function BuyerDashboard({ name }: { name: string }) {
 
 function BuyerWorkspace({ name }: { name: string }) {
   const [state, actions, meta] = useBuyerStore();
-  const [activeTab, setActiveTab] = useState<"catalog" | "orders">("catalog");
+  const {
+    view: activeTab,
+    navigate: setActiveTab,
+    follow,
+  } = useWorkspaceView(["catalog", "orders"] as const, "catalog");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
@@ -51,8 +62,11 @@ function BuyerWorkspace({ name }: { name: string }) {
 
   return (
     <div
-      className={`${styles.workspace} min-h-screen bg-canvas text-foreground flex flex-col font-sans`}
+      className={`app-theme ${styles.workspace} min-h-screen bg-canvas text-foreground flex flex-col font-sans`}
     >
+      <a href="#buyer-content" className="workspace-skip-link">
+        Saltar al contenido
+      </a>
       {/* NAVBAR */}
       <header className="border-b border-border px-4 md:px-8 py-3.5 bg-canvas/90 backdrop-blur sticky top-0 z-40 flex flex-wrap gap-3 items-center justify-between">
         <div className="flex flex-wrap items-center gap-3 sm:gap-6">
@@ -61,10 +75,10 @@ function BuyerWorkspace({ name }: { name: string }) {
             className="flex items-center"
             aria-label="LockBox, volver al inicio"
           >
-            <span className="bg-accent text-canvas font-black px-2 py-0.5 text-sm rounded-l tracking-wider">
+            <span className="bg-accent text-on-accent font-black px-2 py-0.5 text-sm rounded-l tracking-wider">
               LOCK
             </span>
-            <span className="bg-surface border border-border text-white font-bold px-2 py-0.5 text-sm rounded-r tracking-wider">
+            <span className="bg-surface border border-border text-foreground font-bold px-2 py-0.5 text-sm rounded-r tracking-wider">
               BOX
             </span>
           </Link>
@@ -73,29 +87,31 @@ function BuyerWorkspace({ name }: { name: string }) {
             className="flex flex-wrap items-center gap-1 text-xs"
             aria-label="Módulo del comprador"
           >
-            <button
-              onClick={() => setActiveTab("catalog")}
+            <a
+              href="?vista=catalog"
+              onClick={(event) => follow(event, "catalog")}
               aria-current={activeTab === "catalog" ? "page" : undefined}
               className={`px-3 py-1.5 rounded font-bold transition-colors cursor-pointer ${
                 activeTab === "catalog"
                   ? "bg-surface-raised text-accent"
-                  : "text-text-muted hover:text-white"
+                  : "text-text-muted hover:text-foreground"
               }`}
             >
               Catálogo & Live
-            </button>
-            <button
-              onClick={() => setActiveTab("orders")}
+            </a>
+            <a
+              href="?vista=orders"
+              onClick={(event) => follow(event, "orders")}
               aria-current={activeTab === "orders" ? "page" : undefined}
               className={`px-3 py-1.5 rounded font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "orders"
                   ? "bg-surface-raised text-accent"
-                  : "text-text-muted hover:text-white"
+                  : "text-text-muted hover:text-foreground"
               }`}
             >
-              <Package className="w-3.5 h-3.5" />
+              <Package aria-hidden="true" className="w-3.5 h-3.5" />
               Mis Pedidos ({state.orders.length})
-            </button>
+            </a>
           </nav>
         </div>
 
@@ -105,20 +121,20 @@ function BuyerWorkspace({ name }: { name: string }) {
             disabled={meta.busy || meta.loading}
             title="Actualizar catálogo y pedidos"
             aria-label="Actualizar catálogo y pedidos"
-            className="p-2 text-text-subtle hover:text-white transition-colors"
+            className="p-2 text-text-subtle hover:text-foreground transition-colors"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw aria-hidden="true" className="w-4 h-4" />
           </button>
 
           <button
             onClick={() => setIsCartOpen(true)}
             aria-label={`Abrir carrito, ${totalCartItems} artículos`}
-            className="flex items-center gap-2 bg-surface border border-border hover:border-accent px-3.5 py-2 rounded text-xs font-bold text-white transition-colors cursor-pointer relative"
+            className="flex items-center gap-2 bg-surface border border-border hover:border-accent px-3.5 py-2 rounded text-xs font-bold text-foreground transition-colors cursor-pointer relative"
           >
-            <ShoppingBag className="w-4 h-4 text-accent" />
+            <ShoppingBag aria-hidden="true" className="w-4 h-4 text-accent" />
             <span className="hidden sm:inline">Carrito</span>
             {totalCartItems > 0 && (
-              <span className="bg-accent text-canvas text-[10px] font-black px-1.5 py-0.2 rounded-full">
+              <span className="bg-accent text-on-accent text-xs font-black px-1.5 py-0.2 rounded-full">
                 {totalCartItems}
               </span>
             )}
@@ -134,7 +150,22 @@ function BuyerWorkspace({ name }: { name: string }) {
       </header>
 
       {/* CONTENIDO PRINCIPAL */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
+      <main
+        id="buyer-content"
+        tabIndex={-1}
+        className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8"
+      >
+        <div className={styles.pageHeading}>
+          <div>
+            <p className={styles.eyebrow}>ESPACIO DEL COMPRADOR</p>
+            <h1>
+              {activeTab === "catalog"
+                ? "Encuentra tu próxima compra"
+                : "Sigue tus pedidos"}
+            </h1>
+            <p>Hola, {name}. Compra y recoge en tu punto LockBox.</p>
+          </div>
+        </div>
         <div className="mb-5 rounded-lg border border-accent/25 bg-accent/5 p-4 text-sm text-text-secondary">
           <strong className="text-accent">
             Hola, {name}. Compras de prueba conectadas.
@@ -149,7 +180,19 @@ function BuyerWorkspace({ name }: { name: string }) {
           </p>
         )}
         {meta.loading && <p role="status">Cargando catálogo y pedidos…</p>}
-        {meta.busy && <p role="status">Guardando cambio…</p>}
+        {meta.busy && (
+          <p
+            role="status"
+            className="flex items-center gap-2 py-3 text-text-muted"
+          >
+            <LoaderCircle
+              aria-hidden="true"
+              size={18}
+              className="animate-spin motion-reduce:animate-none"
+            />
+            Guardando cambio…
+          </p>
+        )}
         {logoutError && (
           <p role="alert" className="mb-4 text-danger">
             {logoutError}

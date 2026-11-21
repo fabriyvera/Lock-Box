@@ -17,6 +17,7 @@ export default function LivePanel({
   const [selected, setSelected] = useState<string[]>([]);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
+  const [selectionError, setSelectionError] = useState("");
   const available = state.products.filter(
     (p) => p.status === "published" && p.stock > 0,
   );
@@ -54,7 +55,7 @@ export default function LivePanel({
       <div className={styles.liveLayout}>
         <section className={styles.card}>
           <div className={styles.liveStage}>
-            <Radio size={48} strokeWidth={1.4} />
+            <Radio aria-hidden="true" size={48} strokeWidth={1.4} />
             <Badge tone={live ? "red" : "neutral"}>
               {live ? "LIVE SIMULADO" : "ESTUDIO LOCKBOX"}
             </Badge>
@@ -79,10 +80,11 @@ export default function LivePanel({
                   className={styles.danger}
                   onClick={() => setConfirmEnd(true)}
                 >
-                  <Square size={16} /> Finalizar live
+                  <Square aria-hidden="true" size={16} /> Finalizar live
                 </button>
                 <button className={styles.secondary} onClick={copyCatalog}>
-                  <Copy size={16} /> Copiar catálogo para TikTok
+                  <Copy aria-hidden="true" size={16} /> Copiar catálogo para
+                  TikTok
                 </button>
                 <p role="status" className={styles.muted}>
                   {copyMessage}
@@ -93,6 +95,16 @@ export default function LivePanel({
                 className={styles.form}
                 onSubmit={async (event) => {
                   event.preventDefault();
+                  if (!title.trim() || !selected.length) {
+                    setSelectionError(
+                      "Escribe un título y selecciona al menos un producto para iniciar el live.",
+                    );
+                    event.currentTarget
+                      .querySelector<HTMLInputElement>("input")
+                      ?.focus();
+                    return;
+                  }
+                  setSelectionError("");
                   if (
                     await act(
                       {
@@ -113,6 +125,8 @@ export default function LivePanel({
                 <label>
                   Título de tu live
                   <input
+                    autoComplete="off"
+                    name="title"
                     required
                     maxLength={100}
                     placeholder="Ej. Nuevos favoritos · colección de octubre"
@@ -120,11 +134,13 @@ export default function LivePanel({
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </label>
-                <button
-                  className={styles.primary}
-                  disabled={!selected.length || !title.trim()}
-                >
-                  <Play size={16} /> Iniciar live simulado
+                {selectionError && (
+                  <p role="alert" className={styles.error}>
+                    {selectionError}
+                  </p>
+                )}
+                <button className={styles.primary}>
+                  <Play aria-hidden="true" size={16} /> Iniciar live simulado
                 </button>
               </form>
             )}
@@ -145,6 +161,9 @@ export default function LivePanel({
               <label className={styles.liveProduct} key={product.id}>
                 {!live && (
                   <input
+                    autoComplete="off"
+                    name="liveProducts"
+                    value={product.id}
                     type="checkbox"
                     checked={selected.includes(product.id)}
                     onChange={(e) =>
@@ -166,7 +185,13 @@ export default function LivePanel({
                     <span>· {product.stock} disponibles</span>
                   </p>
                 </div>
-                {live && <Check size={18} className={styles.green} />}
+                {live && (
+                  <Check
+                    aria-hidden="true"
+                    size={18}
+                    className={styles.green}
+                  />
+                )}
               </label>
             ))}
           </div>

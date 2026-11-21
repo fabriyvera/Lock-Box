@@ -14,6 +14,7 @@ import {
   RotateCcw,
   X,
   Store,
+  LoaderCircle,
 } from "lucide-react";
 import { useSellerStore } from "@/lib/seller/store";
 import { activeLive } from "@/lib/seller/domain";
@@ -24,6 +25,7 @@ import OrdersPanel from "./OrdersPanel";
 import { WalletPanel, PlansPanel } from "./FinancePanel";
 import ProfilePanel from "./ProfilePanel";
 import OverviewPanel, { type Screen } from "./OverviewPanel";
+import { useWorkspaceView } from "@/components/workspace/useWorkspaceView";
 import { Badge } from "./ui";
 import styles from "./seller.module.css";
 
@@ -39,7 +41,14 @@ const NAV = [
 
 export default function SellerDashboard() {
   const { state, dispatch, refresh, logout, error, loading } = useSellerStore();
-  const [screen, setScreen] = useState<Screen>("overview");
+  const {
+    view: screen,
+    navigate: setScreen,
+    follow,
+  } = useWorkspaceView<Screen>(
+    NAV.map((item) => item.id),
+    "overview",
+  );
   const [toast, setToast] = useState<{
     message: string;
     error: boolean;
@@ -78,15 +87,18 @@ export default function SellerDashboard() {
   }
   if (!state)
     return (
-      <main className={styles.loading} aria-busy={loading}>
+      <main className={`app-theme ${styles.loading}`} aria-busy={loading}>
         <div className={styles.logo}>
           <span>LOCK</span>
           <span>BOX</span>
         </div>
-        <p>{loading ? "Cargando tu espacio de vendedor…" : error}</p>
+        <h1>Tu espacio de vendedor</h1>
+        <p role={loading ? "status" : "alert"}>
+          {loading ? "Cargando tu tienda…" : error}
+        </p>
         {!loading && (
           <>
-            <Link href="/login" className={styles.primary}>
+            <Link href="/login?perfil=vendedor" className={styles.primary}>
               Iniciar sesión
             </Link>
             <button
@@ -106,7 +118,10 @@ export default function SellerDashboard() {
   const plans = state.planSettings ?? PLANS;
   const props = { state, act };
   return (
-    <div className={styles.shell}>
+    <div className={`app-theme ${styles.shell}`}>
+      <a href="#seller-content" className="workspace-skip-link">
+        Saltar al contenido
+      </a>
       <aside className={styles.sidebar}>
         <Link
           href="/"
@@ -120,23 +135,24 @@ export default function SellerDashboard() {
         <p className={styles.workspaceLabel}>ESPACIO DEL VENDEDOR</p>
         <nav aria-label="Módulo del vendedor">
           {NAV.map((item) => (
-            <button
+            <a
+              href={`?vista=${item.id}`}
               key={item.id}
               aria-label={item.label}
-              onClick={() => setScreen(item.id)}
+              onClick={(event) => follow(event, item.id)}
               aria-current={screen === item.id ? "page" : undefined}
               className={screen === item.id ? styles.activeNav : ""}
             >
-              <item.icon size={19} />
+              <item.icon size={19} aria-hidden="true" />
               <span>{item.label}</span>
               {item.id === "orders" && paidCount > 0 && <b>{paidCount}</b>}
               {item.id === "live" && live && <i className={styles.liveDot} />}
-            </button>
+            </a>
           ))}
         </nav>
         <div className={styles.sidebarBottom}>
           <div className={styles.sidebarPlan}>
-            <Crown size={20} />
+            <Crown aria-hidden="true" size={20} />
             <div>
               <strong>Plan {plans[state.plan].name}</strong>
               <p>{plans[state.plan].commissionPercent}% de comisión · prueba</p>
@@ -149,10 +165,10 @@ export default function SellerDashboard() {
             Explorar planes →
           </button>
           <Link href="/" prefetch={false} className={styles.backLink}>
-            <ArrowLeft size={16} /> Volver al inicio
+            <ArrowLeft aria-hidden="true" size={16} /> Volver al inicio
           </Link>
           <Link href="/admin" prefetch={false} className={styles.backLink}>
-            <Package size={16} /> Administrar punto
+            <Package aria-hidden="true" size={16} /> Administrar punto
           </Link>
         </div>
       </aside>
@@ -194,7 +210,7 @@ export default function SellerDashboard() {
               aria-label="Editar mi tienda"
             >
               <div className={styles.avatar}>
-                <Store size={18} />
+                <Store aria-hidden="true" size={18} />
               </div>
               <span>
                 <strong>{state.profile.storeName}</strong>
@@ -213,10 +229,10 @@ export default function SellerDashboard() {
             disabled={saving}
             onClick={() => void refresh().catch(() => {})}
           >
-            <RotateCcw size={14} /> Actualizar datos
+            <RotateCcw aria-hidden="true" size={14} /> Actualizar datos
           </button>
         </div>
-        <main className={styles.content} id="seller-content">
+        <main className={styles.content} id="seller-content" tabIndex={-1}>
           <div className={styles.pageHeading}>
             <div>
               <span className={styles.eyebrow}>
@@ -239,10 +255,19 @@ export default function SellerDashboard() {
           </div>
           {saving && (
             <p role="status" className={styles.note}>
+              <LoaderCircle
+                aria-hidden="true"
+                size={18}
+                className="animate-spin motion-reduce:animate-none"
+              />
               Guardando cambios en Supabase…
             </p>
           )}
-          <fieldset disabled={saving} className={styles.operationFields}>
+          <fieldset
+            disabled={saving}
+            aria-busy={saving}
+            className={styles.operationFields}
+          >
             {screen === "overview" && (
               <OverviewPanel state={state} now={now} navigate={setScreen} />
             )}
@@ -267,7 +292,7 @@ export default function SellerDashboard() {
         >
           <span>{toast.message}</span>
           <button aria-label="Cerrar aviso" onClick={() => setToast(null)}>
-            <X size={17} />
+            <X aria-hidden="true" size={17} />
           </button>
         </div>
       )}

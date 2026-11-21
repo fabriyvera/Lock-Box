@@ -38,6 +38,8 @@ export function ProductVisual({ product }: { product: SellerProduct }) {
           key={product.imageUrl}
           src={product.imageUrl}
           alt={product.title}
+          width={500}
+          height={280}
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={(event) => {
@@ -79,7 +81,7 @@ export function Empty({
 }) {
   return (
     <div className={styles.empty}>
-      <Package size={32} />
+      <Package aria-hidden="true" size={32} />
       <h3>{title}</h3>
       <p>{children}</p>
     </div>

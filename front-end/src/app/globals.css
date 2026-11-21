@@ -25,6 +25,7 @@
   --color-accent-hover: #00c988;
   --color-accent-bright: #5cffcb;
   --color-on-accent: #060b14;
+  --color-home-canvas: #f5f8fa;
   --color-white: #ffffff;
   --color-black: #000000;
   --color-success: #00e59b;
@@ -48,59 +49,355 @@
   --color-product-accessories-accent: #aa722d;
 
   /* Transparencias derivadas: cambiar el color base actualiza sus variantes. */
-  --color-accent-border: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  --color-accent-border: color-mix(
+    in srgb,
+    var(--color-accent) 25%,
+    transparent
+  );
   --color-accent-faint: color-mix(in srgb, var(--color-accent) 4%, transparent);
   --color-accent-glow: color-mix(in srgb, var(--color-accent) 40%, transparent);
-  --color-accent-muted: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  --color-accent-muted: color-mix(
+    in srgb,
+    var(--color-accent) 18%,
+    transparent
+  );
   --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  --color-accent-subtle: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  --color-accent-subtle: color-mix(
+    in srgb,
+    var(--color-accent) 8%,
+    transparent
+  );
   --color-black-strong: color-mix(in srgb, var(--color-black) 60%, transparent);
   --color-border-soft: color-mix(in srgb, var(--color-border) 40%, transparent);
-  --color-canvas-glass: color-mix(in srgb, var(--color-canvas) 85%, transparent);
-  --color-danger-strong-border: color-mix(in srgb, var(--color-danger-strong) 25%, transparent);
-  --color-danger-strong-muted: color-mix(in srgb, var(--color-danger-strong) 18%, transparent);
-  --color-danger-strong-soft: color-mix(in srgb, var(--color-danger-strong) 12%, transparent);
-  --color-danger-strong-subtle: color-mix(in srgb, var(--color-danger-strong) 8%, transparent);
-  --color-info-strong-border: color-mix(in srgb, var(--color-info-strong) 25%, transparent);
-  --color-info-strong-faint: color-mix(in srgb, var(--color-info-strong) 4%, transparent);
-  --color-info-strong-muted: color-mix(in srgb, var(--color-info-strong) 18%, transparent);
-  --color-info-strong-subtle: color-mix(in srgb, var(--color-info-strong) 8%, transparent);
-  --color-product-accessories-accent-soft: color-mix(in srgb, var(--color-product-accessories-accent) 12%, transparent);
-  --color-surface-deep-glass: color-mix(in srgb, var(--color-surface-deep) 85%, transparent);
-  --color-surface-deep-opaque: color-mix(in srgb, var(--color-surface-deep) 95%, transparent);
-  --color-surface-raised-soft: color-mix(in srgb, var(--color-surface-raised) 40%, transparent);
-  --color-warning-faint: color-mix(in srgb, var(--color-warning) 4%, transparent);
-  --color-warning-muted: color-mix(in srgb, var(--color-warning) 18%, transparent);
-  --color-warning-strong-border: color-mix(in srgb, var(--color-warning-strong) 25%, transparent);
-  --color-warning-strong-subtle: color-mix(in srgb, var(--color-warning-strong) 8%, transparent);
+  --color-canvas-glass: color-mix(
+    in srgb,
+    var(--color-canvas) 85%,
+    transparent
+  );
+  --color-danger-strong-border: color-mix(
+    in srgb,
+    var(--color-danger-strong) 25%,
+    transparent
+  );
+  --color-danger-strong-muted: color-mix(
+    in srgb,
+    var(--color-danger-strong) 18%,
+    transparent
+  );
+  --color-danger-strong-soft: color-mix(
+    in srgb,
+    var(--color-danger-strong) 12%,
+    transparent
+  );
+  --color-danger-strong-subtle: color-mix(
+    in srgb,
+    var(--color-danger-strong) 8%,
+    transparent
+  );
+  --color-info-strong-border: color-mix(
+    in srgb,
+    var(--color-info-strong) 25%,
+    transparent
+  );
+  --color-info-strong-faint: color-mix(
+    in srgb,
+    var(--color-info-strong) 4%,
+    transparent
+  );
+  --color-info-strong-muted: color-mix(
+    in srgb,
+    var(--color-info-strong) 18%,
+    transparent
+  );
+  --color-info-strong-subtle: color-mix(
+    in srgb,
+    var(--color-info-strong) 8%,
+    transparent
+  );
+  --color-product-accessories-accent-soft: color-mix(
+    in srgb,
+    var(--color-product-accessories-accent) 12%,
+    transparent
+  );
+  --color-surface-deep-glass: color-mix(
+    in srgb,
+    var(--color-surface-deep) 85%,
+    transparent
+  );
+  --color-surface-deep-opaque: color-mix(
+    in srgb,
+    var(--color-surface-deep) 95%,
+    transparent
+  );
+  --color-surface-raised-soft: color-mix(
+    in srgb,
+    var(--color-surface-raised) 40%,
+    transparent
+  );
+  --color-warning-faint: color-mix(
+    in srgb,
+    var(--color-warning) 4%,
+    transparent
+  );
+  --color-warning-muted: color-mix(
+    in srgb,
+    var(--color-warning) 18%,
+    transparent
+  );
+  --color-warning-strong-border: color-mix(
+    in srgb,
+    var(--color-warning-strong) 25%,
+    transparent
+  );
+  --color-warning-strong-subtle: color-mix(
+    in srgb,
+    var(--color-warning-strong) 8%,
+    transparent
+  );
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
+/* Tema claro compartido por portada, acceso y espacios de trabajo.
+ * Cada módulo consume los mismos tokens, sin paletas locales. */
+.home-theme,
+.app-theme {
+  color-scheme: light;
+  --color-canvas: var(--color-home-canvas);
+  --color-surface-deep: var(--color-home-canvas);
+  --color-surface: #ffffff;
+  --color-surface-raised: #f0f5f7;
+  --color-surface-hover: #e6eef2;
+  --color-foreground: #142b3b;
+  --color-text-secondary: #344f60;
+  --color-text-muted: #526879;
+  --color-text-subtle: #526879;
+  --color-text-disabled: #627487;
+  --color-border: #d9e3e9;
+  --color-border-strong: #8195a4;
+  --color-border-emphasis: #536f80;
+  --color-accent: #0b7469;
+  --color-accent-hover: #075b53;
+  --color-on-accent: #ffffff;
+  --color-accent-muted: #cae9e3;
+  --color-accent-soft: #e3f2ee;
+  --color-accent-subtle: #edf6f3;
+  --color-focus: #225bba;
+  --color-success: #176645;
+  --color-success-surface: #e8f5ed;
+  --color-on-success: #155638;
+  --color-info: #225bba;
+  --color-warning: #805300;
+  --color-warning-strong: #a66700;
+  --color-danger: #a32635;
+  --color-danger-strong: #a32635;
+  --color-danger-surface: #fceef0;
+  --color-danger-strong-border: #de9ca4;
+  --color-home-ink: #142f40;
+  --color-home-ink-raised: #234657;
+  --color-home-ink-border: #3d5b6a;
+  --color-home-on-ink: #ffffff;
+  --color-home-on-ink-muted: #c1d2dc;
+  --color-home-on-ink-accent: #8addbf;
+  --color-home-shadow: #142f401a;
+  --color-product-default: #edf6f3;
+  --color-product-default-foreground: #356b62;
+  --color-product-tech: #edf2fb;
+  --color-product-tech-foreground: #42669a;
+  --color-product-accessories: #f5f0e9;
+  --color-product-accessories-foreground: #785b38;
+  --color-product-beauty: #f3edf7;
+  --color-product-beauty-foreground: #79558e;
+  --color-accent-bright: var(--color-accent);
+  /* Volver a derivar aquí: los tokens heredados se resuelven en su origen. */
+  --color-accent-border: color-mix(
+    in srgb,
+    var(--color-accent) 25%,
+    transparent
+  );
+  --color-accent-faint: color-mix(in srgb, var(--color-accent) 4%, transparent);
+  --color-accent-glow: color-mix(in srgb, var(--color-accent) 40%, transparent);
+  --color-border-soft: color-mix(in srgb, var(--color-border) 40%, transparent);
+  --color-canvas-glass: color-mix(
+    in srgb,
+    var(--color-home-ink) 60%,
+    transparent
+  );
+  --color-danger-strong-muted: color-mix(
+    in srgb,
+    var(--color-danger-strong) 18%,
+    transparent
+  );
+  --color-danger-strong-soft: color-mix(
+    in srgb,
+    var(--color-danger-strong) 12%,
+    transparent
+  );
+  --color-danger-strong-subtle: color-mix(
+    in srgb,
+    var(--color-danger-strong) 8%,
+    transparent
+  );
+  --color-info-strong-border: color-mix(
+    in srgb,
+    var(--color-info-strong) 25%,
+    transparent
+  );
+  --color-info-strong-faint: color-mix(
+    in srgb,
+    var(--color-info-strong) 4%,
+    transparent
+  );
+  --color-info-strong-muted: color-mix(
+    in srgb,
+    var(--color-info-strong) 18%,
+    transparent
+  );
+  --color-info-strong-subtle: color-mix(
+    in srgb,
+    var(--color-info-strong) 8%,
+    transparent
+  );
+  --color-surface-deep-glass: color-mix(
+    in srgb,
+    var(--color-surface-deep) 85%,
+    transparent
+  );
+  --color-surface-deep-opaque: color-mix(
+    in srgb,
+    var(--color-surface-deep) 95%,
+    transparent
+  );
+  --color-surface-raised-soft: color-mix(
+    in srgb,
+    var(--color-surface-raised) 40%,
+    transparent
+  );
+  --color-warning-faint: color-mix(
+    in srgb,
+    var(--color-warning) 4%,
+    transparent
+  );
+  --color-warning-muted: color-mix(
+    in srgb,
+    var(--color-warning) 18%,
+    transparent
+  );
+  --color-warning-strong-border: color-mix(
+    in srgb,
+    var(--color-warning-strong) 25%,
+    transparent
+  );
+  --color-warning-strong-subtle: color-mix(
+    in srgb,
+    var(--color-warning-strong) 8%,
+    transparent
+  );
+}
+html:has(:is(.home-theme, .app-theme)),
+body:has(:is(.home-theme, .app-theme)) {
+  color-scheme: light;
+  background: var(--color-home-canvas);
+}
+:is(.home-theme, .app-theme) input:-webkit-autofill,
+:is(.home-theme, .app-theme) input:-webkit-autofill:hover,
+:is(.home-theme, .app-theme) input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-foreground) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset !important;
+  caret-color: var(--color-foreground);
+}
+
+.app-theme {
+  accent-color: var(--color-accent);
+  -webkit-tap-highlight-color: var(--color-accent-soft);
+}
+.app-theme :focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+.app-theme :is(button, a, input, select, textarea) {
+  touch-action: manipulation;
+}
+.app-theme :is(h1, h2, h3) {
+  text-wrap: balance;
+}
+.app-theme :is(h1, h2, h3, p, td, dd) {
+  overflow-wrap: anywhere;
+}
+.app-theme :is(input, select, textarea) {
+  scroll-margin-block: 100px;
+}
+.workspace-skip-link {
+  position: fixed;
+  left: 16px;
+  top: 12px;
+  transform: translateY(-160%);
+  z-index: 100;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+}
+.workspace-skip-link:focus {
+  transform: translateY(0);
+}
 
 html,
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   background: var(--color-canvas);
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
   color-scheme: dark;
 }
 
-a { text-decoration: none; color: inherit; }
-button { font-family: inherit; cursor: pointer; }
-input { font-family: inherit; }
+a {
+  text-decoration: none;
+  color: inherit;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+input {
+  font-family: inherit;
+}
 
 /* Contenido y controles legibles con zoom, teclado y pantallas pequeñas. */
-img, video { max-width: 100%; }
-button, input, select, textarea { max-width: 100%; }
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+img,
+video {
+  max-width: 100%;
+}
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
 @media (max-width: 720px) {
-  input, select, textarea { font-size: 16px; }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* Evita que el autocompletado cambie el tema del formulario. */
@@ -113,6 +410,14 @@ input:-webkit-autofill:focus {
   caret-color: var(--color-white);
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
