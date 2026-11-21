@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import { useUnsavedChanges } from "@/components/workspace/useUnsavedChanges";
 import { CATEGORIES, type SellerProduct } from "@/lib/seller/model";
 import { parsePrice } from "@/lib/seller/domain";
 import Dialog from "./Dialog";
@@ -15,7 +16,7 @@ export default function ProductEditor({
   onSave: (product: SellerProduct) => Promise<void>;
   onClose: () => void;
 }) {
-  const [form, setForm] = useState({
+  const [initialForm] = useState({
     title: product?.title ?? "",
     description: product?.description ?? "",
     category: product?.category ?? "Moda",
@@ -25,7 +26,19 @@ export default function ProductEditor({
     imageUrl: product?.imageUrl ?? "",
     tags: product?.tags.join(", ") ?? "",
   });
+  const [form, setForm] = useState(initialForm);
+  const confirmDiscard = useUnsavedChanges(
+    JSON.stringify(form) !== JSON.stringify(initialForm),
+  );
+  function close() {
+    if (confirmDiscard()) onClose();
+  }
   const [error, setError] = useState("");
+  const [invalidField, setInvalidField] = useState<"price" | "stock" | null>(
+    null,
+  );
+  const formRef = useRef<HTMLFormElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
   const [identity] = useState(() => ({
     id: product?.id ?? crypto.randomUUID(),
     createdAt: product?.createdAt ?? new Date().toISOString(),
@@ -34,15 +47,34 @@ export default function ProductEditor({
     setForm((current) => ({ ...current, [name]: value }));
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
+    setInvalidField(null);
+    let priceCents: number;
     try {
-      if (!/^\d+$/.test(form.stock))
-        throw new Error("El stock debe ser un número entero positivo o cero.");
+      priceCents = parsePrice(form.price);
+    } catch (err) {
+      setInvalidField("price");
+      setError(err instanceof Error ? err.message : "Revisa el precio.");
+      formRef.current
+        ?.querySelector<HTMLInputElement>('[name="price"]')
+        ?.focus();
+      return;
+    }
+    if (!/^\d+$/.test(form.stock)) {
+      setInvalidField("stock");
+      setError("El stock debe ser un número entero positivo o cero.");
+      formRef.current
+        ?.querySelector<HTMLInputElement>('[name="stock"]')
+        ?.focus();
+      return;
+    }
+    try {
       await onSave({
         id: identity.id,
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,
-        priceCents: parsePrice(form.price),
+        priceCents,
         stock: Number(form.stock),
         sku: form.sku.trim(),
         imageUrl: form.imageUrl.trim(),
@@ -61,14 +93,15 @@ export default function ProductEditor({
       setError(
         err instanceof Error ? err.message : "No se pudo guardar el producto.",
       );
+      requestAnimationFrame(() => errorRef.current?.focus());
     }
   }
   return (
     <Dialog
       title={product ? "Editar producto" : "Nuevo producto"}
-      onClose={onClose}
+      onClose={close}
     >
-      <form className={styles.form} onSubmit={submit}>
+      <form ref={formRef} className={styles.form} onSubmit={submit}>
         <p className={styles.muted}>
           Los nuevos productos se guardan como borrador. Publícalos cuando estén
           listos.
@@ -76,7 +109,8 @@ export default function ProductEditor({
         <label>
           Nombre del producto
           <input
-            autoFocus
+            autoComplete="off"
+            name="title"
             required
             maxLength={100}
             value={form.title}
@@ -87,6 +121,8 @@ export default function ProductEditor({
         <label>
           Descripción
           <textarea
+            autoComplete="off"
+            name="description"
             rows={3}
             maxLength={2000}
             value={form.description}
@@ -98,6 +134,7 @@ export default function ProductEditor({
           <label>
             Categoría
             <select
+              name="category"
               value={form.category}
               onChange={(e) => field("category", e.target.value)}
             >
@@ -109,6 +146,8 @@ export default function ProductEditor({
           <label>
             SKU (opcional)
             <input
+              autoComplete="off"
+              name="sku"
               maxLength={40}
               value={form.sku}
               onChange={(e) => field("sku", e.target.value)}
@@ -120,16 +159,33 @@ export default function ProductEditor({
           <label>
             Precio en Bs.
             <input
+              autoComplete="off"
+              name="price"
+              aria-invalid={invalidField === "price" || undefined}
+              aria-describedby={
+                invalidField === "price" ? "product-price-error" : undefined
+              }
               required
               inputMode="decimal"
               value={form.price}
               onChange={(e) => field("price", e.target.value)}
               placeholder="185.00"
             />
+            {invalidField === "price" && (
+              <small id="product-price-error" role="alert">
+                {error}
+              </small>
+            )}
           </label>
           <label>
             Unidades disponibles
             <input
+              autoComplete="off"
+              name="stock"
+              aria-invalid={invalidField === "stock" || undefined}
+              aria-describedby={
+                invalidField === "stock" ? "product-stock-error" : undefined
+              }
               required
               type="number"
               min={0}
@@ -138,11 +194,18 @@ export default function ProductEditor({
               value={form.stock}
               onChange={(e) => field("stock", e.target.value)}
             />
+            {invalidField === "stock" && (
+              <small id="product-stock-error" role="alert">
+                {error}
+              </small>
+            )}
           </label>
         </div>
         <label>
           URL de imagen (opcional)
           <input
+            autoComplete="off"
+            name="imageUrl"
             type="url"
             maxLength={1500}
             value={form.imageUrl}
@@ -157,6 +220,8 @@ export default function ProductEditor({
         <label>
           Etiquetas (opcional)
           <input
+            autoComplete="off"
+            name="tags"
             maxLength={250}
             value={form.tags}
             onChange={(e) => field("tags", e.target.value)}
@@ -166,13 +231,13 @@ export default function ProductEditor({
             Hasta 8 etiquetas de 30 caracteres, separadas por comas.
           </small>
         </label>
-        {error && (
-          <p role="alert" className={styles.error}>
+        {error && !invalidField && (
+          <p ref={errorRef} tabIndex={-1} role="alert" className={styles.error}>
             {error}
           </p>
         )}
         <div className={styles.actions}>
-          <button type="button" className={styles.secondary} onClick={onClose}>
+          <button type="button" className={styles.secondary} onClick={close}>
             Cancelar
           </button>
           <button type="submit" className={styles.primary}>

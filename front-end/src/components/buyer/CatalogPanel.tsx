@@ -9,6 +9,11 @@ import { Search, Radio, ShoppingCart, Check } from "lucide-react";
 export function CatalogPanel() {
   const [state, actions, meta] = useBuyerStore();
   const [addedId, setAddedId] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    if (!addedId) return;
+    const timer = setTimeout(() => setAddedId(null), 1200);
+    return () => clearTimeout(timer);
+  }, [addedId]);
 
   // Extraer categorías únicas
   const categories = Array.from(
@@ -39,7 +44,6 @@ export function CatalogPanel() {
   const handleAddToCart = async (product: (typeof state.catalog)[0]) => {
     if (!(await actions.addToCart(product, 1))) return;
     setAddedId(product.id);
-    setTimeout(() => setAddedId(null), 1200);
   };
 
   return (
@@ -47,16 +51,15 @@ export function CatalogPanel() {
       {/* BANNER EN VIVO (B2) */}
       <div className="bg-gradient-to-r from-surface via-surface-raised to-surface border border-border rounded-xl p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger-strong opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-danger-strong"></span>
+          <span aria-hidden="true" className="relative flex h-3 w-3 shrink-0">
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <span className="bg-danger-strong text-white font-black text-[10px] px-2 py-0.5 rounded tracking-wider uppercase">
+              <span className="bg-accent-soft text-accent font-black text-xs px-2 py-0.5 rounded tracking-wider uppercase">
                 Catálogo LockBox
               </span>
-              <h2 className="text-sm sm:text-base font-black text-white">
+              <h2 className="text-sm sm:text-base font-black text-foreground">
                 Productos de nuestras tiendas
               </h2>
             </div>
@@ -69,13 +72,14 @@ export function CatalogPanel() {
 
         <button
           onClick={() => actions.toggleLiveSessionFilter()}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded text-xs font-bold transition-all cursor-pointer ${
+          aria-pressed={state.activeLiveSession}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded text-xs font-bold transition-colors cursor-pointer ${
             state.activeLiveSession
               ? "bg-danger-strong text-white shadow-lg shadow-danger-strong/20"
               : "bg-surface-raised border border-border text-text-secondary hover:border-border-strong"
           }`}
         >
-          <Radio className="w-4 h-4" />
+          <Radio aria-hidden="true" className="w-4 h-4" />
           {state.activeLiveSession
             ? "Mostrando productos en directo"
             : "Filtrar productos en live"}
@@ -86,14 +90,19 @@ export function CatalogPanel() {
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Barra de búsqueda */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle" />
+          <Search
+            aria-hidden="true"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle"
+          />
           <input
-            type="text"
+            autoComplete="off"
+            name="searchQuery"
+            type="search"
             value={state.searchQuery}
             onChange={(e) => actions.setSearchQuery(e.target.value)}
-            placeholder="Buscar productos, marcas o tiendas..."
+            placeholder="Buscar productos, marcas o tiendas…"
             aria-label="Buscar productos, marcas o tiendas"
-            className="w-full bg-surface border border-border text-white text-xs pl-10 pr-4 py-2.5 rounded outline-none focus:border-accent transition-colors placeholder:text-text-subtle"
+            className="w-full bg-surface border border-border text-foreground text-xs pl-10 pr-4 py-2.5 rounded focus:border-accent transition-colors placeholder:text-text-subtle"
           />
         </div>
 
@@ -101,10 +110,11 @@ export function CatalogPanel() {
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
           <button
             onClick={() => actions.setSelectedCategory(null)}
+            aria-pressed={state.selectedCategory === null}
             className={`px-3 py-1.5 rounded-full font-bold transition-colors whitespace-nowrap cursor-pointer ${
               state.selectedCategory === null
-                ? "bg-accent text-canvas"
-                : "bg-surface text-text-muted border border-border hover:text-white"
+                ? "bg-accent text-on-accent"
+                : "bg-surface text-text-muted border border-border hover:text-foreground"
             }`}
           >
             Todas
@@ -113,10 +123,11 @@ export function CatalogPanel() {
             <button
               key={cat.id}
               onClick={() => actions.setSelectedCategory(cat.id)}
+              aria-pressed={state.selectedCategory === cat.id}
               className={`px-3 py-1.5 rounded-full font-bold transition-colors whitespace-nowrap cursor-pointer ${
                 state.selectedCategory === cat.id
-                  ? "bg-accent text-canvas"
-                  : "bg-surface text-text-muted border border-border hover:text-white"
+                  ? "bg-accent text-on-accent"
+                  : "bg-surface text-text-muted border border-border hover:text-foreground"
               }`}
             >
               {cat.name}
@@ -125,6 +136,11 @@ export function CatalogPanel() {
         </div>
       </div>
 
+      <p role="status" className="sr-only">
+        {addedId
+          ? "Producto agregado al carrito."
+          : `${filteredProducts.length} productos encontrados.`}
+      </p>
       {/* GRILLA DE PRODUCTOS */}
       {filteredProducts.length === 0 ? (
         <div className="p-12 text-center border border-dashed border-border rounded-xl">
@@ -141,7 +157,7 @@ export function CatalogPanel() {
             return (
               <div
                 key={product.id}
-                className="bg-surface border border-border rounded-lg overflow-hidden flex flex-col justify-between hover:border-border-emphasis transition-all group"
+                className="bg-surface border border-border rounded-lg overflow-hidden flex flex-col justify-between hover:border-border-emphasis transition-colors group"
               >
                 <div>
                   <div className="relative aspect-video w-full bg-canvas overflow-hidden">
@@ -154,24 +170,24 @@ export function CatalogPanel() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {product.isLiveFeatured && (
-                      <span className="absolute top-2 left-2 bg-danger-strong/90 text-white font-bold text-[9px] px-2 py-0.5 rounded tracking-wide uppercase backdrop-blur-sm">
+                      <span className="absolute top-2 left-2 bg-danger-strong/90 text-white font-bold text-xs px-2 py-0.5 rounded tracking-wide uppercase backdrop-blur-sm">
                         En Vivo
                       </span>
                     )}
-                    <span className="absolute bottom-2 right-2 bg-black/70 text-text-secondary text-[10px] px-2 py-0.5 rounded font-mono">
+                    <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded font-mono">
                       Stock: {product.stock}
                     </span>
                   </div>
 
                   <div className="p-4 space-y-2">
-                    <div className="flex items-center justify-between text-[11px] text-text-muted">
+                    <div className="flex items-center justify-between text-xs text-text-muted">
                       <span>{product.categoryName}</span>
                       <span className="text-accent font-semibold">
                         @{product.sellerName}
                       </span>
                     </div>
 
-                    <h3 className="text-sm font-bold text-white line-clamp-1 group-hover:text-accent transition-colors">
+                    <h3 className="text-sm font-bold text-foreground line-clamp-1 group-hover:text-accent transition-colors">
                       {product.title}
                     </h3>
                     <p className="text-xs text-text-muted line-clamp-2 leading-relaxed">
@@ -182,7 +198,7 @@ export function CatalogPanel() {
 
                 <div className="p-4 pt-0 border-t border-border/60 flex items-center justify-between mt-3">
                   <div>
-                    <span className="text-[10px] text-text-subtle uppercase tracking-wider block">
+                    <span className="text-xs text-text-subtle uppercase tracking-wider block">
                       Precio
                     </span>
                     <span className="text-base font-black text-accent">
@@ -192,23 +208,27 @@ export function CatalogPanel() {
 
                   <button
                     onClick={() => handleAddToCart(product)}
+                    aria-label={`${isOutOfStock ? "Sin stock:" : "Agregar al carrito:"} ${product.title}`}
                     disabled={isOutOfStock || meta.busy || meta.loading}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-bold transition-colors cursor-pointer ${
                       isOutOfStock
                         ? "bg-border text-text-subtle cursor-not-allowed"
                         : isJustAdded
-                          ? "bg-accent text-canvas"
-                          : "bg-accent hover:bg-accent-hover text-canvas"
+                          ? "bg-accent text-on-accent"
+                          : "bg-accent hover:bg-accent-hover text-on-accent"
                     }`}
                   >
                     {isJustAdded ? (
                       <>
-                        <Check className="w-3.5 h-3.5" />
+                        <Check aria-hidden="true" className="w-3.5 h-3.5" />
                         Agregado
                       </>
                     ) : (
                       <>
-                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <ShoppingCart
+                          aria-hidden="true"
+                          className="w-3.5 h-3.5"
+                        />
                         Agregar
                       </>
                     )}

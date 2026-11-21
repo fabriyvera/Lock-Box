@@ -50,13 +50,15 @@ export default function CatalogPanel({ state, act }: PanelProps) {
           className={styles.primary}
           onClick={() => setEditor({ product: null })}
         >
-          <Plus size={17} /> Nuevo producto
+          <Plus aria-hidden="true" size={17} /> Nuevo producto
         </button>
       </div>
       <div className={styles.toolbar}>
         <label className={styles.search}>
-          <Search size={17} />
+          <Search aria-hidden="true" size={17} />
           <input
+            autoComplete="off"
+            name="query"
             aria-label="Buscar productos"
             placeholder="Buscar por nombre, SKU o etiqueta"
             value={query}
@@ -64,6 +66,7 @@ export default function CatalogPanel({ state, act }: PanelProps) {
           />
         </label>
         <select
+          name="filter"
           aria-label="Filtrar por estado"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -76,6 +79,7 @@ export default function CatalogPanel({ state, act }: PanelProps) {
           ))}
         </select>
         <select
+          name="category"
           aria-label="Filtrar por categoría"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -125,7 +129,7 @@ export default function CatalogPanel({ state, act }: PanelProps) {
                     disabled={inLive}
                     onClick={() => setEditor({ product })}
                   >
-                    <Pencil size={14} /> Editar
+                    <Pencil aria-hidden="true" size={14} /> Editar
                   </button>
                   <button
                     className={styles.secondary}
@@ -138,9 +142,9 @@ export default function CatalogPanel({ state, act }: PanelProps) {
                     }
                   >
                     {product.status === "published" ? (
-                      <Pause size={14} />
+                      <Pause aria-hidden="true" size={14} />
                     ) : (
-                      <Play size={14} />
+                      <Play aria-hidden="true" size={14} />
                     )}
                     {product.status === "published" ? "Pausar" : "Publicar"}
                   </button>
@@ -150,7 +154,7 @@ export default function CatalogPanel({ state, act }: PanelProps) {
                     aria-label={`Archivar ${product.title}`}
                     onClick={() => setArchive(product)}
                   >
-                    <Archive size={16} />
+                    <Archive aria-hidden="true" size={16} />
                   </button>
                 </div>
                 {inLive && (

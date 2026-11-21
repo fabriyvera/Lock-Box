@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import styles from "./workspace.module.css";
 import Dialog from "@/components/seller/Dialog";
 import { OrderStatus } from "@/lib/buyer/model";
 
@@ -75,7 +76,7 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border ${config.bg} ${config.text} ${config.border}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${config.bg} ${config.text} ${config.border}`}
     >
       {config.label}
     </span>
@@ -97,7 +98,7 @@ export function Modal({
 
   return (
     <Dialog title={title} onClose={onClose}>
-      {children}
+      <div className={styles.modalBody}>{children}</div>
     </Dialog>
   );
 }

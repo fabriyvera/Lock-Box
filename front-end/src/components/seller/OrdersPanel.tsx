@@ -1,23 +1,34 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Search, Download, Truck, MapPin, ShieldCheck, ChevronRight } from 'lucide-react';
-import { ORDER_LABELS, type SellerOrder } from '@/lib/seller/model';
-import { money } from '@/lib/seller/domain';
-import Dialog from './Dialog';
-import { Badge, Empty, dateLabel, type PanelProps } from './ui';
-import styles from './seller.module.css';
+import { useState } from "react";
+import {
+  Search,
+  Download,
+  Truck,
+  MapPin,
+  ShieldCheck,
+  ChevronRight,
+} from "lucide-react";
+import { ORDER_LABELS, type SellerOrder } from "@/lib/seller/model";
+import { money } from "@/lib/seller/domain";
+import Dialog from "./Dialog";
+import { Badge, Empty, dateLabel, type PanelProps } from "./ui";
+import styles from "./seller.module.css";
 
 function csvCell(value: string) {
-  return '"' + (/^[=+@\-\t\r]/.test(value) ? "'" + value : value).replaceAll('"', '""') + '"';
+  return (
+    '"' +
+    (/^[=+@\-\t\r]/.test(value) ? "'" + value : value).replaceAll('"', '""') +
+    '"'
+  );
 }
 export default function OrdersPanel({ state, act }: PanelProps) {
-  const [query, setQuery] = useState('');
-  const [status, setStatus] = useState('all');
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const orders = state.orders.filter(
     (order) =>
-      (status === 'all' || order.status === status) &&
+      (status === "all" || order.status === status) &&
       `${order.id} ${order.buyer} ${order.productTitle}`
         .toLowerCase()
         .includes(query.toLowerCase()),
@@ -26,15 +37,15 @@ export default function OrdersPanel({ state, act }: PanelProps) {
   function exportOrders() {
     const rows = [
       [
-        'Pedido',
-        'Comprador',
-        'Producto',
-        'Cantidad',
-        'Estado',
-        'Bruto Bs.',
-        'Comisión Bs.',
-        'Neto Bs.',
-        'Fecha',
+        "Pedido",
+        "Comprador",
+        "Producto",
+        "Cantidad",
+        "Estado",
+        "Bruto Bs.",
+        "Comisión Bs.",
+        "Neto Bs.",
+        "Fecha",
       ],
       ...orders.map((order) => [
         order.id,
@@ -49,24 +60,27 @@ export default function OrdersPanel({ state, act }: PanelProps) {
       ]),
     ];
     const url = URL.createObjectURL(
-      new Blob(['\uFEFF' + rows.map((row) => row.map(csvCell).join(',')).join('\r\n')], {
-        type: 'text/csv;charset=utf-8',
-      }),
+      new Blob(
+        ["\uFEFF" + rows.map((row) => row.map(csvCell).join(",")).join("\r\n")],
+        {
+          type: "text/csv;charset=utf-8",
+        },
+      ),
     );
-    const anchor = document.createElement('a');
+    const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = 'lockbox-ventas-demo.csv';
+    anchor.download = "lockbox-ventas-demo.csv";
     anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function tone(order: SellerOrder) {
-    return order.status === 'released'
-      ? 'green'
-      : order.status === 'paid'
-        ? 'amber'
-        : order.status === 'disputed'
-          ? 'red'
-          : 'blue';
+    return order.status === "released"
+      ? "green"
+      : order.status === "paid"
+        ? "amber"
+        : order.status === "disputed"
+          ? "red"
+          : "blue";
   }
   return (
     <>
@@ -75,14 +89,20 @@ export default function OrdersPanel({ state, act }: PanelProps) {
           <h2>Pedidos y ventas</h2>
           <p>Del pago protegido a la entrega, sigue cada pedido.</p>
         </div>
-        <button className={styles.secondary} onClick={exportOrders} disabled={!orders.length}>
-          <Download size={16} /> Exportar vista CSV
+        <button
+          className={styles.secondary}
+          onClick={exportOrders}
+          disabled={!orders.length}
+        >
+          <Download aria-hidden="true" size={16} /> Exportar vista CSV
         </button>
       </div>
       <div className={styles.toolbar}>
         <label className={styles.search}>
-          <Search size={17} />
+          <Search aria-hidden="true" size={17} />
           <input
+            autoComplete="off"
+            name="query"
             aria-label="Buscar pedidos"
             placeholder="Buscar pedido, comprador o producto"
             value={query}
@@ -90,6 +110,7 @@ export default function OrdersPanel({ state, act }: PanelProps) {
           />
         </label>
         <select
+          name="status"
           aria-label="Filtrar pedidos"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
@@ -104,15 +125,21 @@ export default function OrdersPanel({ state, act }: PanelProps) {
         <span className={styles.muted}>{orders.length} pedidos</span>
       </div>
       <div className={styles.card}>
-        <div className={styles.tableScroll}>
+        <div
+          className={styles.tableScroll}
+          tabIndex={0}
+          role="region"
+          aria-label="Pedidos y ventas, tabla desplazable"
+        >
           <table className={styles.table}>
+            <caption className="sr-only">Pedidos y ventas de tu tienda</caption>
             <thead>
               <tr>
-                <th>Pedido / comprador</th>
-                <th>Producto</th>
-                <th>Estado</th>
-                <th>Venta neta</th>
-                <th>Detalle</th>
+                <th scope="col">Pedido / comprador</th>
+                <th scope="col">Producto</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Venta neta</th>
+                <th scope="col">Detalle</th>
               </tr>
             </thead>
             <tbody>
@@ -127,14 +154,18 @@ export default function OrdersPanel({ state, act }: PanelProps) {
                   <td>
                     {order.productTitle}
                     <small>
-                      {order.quantity} unidad{order.quantity === 1 ? '' : 'es'}
+                      {order.quantity} unidad{order.quantity === 1 ? "" : "es"}
                     </small>
                   </td>
                   <td>
-                    <Badge tone={tone(order)}>{ORDER_LABELS[order.status]}</Badge>
+                    <Badge tone={tone(order)}>
+                      {ORDER_LABELS[order.status]}
+                    </Badge>
                   </td>
                   <td>
-                    <strong>{money(order.subtotalCents - order.commissionCents)}</strong>
+                    <strong>
+                      {money(order.subtotalCents - order.commissionCents)}
+                    </strong>
                     <small>Comisión {money(order.commissionCents)}</small>
                   </td>
                   <td>
@@ -143,7 +174,7 @@ export default function OrdersPanel({ state, act }: PanelProps) {
                       aria-label={`Ver pedido ${order.id}`}
                       onClick={() => setSelectedId(order.id)}
                     >
-                      <ChevronRight size={20} />
+                      <ChevronRight aria-hidden="true" size={20} />
                     </button>
                   </td>
                 </tr>
@@ -158,20 +189,24 @@ export default function OrdersPanel({ state, act }: PanelProps) {
         )}
       </div>
       <p className={styles.note}>
-        <ShieldCheck size={18} />
-        El vendedor despacha; el Punto LockBox confirma recepción y entrega. El pago se libera
-        después de validar el QR.
+        <ShieldCheck aria-hidden="true" size={18} />
+        El vendedor despacha; el Punto LockBox confirma recepción y entrega. El
+        pago se libera después de validar el QR.
       </p>
       {selected && (
-        <Dialog title={`Pedido ${selected.id}`} onClose={() => setSelectedId(null)}>
+        <Dialog
+          title={`Pedido ${selected.id}`}
+          onClose={() => setSelectedId(null)}
+        >
           <div className={styles.form}>
             <Badge tone={tone(selected)}>{ORDER_LABELS[selected.status]}</Badge>
             <h3>{selected.productTitle}</h3>
             <p>
-              {selected.buyer} · {selected.quantity} unidad{selected.quantity === 1 ? '' : 'es'}
+              {selected.buyer} · {selected.quantity} unidad
+              {selected.quantity === 1 ? "" : "es"}
             </p>
             <div className={styles.pointBox}>
-              <MapPin size={22} />
+              <MapPin aria-hidden="true" size={22} />
               <div>
                 <strong>{selected.point}</strong>
                 <p>{selected.address}</p>
@@ -188,7 +223,9 @@ export default function OrdersPanel({ state, act }: PanelProps) {
               </div>
               <div>
                 <dt>Ingreso neto</dt>
-                <dd>{money(selected.subtotalCents - selected.commissionCents)}</dd>
+                <dd>
+                  {money(selected.subtotalCents - selected.commissionCents)}
+                </dd>
               </div>
             </dl>
             <h3>Historial del pedido</h3>
@@ -200,28 +237,32 @@ export default function OrdersPanel({ state, act }: PanelProps) {
                 </li>
               ))}
             </ol>
-            {selected.status === 'paid' ? (
+            {selected.status === "paid" ? (
               <>
                 <p className={styles.muted}>
-                  Marca el despacho cuando el paquete esté preparado y salga hacia el punto
-                  asignado. El dinero seguirá retenido.
+                  Marca el despacho cuando el paquete esté preparado y salga
+                  hacia el punto asignado. El dinero seguirá retenido.
                 </p>
                 <button
                   className={styles.primary}
                   onClick={() =>
                     act(
-                      { type: 'dispatchOrder', id: selected.id, at: new Date().toISOString() },
-                      'Pedido marcado como despachado. El pago sigue en garantía.',
+                      {
+                        type: "dispatchOrder",
+                        id: selected.id,
+                        at: new Date().toISOString(),
+                      },
+                      "Pedido marcado como despachado. El pago sigue en garantía.",
                     )
                   }
                 >
-                  <Truck size={17} /> Marcar como despachado
+                  <Truck aria-hidden="true" size={17} /> Marcar como despachado
                 </button>
               </>
             ) : (
               <p className={styles.note}>
-                La siguiente acción corresponde al comprador, al Punto LockBox o al sistema, según
-                el estado.
+                La siguiente acción corresponde al comprador, al Punto LockBox o
+                al sistema, según el estado.
               </p>
             )}
           </div>

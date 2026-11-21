@@ -6,13 +6,20 @@ import {
   Wallet,
   Radio,
   ChevronRight,
-} from 'lucide-react';
-import { money, balances, activeLive } from '@/lib/seller/domain';
-import { ORDER_LABELS, type SellerState } from '@/lib/seller/model';
-import { Badge } from './ui';
-import styles from './seller.module.css';
+} from "lucide-react";
+import { money, balances, activeLive } from "@/lib/seller/domain";
+import { ORDER_LABELS, type SellerState } from "@/lib/seller/model";
+import { Badge } from "./ui";
+import styles from "./seller.module.css";
 
-export type Screen = 'overview' | 'catalog' | 'live' | 'orders' | 'wallet' | 'plans' | 'profile';
+export type Screen =
+  | "overview"
+  | "catalog"
+  | "live"
+  | "orders"
+  | "wallet"
+  | "plans"
+  | "profile";
 export default function OverviewPanel({
   state,
   now,
@@ -24,25 +31,29 @@ export default function OverviewPanel({
 }) {
   const balance = balances(state, now);
   const paid = state.orders.filter(
-    (order) => !['pending', 'cancelled', 'refunded'].includes(order.status),
+    (order) => !["pending", "cancelled", "refunded"].includes(order.status),
   );
   const gross = paid.reduce((sum, order) => sum + order.subtotalCents, 0);
-  const dispatchCount = state.orders.filter((order) => order.status === 'paid').length;
-  const activeProducts = state.products.filter((product) => product.status === 'published');
+  const dispatchCount = state.orders.filter(
+    (order) => order.status === "paid",
+  ).length;
+  const activeProducts = state.products.filter(
+    (product) => product.status === "published",
+  );
   const live = activeLive(state);
   const dayKey = (date: number | string) =>
-    new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/La_Paz',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/La_Paz",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     }).format(new Date(date));
   const days = Array.from({ length: 7 }, (_, index) => {
     const time = now - (6 - index) * 86400000;
     return {
-      label: new Intl.DateTimeFormat('es-BO', {
-        weekday: 'short',
-        timeZone: 'America/La_Paz',
+      label: new Intl.DateTimeFormat("es-BO", {
+        weekday: "short",
+        timeZone: "America/La_Paz",
       }).format(time),
       cents: paid
         .filter((order) => dayKey(order.createdAt) === dayKey(time))
@@ -61,53 +72,56 @@ export default function OverviewPanel({
             <br />
             LockBox acompaña cada paso de tu venta.
           </p>
-          <button className={styles.primary} onClick={() => navigate('catalog')}>
-            Gestionar catálogo <ArrowUpRight size={17} />
+          <button
+            className={styles.primary}
+            onClick={() => navigate("catalog")}
+          >
+            Gestionar catálogo <ArrowUpRight aria-hidden="true" size={17} />
           </button>
         </div>
         <div className={styles.heroGraphic} aria-hidden="true">
           <div className={styles.orbitOne} />
           <div className={styles.orbitTwo} />
           <div className={styles.heroBox}>
-            <Package size={68} strokeWidth={1} />
+            <Package aria-hidden="true" size={68} strokeWidth={1} />
           </div>
           <span className={styles.heroPill}>
-            <ShieldCheck size={15} /> PAGO PROTEGIDO
+            <ShieldCheck aria-hidden="true" size={15} /> PAGO PROTEGIDO
           </span>
           <span className={styles.heroPillTwo}>
-            <Truck size={15} /> ENTREGA SEGURA
+            <Truck aria-hidden="true" size={15} /> ENTREGA SEGURA
           </span>
         </div>
       </section>
       <div className={styles.metricGrid}>
         {[
           {
-            label: 'Ventas confirmadas',
+            label: "Ventas confirmadas",
             value: money(gross),
             note: `${paid.length} pedidos · total de la demo`,
             icon: ArrowUpRight,
-            tone: 'green',
+            tone: "green",
           },
           {
-            label: 'Por despachar',
-            value: String(dispatchCount).padStart(2, '0'),
-            note: 'Con pago confirmado',
+            label: "Por despachar",
+            value: String(dispatchCount).padStart(2, "0"),
+            note: "Con pago confirmado",
             icon: Truck,
-            tone: 'amber',
+            tone: "amber",
           },
           {
-            label: 'En garantía',
+            label: "En garantía",
             value: money(balance.heldCents),
-            note: 'Pendiente de entrega y QR',
+            note: "Pendiente de entrega y QR",
             icon: ShieldCheck,
-            tone: 'blue',
+            tone: "blue",
           },
           {
-            label: 'Saldo disponible',
+            label: "Saldo disponible",
             value: money(balance.availableCents),
-            note: 'Listo para solicitar liquidación',
+            note: "Listo para solicitar liquidación",
             icon: Wallet,
-            tone: 'green',
+            tone: "green",
           },
         ].map((metric) => (
           <section key={metric.label} className={styles.metric}>
@@ -132,54 +146,77 @@ export default function OverviewPanel({
           <div
             className={styles.chart}
             role="img"
-            aria-label={days.map((day) => `${day.label}: ${money(day.cents)}`).join('; ')}
+            aria-label={days
+              .map((day) => `${day.label}: ${money(day.cents)}`)
+              .join("; ")}
           >
             {days.map((day, index) => (
               <div className={styles.chartColumn} key={index}>
-                <span>{day.cents ? money(day.cents) : '—'}</span>
+                <span>{day.cents ? money(day.cents) : "—"}</span>
                 <div className={styles.barTrack}>
                   <div
                     className={styles.bar}
-                    style={{ height: `${day.cents ? Math.max(5, (day.cents / max) * 100) : 0}%` }}
+                    style={{
+                      height: `${day.cents ? Math.max(5, (day.cents / max) * 100) : 0}%`,
+                    }}
                   />
                 </div>
                 <small>{day.label}</small>
               </div>
             ))}
           </div>
+          <details className={styles.chartDetails}>
+            <summary>Ver importes por día</summary>
+            <dl>
+              {days.map((day, index) => (
+                <div key={index}>
+                  <dt>{day.label}</dt>
+                  <dd>{money(day.cents)}</dd>
+                </div>
+              ))}
+            </dl>
+          </details>
         </section>
         <section className={styles.card}>
           <div className={styles.cardHeading}>
             <h3>Tu siguiente paso</h3>
           </div>
           <div className={styles.nextSteps}>
-            <button onClick={() => navigate('orders')}>
-              <Truck size={21} />
+            <button onClick={() => navigate("orders")}>
+              <Truck aria-hidden="true" size={21} />
               <div>
                 <strong>Prepara tus entregas</strong>
                 <p>{dispatchCount} pedidos esperan despacho</p>
               </div>
-              <ChevronRight size={18} />
+              <ChevronRight aria-hidden="true" size={18} />
             </button>
-            <button onClick={() => navigate('catalog')}>
-              <Package size={21} />
+            <button onClick={() => navigate("catalog")}>
+              <Package aria-hidden="true" size={21} />
               <div>
                 <strong>Mantén tu catálogo al día</strong>
                 <p>
-                  {activeProducts.length} productos publicados ·{' '}
-                  {state.products.filter((p) => p.status !== 'archived' && p.stock <= 3).length} con
-                  stock bajo
+                  {activeProducts.length} productos publicados ·{" "}
+                  {
+                    state.products.filter(
+                      (p) => p.status !== "archived" && p.stock <= 3,
+                    ).length
+                  }{" "}
+                  con stock bajo
                 </p>
               </div>
-              <ChevronRight size={18} />
+              <ChevronRight aria-hidden="true" size={18} />
             </button>
-            <button onClick={() => navigate('live')}>
-              <Radio size={21} />
+            <button onClick={() => navigate("live")}>
+              <Radio aria-hidden="true" size={21} />
               <div>
-                <strong>{live ? 'Tu live está activo' : 'Prepara tu próximo live'}</strong>
-                <p>{live?.title || 'Elige productos y conecta con tu audiencia'}</p>
+                <strong>
+                  {live ? "Tu live está activo" : "Prepara tu próximo live"}
+                </strong>
+                <p>
+                  {live?.title || "Elige productos y conecta con tu audiencia"}
+                </p>
               </div>
-              <ChevronRight size={18} />
+              <ChevronRight aria-hidden="true" size={18} />
             </button>
           </div>
         </section>
@@ -187,8 +224,11 @@ export default function OverviewPanel({
       <section className={styles.card}>
         <div className={styles.cardHeading}>
           <h3>Pedidos recientes</h3>
-          <button className={styles.textButton} onClick={() => navigate('orders')}>
-            Ver todos <ArrowUpRight size={15} />
+          <button
+            className={styles.textButton}
+            onClick={() => navigate("orders")}
+          >
+            Ver todos <ArrowUpRight aria-hidden="true" size={15} />
           </button>
         </div>
         {[...state.orders]
@@ -198,10 +238,10 @@ export default function OverviewPanel({
             <button
               className={styles.recentOrder}
               key={order.id}
-              onClick={() => navigate('orders')}
+              onClick={() => navigate("orders")}
             >
               <div className={styles.orderIcon}>
-                <Package size={19} />
+                <Package aria-hidden="true" size={19} />
               </div>
               <div>
                 <strong>{order.productTitle}</strong>
@@ -211,13 +251,17 @@ export default function OverviewPanel({
               </div>
               <Badge
                 tone={
-                  order.status === 'paid' ? 'amber' : order.status === 'released' ? 'green' : 'blue'
+                  order.status === "paid"
+                    ? "amber"
+                    : order.status === "released"
+                      ? "green"
+                      : "blue"
                 }
               >
                 {ORDER_LABELS[order.status]}
               </Badge>
               <strong>{money(order.subtotalCents)}</strong>
-              <ChevronRight size={17} />
+              <ChevronRight aria-hidden="true" size={17} />
             </button>
           ))}
       </section>
