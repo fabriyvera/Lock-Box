@@ -14,7 +14,9 @@ import {
   RefreshCw,
   ScanLine,
   UserRound,
+  LoaderCircle,
 } from "lucide-react";
+import Dialog from "@/components/seller/Dialog";
 import { createClient } from "@/lib/supabase/client";
 import { pointRequest } from "@/lib/collection-point/api";
 import {
@@ -25,6 +27,7 @@ import {
 } from "@/lib/collection-point/model";
 import styles from "./point.module.css";
 
+const count = new Intl.NumberFormat("es-BO");
 const time = (value: string) =>
   new Intl.DateTimeFormat("es-BO", {
     timeZone: "America/La_Paz",
@@ -38,10 +41,12 @@ export default function PointDashboard({ name }: { name: string }) {
   const [state, setState] = useState<PointState | null>(null);
   const [pointId, setPointId] = useState("");
   const [code, setCode] = useState("");
+  const [codeError, setCodeError] = useState<string | null>(null);
   const [scan, setScan] = useState<{
     order: PointOrder;
     qrCode: string;
   } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,6 +54,8 @@ export default function PointDashboard({ name }: { name: string }) {
   const [revision, setRevision] = useState(0);
   const pending = useRef(false);
   const input = useRef<HTMLInputElement>(null);
+  const errorNotice = useRef<HTMLParagraphElement>(null);
+  const scanResult = useRef<HTMLDivElement>(null);
   const mutation = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -82,12 +89,19 @@ export default function PointDashboard({ name }: { name: string }) {
 
   async function lookup(event: FormEvent) {
     event.preventDefault();
-    if (pending.current || loading || !code.trim()) return;
+    if (pending.current || loading) return;
+    if (!code.trim()) {
+      setCodeError("Ingresa el código del pedido para consultarlo.");
+      input.current?.focus();
+      return;
+    }
     pending.current = true;
     setBusy(true);
     setError(null);
     setMessage(null);
     setScan(null);
+    setCodeError(null);
+    setConfirmOpen(false);
     mutation.current = new AbortController();
     try {
       const qrCode = code.trim();
@@ -98,10 +112,12 @@ export default function PointDashboard({ name }: { name: string }) {
       );
       setScan({ order: result.order, qrCode });
       setPointId(result.order.pointId);
+      requestAnimationFrame(() => scanResult.current?.focus());
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "No se pudo leer el código.",
       );
+      requestAnimationFrame(() => errorNotice.current?.focus());
     } finally {
       pending.current = false;
       setBusy(false);
@@ -136,7 +152,7 @@ export default function PointDashboard({ name }: { name: string }) {
         mutation.current.signal,
       );
       setState(fresh.state);
-      input.current?.focus();
+      requestAnimationFrame(() => input.current?.focus());
     } catch (reason) {
       setScan(null);
       setError(
@@ -146,9 +162,11 @@ export default function PointDashboard({ name }: { name: string }) {
             ? reason.message
             : "No se pudo confirmar el cambio. Consulta el código antes de reintentar.",
       );
+      requestAnimationFrame(() => errorNotice.current?.focus());
     } finally {
       pending.current = false;
       setBusy(false);
+      setConfirmOpen(false);
     }
   }
   function refresh() {
@@ -156,6 +174,7 @@ export default function PointDashboard({ name }: { name: string }) {
     setLoading(true);
     setError(null);
     setScan(null);
+    setConfirmOpen(false);
     setRevision((value) => value + 1);
   }
   async function logout() {
@@ -175,7 +194,10 @@ export default function PointDashboard({ name }: { name: string }) {
   }
 
   return (
-    <div className={styles.shell}>
+    <div className={`app-theme ${styles.shell}`}>
+      <a href="#point-content" className="workspace-skip-link">
+        Saltar al contenido
+      </a>
       <header className={styles.header}>
         <Link
           href="/"
@@ -185,7 +207,7 @@ export default function PointDashboard({ name }: { name: string }) {
           <span>LOCK</span>
           <span>BOX</span>
         </Link>
-        <span className={styles.workspace}>ADMINISTRACIÓN DEL PUNTO</span>
+        <span className={styles.workspace}>ESPACIO DEL PUNTO LOCKBOX</span>
         <div className={styles.account}>
           <UserRound size={18} aria-hidden="true" />
           <span>{name}</span>
@@ -198,7 +220,7 @@ export default function PointDashboard({ name }: { name: string }) {
           <LogOut size={16} aria-hidden="true" /> Cerrar sesión
         </button>
       </header>
-      <main className={styles.content} aria-busy={loading || busy}>
+      <main id="point-content" tabIndex={-1} className={styles.content}>
         <Link href="/" className={styles.back}>
           <ArrowLeft size={16} aria-hidden="true" /> Volver al inicio
         </Link>
@@ -215,12 +237,21 @@ export default function PointDashboard({ name }: { name: string }) {
             onClick={refresh}
             disabled={busy || loading}
           >
-            <RefreshCw size={16} aria-hidden="true" />{" "}
+            <RefreshCw
+              size={16}
+              aria-hidden="true"
+              className={loading ? styles.spinning : undefined}
+            />{" "}
             {loading ? "Cargando…" : "Actualizar"}
           </button>
         </div>
         {error && (
-          <p role="alert" className={styles.error}>
+          <p
+            ref={errorNotice}
+            tabIndex={-1}
+            role="alert"
+            className={styles.error}
+          >
             {error}
           </p>
         )}
@@ -229,13 +260,30 @@ export default function PointDashboard({ name }: { name: string }) {
             {message}
           </p>
         )}
+        {busy && (
+          <p role="status" className={styles.processing}>
+            <LoaderCircle
+              size={18}
+              aria-hidden="true"
+              className={styles.spinning}
+            />
+            Procesando solicitud…
+          </p>
+        )}
         {!state && loading && (
           <p className={styles.muted} role="status">
             Consultando tus puntos de recojo…
           </p>
         )}
         {state && !point && (
-          <p className={styles.muted}>No tienes puntos activos asignados.</p>
+          <section className={styles.empty} aria-label="Sin puntos asignados">
+            <MapPin size={32} aria-hidden="true" />
+            <h2>No tienes puntos activos asignados</h2>
+            <p>
+              Contacta al equipo de LockBox para revisar la asignación de tu
+              punto de recojo.
+            </p>
+          </section>
         )}
         {point && (
           <>
@@ -248,12 +296,15 @@ export default function PointDashboard({ name }: { name: string }) {
                 <label htmlFor="point-select">Punto de recojo</label>
                 <select
                   id="point-select"
+                  name="pointId"
                   value={point.id}
                   disabled={busy || loading}
                   onChange={(event) => {
                     setPointId(event.target.value);
                     setScan(null);
+                    setConfirmOpen(false);
                     setCode("");
+                    setCodeError(null);
                     setMessage(null);
                   }}
                 >
@@ -273,8 +324,8 @@ export default function PointDashboard({ name }: { name: string }) {
                 <div>
                   <span>Pedidos en el punto</span>
                   <strong>
-                    {point.occupied}
-                    <small> / capacidad {point.capacity}</small>
+                    {count.format(point.occupied)}
+                    <small> / capacidad {count.format(point.capacity)}</small>
                   </strong>
                 </div>
               </div>
@@ -282,14 +333,14 @@ export default function PointDashboard({ name }: { name: string }) {
                 <Clock3 className={styles.info} aria-hidden="true" />
                 <div>
                   <span>Listos para retiro</span>
-                  <strong>{point.pending}</strong>
+                  <strong>{count.format(point.pending)}</strong>
                 </div>
               </div>
               <div className={styles.card}>
                 <CheckCheck className={styles.accent} aria-hidden="true" />
                 <div>
                   <span>Entregados hoy</span>
-                  <strong>{point.deliveredToday}</strong>
+                  <strong>{count.format(point.deliveredToday)}</strong>
                 </div>
               </div>
             </div>
@@ -297,6 +348,7 @@ export default function PointDashboard({ name }: { name: string }) {
               className={styles.workflow}
               aria-label="Flujo de un pedido en el punto"
             >
+              <h2 className="sr-only">Cómo gestionar un pedido</h2>
               {[
                 {
                   icon: Package,
@@ -317,7 +369,7 @@ export default function PointDashboard({ name }: { name: string }) {
                 <div key={title}>
                   <Icon size={20} aria-hidden="true" />
                   <div>
-                    <h2>{title}</h2>
+                    <h3>{title}</h3>
                     <p>{text}</p>
                   </div>
                 </div>
@@ -336,12 +388,17 @@ export default function PointDashboard({ name }: { name: string }) {
                       <p>Lector QR o ingreso manual</p>
                     </div>
                     <form
+                      noValidate
                       onSubmit={(event) => void lookup(event)}
                       className={styles.form}
                     >
                       <label htmlFor="qr-code">Código del pedido</label>
                       <input
                         id="qr-code"
+                        name="qrCode"
+                        type="text"
+                        required
+                        autoCapitalize="none"
                         ref={input}
                         value={code}
                         maxLength={160}
@@ -350,17 +407,30 @@ export default function PointDashboard({ name }: { name: string }) {
                         disabled={busy || loading}
                         onChange={(event) => {
                           setCode(event.target.value);
+                          setCodeError(null);
                           setScan(null);
                         }}
                         placeholder="LBX-…"
-                        aria-describedby="qr-help"
+                        aria-invalid={Boolean(codeError) || undefined}
+                        aria-describedby={
+                          codeError ? "qr-help qr-error" : "qr-help"
+                        }
                       />
+                      {codeError && (
+                        <p
+                          id="qr-error"
+                          role="alert"
+                          className={styles.fieldError}
+                        >
+                          {codeError}
+                        </p>
+                      )}
                       <p id="qr-help" className={styles.muted}>
                         Consulta el código antes de confirmar cualquier cambio.
                       </p>
                       <button
                         className={styles.primary}
-                        disabled={busy || loading || !code.trim()}
+                        disabled={busy || loading}
                         type="submit"
                       >
                         {busy ? "Procesando…" : "Consultar pedido"}
@@ -368,11 +438,19 @@ export default function PointDashboard({ name }: { name: string }) {
                     </form>
                   </div>
                   {scan && (
-                    <div className={styles.confirmation}>
-                      <span className={styles.tag}>
+                    <div
+                      ref={scanResult}
+                      tabIndex={-1}
+                      className={styles.confirmation}
+                      aria-labelledby="scan-result-title"
+                    >
+                      <span
+                        className={styles.tag}
+                        data-status={scan.order.status}
+                      >
                         {STATUS_LABELS[scan.order.status]}
                       </span>
-                      <h3>{scan.order.productTitle}</h3>
+                      <h3 id="scan-result-title">{scan.order.productTitle}</h3>
                       <p>
                         {scan.order.buyerLabel} · Pedido{" "}
                         {scan.order.id.slice(0, 8)}
@@ -387,7 +465,7 @@ export default function PointDashboard({ name }: { name: string }) {
                           type="button"
                           className={styles.primary}
                           disabled={busy || loading}
-                          onClick={() => void confirm()}
+                          onClick={() => setConfirmOpen(true)}
                         >
                           {next.label}
                         </button>
@@ -414,7 +492,10 @@ export default function PointDashboard({ name }: { name: string }) {
                           className={styles.order}
                           data-status={order.status}
                         >
-                          <span className={styles.tag}>
+                          <span
+                            className={styles.tag}
+                            data-status={order.status}
+                          >
                             {STATUS_LABELS[order.status]}
                           </span>
                           <h3>{order.productTitle}</h3>
@@ -464,6 +545,73 @@ export default function PointDashboard({ name }: { name: string }) {
           </>
         )}
       </main>
+      {confirmOpen && scan && next && (
+        <Dialog
+          title={next.label}
+          onClose={() => {
+            if (!busy) setConfirmOpen(false);
+          }}
+        >
+          <div className={styles.confirmBody}>
+            <p>
+              Vas a actualizar el pedido{" "}
+              <strong>{scan.order.id.slice(0, 8)}</strong> de{" "}
+              <strong>{scan.order.buyerLabel}</strong>.
+            </p>
+            <dl className={styles.summary}>
+              <div>
+                <dt>Producto</dt>
+                <dd>{scan.order.productTitle}</dd>
+              </div>
+              <div>
+                <dt>Punto</dt>
+                <dd>{point?.name}</dd>
+              </div>
+              <div>
+                <dt>Estado actual</dt>
+                <dd>{STATUS_LABELS[scan.order.status]}</dd>
+              </div>
+              <div>
+                <dt>Nuevo estado</dt>
+                <dd>{STATUS_LABELS[next.status]}</dd>
+              </div>
+            </dl>
+            <p className={styles.muted}>
+              {next.status === "delivered"
+                ? "Confirma que entregaste el paquete al comprador y verificaste su código. Esta acción registra la entrega del pedido."
+                : "Verifica que el paquete esté en el punto y que corresponda al pedido consultado."}
+            </p>
+            {busy && (
+              <p role="status" className={styles.processing}>
+                <LoaderCircle
+                  size={18}
+                  aria-hidden="true"
+                  className={styles.spinning}
+                />
+                Guardando estado del pedido…
+              </p>
+            )}
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={styles.secondary}
+                disabled={busy}
+                onClick={() => setConfirmOpen(false)}
+              >
+                Volver a revisar
+              </button>
+              <button
+                type="button"
+                className={styles.primary}
+                disabled={busy || loading}
+                onClick={() => void confirm()}
+              >
+                {busy ? "Guardando…" : next.label}
+              </button>
+            </div>
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 }

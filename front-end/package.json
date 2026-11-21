@@ -14,6 +14,7 @@
     "test:config": "node scripts/test-supabase-config.mjs",
     "test:auth": "node scripts/test-auth.mjs",
     "test:point": "node scripts/test-point.mjs",
+    "test:point:workspace": "node scripts/test-point-workspace.mjs",
     "test:buyer": "node scripts/test-buyer.mjs",
     "test:buyer:request": "node scripts/test-buyer-request.mjs"
   },
