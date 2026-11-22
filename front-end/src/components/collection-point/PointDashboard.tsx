@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
+  Camera,
   ArrowLeft,
   CheckCheck,
   ClipboardList,
@@ -16,6 +17,7 @@ import {
   UserRound,
   LoaderCircle,
 } from "lucide-react";
+import QrCameraScanner from "./QrCameraScanner";
 import Dialog from "@/components/seller/Dialog";
 import { createClient } from "@/lib/supabase/client";
 import { pointRequest } from "@/lib/collection-point/api";
@@ -28,6 +30,11 @@ import {
 import styles from "./point.module.css";
 
 const count = new Intl.NumberFormat("es-BO");
+const money = (value = 0) =>
+  `Bs. ${new Intl.NumberFormat("es-BO", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)}`;
 const time = (value: string) =>
   new Intl.DateTimeFormat("es-BO", {
     timeZone: "America/La_Paz",
@@ -44,9 +51,11 @@ export default function PointDashboard({ name }: { name: string }) {
   const [codeError, setCodeError] = useState<string | null>(null);
   const [scan, setScan] = useState<{
     order: PointOrder;
-    qrCode: string;
+    qrCode?: string;
   } | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [balanceConfirmed, setBalanceConfirmed] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,42 +96,48 @@ export default function PointDashboard({ name }: { name: string }) {
     state?.activity.filter((item) => item.pointId === point?.id) ?? [];
   const next = scan ? nextPointStatus(scan.order.status) : null;
 
-  async function lookup(event: FormEvent) {
-    event.preventDefault();
-    if (pending.current || loading) return;
-    if (!code.trim()) {
-      setCodeError("Ingresa el código del pedido para consultarlo.");
-      input.current?.focus();
-      return;
-    }
-    pending.current = true;
-    setBusy(true);
-    setError(null);
-    setMessage(null);
-    setScan(null);
-    setCodeError(null);
-    setConfirmOpen(false);
-    mutation.current = new AbortController();
-    try {
-      const qrCode = code.trim();
-      const result = await pointRequest<{ order: PointOrder }>(
-        `/scan/${encodeURIComponent(qrCode)}`,
-        {},
-        mutation.current.signal,
-      );
-      setScan({ order: result.order, qrCode });
-      setPointId(result.order.pointId);
-      requestAnimationFrame(() => scanResult.current?.focus());
-    } catch (reason) {
-      setError(
-        reason instanceof Error ? reason.message : "No se pudo leer el código.",
-      );
-      requestAnimationFrame(() => errorNotice.current?.focus());
-    } finally {
-      pending.current = false;
-      setBusy(false);
-    }
+  async function lookupCode(rawCode: string) {
+  if (pending.current || loading) return;
+  const qrCode = rawCode.trim();
+  if (!qrCode) {
+    setCodeError("Ingresa el código del pedido para consultarlo.");
+    input.current?.focus();
+    return;
   }
+  pending.current = true;
+  setBusy(true);
+  setError(null);
+  setMessage(null);
+  setScan(null);
+  setCodeError(null);
+  setConfirmOpen(false);
+  setBalanceConfirmed(false);
+  mutation.current = new AbortController();
+  try {
+    const result = await pointRequest<{ order: PointOrder }>(
+      `/scan/${encodeURIComponent(qrCode)}`,
+      {},
+      mutation.current.signal,
+    );
+    setCode(qrCode);
+    setScan({ order: result.order, qrCode });
+    setPointId(result.order.pointId);
+    requestAnimationFrame(() => scanResult.current?.focus());
+  } catch (reason) {
+    setError(
+      reason instanceof Error ? reason.message : "No se pudo leer el código.",
+    );
+    requestAnimationFrame(() => errorNotice.current?.focus());
+  } finally {
+    pending.current = false;
+    setBusy(false);
+  }
+}
+
+function lookup(event: FormEvent) {
+  event.preventDefault();
+  void lookupCode(code);
+}
   async function confirm() {
     if (!scan || !next || pending.current || loading) return;
     pending.current = true;
@@ -136,7 +151,11 @@ export default function PointDashboard({ name }: { name: string }) {
         `/${scan.order.id}/status`,
         {
           method: "PATCH",
-          body: JSON.stringify({ qrCode: scan.qrCode, status: next.status }),
+          body: JSON.stringify(
+            scan.qrCode
+              ? { qrCode: scan.qrCode, status: next.status }
+              : { status: next.status },
+          ),
         },
         mutation.current.signal,
       );
@@ -288,36 +307,19 @@ export default function PointDashboard({ name }: { name: string }) {
         {point && (
           <>
             <section
-              className={styles.pointBar}
-              aria-label="Punto seleccionado"
-            >
-              <MapPin size={20} aria-hidden="true" />
-              <div>
-                <label htmlFor="point-select">Punto de recojo</label>
-                <select
-                  id="point-select"
-                  name="pointId"
-                  value={point.id}
-                  disabled={busy || loading}
-                  onChange={(event) => {
-                    setPointId(event.target.value);
-                    setScan(null);
-                    setConfirmOpen(false);
-                    setCode("");
-                    setCodeError(null);
-                    setMessage(null);
-                  }}
-                >
-                  {state?.points.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-                <p className={styles.muted}>{point.address}</p>
-              </div>
-              <span className={styles.tag}>Punto activo</span>
-            </section>
+  className={styles.pointBar}
+  aria-label="Ubicación del punto de recojo"
+>
+  <div className={styles.pointIcon}>
+    <MapPin size={26} aria-hidden="true" />
+  </div>
+  <div className={styles.pointInfo}>
+    <span className={styles.pointLabel}>UBICACIÓN ACTUAL DEL PUNTO</span>
+    <h2 className={styles.pointName}>{point.name}</h2>
+    <p className={styles.pointAddress}>{point.address}</p>
+  </div>
+  <span className={styles.tag}>Punto activo</span>
+</section>
             <div className={styles.stats}>
               <div className={styles.card}>
                 <Package className={styles.warning} aria-hidden="true" />
@@ -384,9 +386,17 @@ export default function PointDashboard({ name }: { name: string }) {
                   </h2>
                   <div className={styles.scanner}>
                     <div className={styles.reader}>
-                      <QrCode size={72} strokeWidth={1.3} aria-hidden="true" />
-                      <p>Lector QR o ingreso manual</p>
-                    </div>
+  <QrCode size={72} strokeWidth={1.3} aria-hidden="true" />
+  <p>Lector QR o ingreso manual</p>
+  <button
+    type="button"
+    className={styles.secondary}
+    disabled={busy || loading}
+    onClick={() => setScannerOpen(true)}
+  >
+    <Camera size={16} aria-hidden="true" /> Escanear con cámara
+  </button>
+</div>
                     <form
                       noValidate
                       onSubmit={(event) => void lookup(event)}
@@ -486,23 +496,49 @@ export default function PointDashboard({ name }: { name: string }) {
                     </p>
                   ) : (
                     <div className={styles.orderGrid}>
-                      {orders.map((order) => (
-                        <article
-                          key={order.id}
-                          className={styles.order}
-                          data-status={order.status}
-                        >
-                          <span
-                            className={styles.tag}
+                      {orders.map((order) => {
+                        const step = nextPointStatus(order.status);
+                        return (
+                          <article
+                            key={order.id}
+                            className={styles.order}
                             data-status={order.status}
                           >
-                            {STATUS_LABELS[order.status]}
-                          </span>
-                          <h3>{order.productTitle}</h3>
-                          <p>{order.buyerLabel}</p>
-                          <small>Pedido {order.id.slice(0, 8)}</small>
-                        </article>
-                      ))}
+                            <span
+                              className={styles.tag}
+                              data-status={order.status}
+                            >
+                              {STATUS_LABELS[order.status]}
+                            </span>
+                            <h3>{order.productTitle}</h3>
+                            <p>{order.buyerLabel}</p>
+                            <small>Pedido {order.id.slice(0, 8)}</small>
+
+                            {step && order.status !== "ready" && (
+                              <button
+                                type="button"
+                                className={styles.primary}
+                                style={{ marginTop: "12px", width: "100%" }}
+                                disabled={busy || loading}
+                                onClick={() => {
+                                  setScan({ order });
+                                  setConfirmOpen(true);
+                                }}
+                              >
+                                {step.label}
+                              </button>
+                            )}
+                            {order.status === "ready" && (
+                              <p
+                                className={styles.muted}
+                                style={{ marginTop: "10px", marginBottom: 0 }}
+                              >
+                                Escanea el QR del comprador para entregar.
+                              </p>
+                            )}
+                          </article>
+                        );
+                      })}
                     </div>
                   )}
                 </section>
@@ -575,12 +611,61 @@ export default function PointDashboard({ name }: { name: string }) {
                 <dt>Nuevo estado</dt>
                 <dd>{STATUS_LABELS[next.status]}</dd>
               </div>
+              {scan.order.totalAmount !== undefined && (
+                <>
+                  <div>
+                    <dt>Total pedido</dt>
+                    <dd>{money(scan.order.totalAmount)}</dd>
+                  </div>
+                  <div>
+                    <dt>Reserva (50%)</dt>
+                    <dd>{money(scan.order.depositAmount)} (Pagado)</dd>
+                  </div>
+                  <div>
+                    <dt>Saldo al recoger (50%)</dt>
+                    <dd>
+                      <strong>{money(scan.order.balanceAmount)}</strong>
+                    </dd>
+                  </div>
+                </>
+              )}
             </dl>
-            <p className={styles.muted}>
-              {next.status === "delivered"
-                ? "Confirma que entregaste el paquete al comprador y verificaste su código. Esta acción registra la entrega del pedido."
-                : "Verifica que el paquete esté en el punto y que corresponda al pedido consultado."}
-            </p>
+
+            {next.status === "delivered" ? (
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid var(--color-accent-border)",
+                  background: "var(--color-accent-faint)",
+                  cursor: "pointer",
+                  marginBottom: "16px",
+                  fontSize: "15px",
+                  fontWeight: 600,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={balanceConfirmed}
+                  disabled={busy}
+                  onChange={(e) => setBalanceConfirmed(e.target.checked)}
+                  style={{ width: "20px", height: "20px", marginTop: "2px" }}
+                />
+                <span>
+                  Confirmo la entrega del paquete y la verificación del 50%
+                  restante ({money(scan.order.balanceAmount)}).
+                </span>
+              </label>
+            ) : (
+              <p className={styles.muted}>
+                Verifica que el paquete esté en el punto y que corresponda al
+                pedido consultado.
+              </p>
+            )}
+
             {busy && (
               <p role="status" className={styles.processing}>
                 <LoaderCircle
@@ -596,14 +681,21 @@ export default function PointDashboard({ name }: { name: string }) {
                 type="button"
                 className={styles.secondary}
                 disabled={busy}
-                onClick={() => setConfirmOpen(false)}
+                onClick={() => {
+                  setConfirmOpen(false);
+                  setBalanceConfirmed(false);
+                }}
               >
                 Volver a revisar
               </button>
               <button
                 type="button"
                 className={styles.primary}
-                disabled={busy || loading}
+                disabled={
+                  busy ||
+                  loading ||
+                  (next.status === "delivered" && !balanceConfirmed)
+                }
                 onClick={() => void confirm()}
               >
                 {busy ? "Guardando…" : next.label}
@@ -612,6 +704,20 @@ export default function PointDashboard({ name }: { name: string }) {
           </div>
         </Dialog>
       )}
+      {scannerOpen && (
+  <Dialog
+    title="Escanear código QR"
+    onClose={() => setScannerOpen(false)}
+  >
+    <QrCameraScanner
+      onClose={() => setScannerOpen(false)}
+      onScan={(decodedText) => {
+        setScannerOpen(false);
+        void lookupCode(decodedText);
+      }}
+    />
+  </Dialog>
+)}
     </div>
   );
 }

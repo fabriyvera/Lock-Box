@@ -11,9 +11,14 @@ const qrCode = z
   .max(160)
   .regex(/^[A-Za-z0-9_-]+$/);
 const transition = z
-  .object({ qrCode, status: z.enum(["in_lockbox", "ready", "delivered"]) })
-  .strict();
-
+  .object({
+    qrCode: qrCode.optional(),
+    status: z.enum(["in_lockbox", "ready", "delivered"]),
+  })
+  .strict()
+  .refine((data) => data.status !== "delivered" || Boolean(data.qrCode), {
+    message: "Se requiere el código QR para confirmar la entrega.",
+  });
 export function createOrdersRouter(
   dependencies: Pick<Dependencies, "createClient">,
 ) {

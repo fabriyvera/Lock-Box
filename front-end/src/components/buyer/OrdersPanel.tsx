@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
 import { useBuyerStore } from "@/lib/buyer/connected-store";
+import { createClient } from "@/lib/supabase/client";
 import {
   formatBOB,
   formatBuyerDate,
@@ -23,6 +24,7 @@ import {
   Star,
   AlertTriangle,
   AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 
 export function OrdersPanel() {
@@ -37,7 +39,27 @@ export function OrdersPanel() {
 
   // Estado para el modal personalizado de cancelación
   const [orderToCancel, setOrderToCancel] = useState<BuyerOrder | null>(null);
+  const [releasingId, setReleasingId] = useState<string | null>(null);
 
+  async function handleReleasePayment(orderId: string) {
+    setReleasingId(orderId);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.rpc("buyer_release_payment", {
+        p_order_id: orderId,
+      });
+      if (error) throw error;
+      await actions.refresh();
+    } catch (err) {
+      alert(
+        err instanceof Error
+          ? err.message
+          : "No se pudo liberar el pago del pedido.",
+      );
+    } finally {
+      setReleasingId(null);
+    }
+  }
   // Form states
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
@@ -195,12 +217,48 @@ export function OrdersPanel() {
                     <p className="text-text-muted text-xs">
                       {order.lockBoxPoint.address}
                     </p>
-                    <div className="pt-2 border-t border-border flex justify-between font-mono">
-                      <span className="text-text-muted">Total del pedido:</span>
-                      <span className="font-bold text-accent">
-                        {formatBOB(order.totalCents)}
-                      </span>
-                    </div>
+                    {(() => {
+                      const depositCents = Math.round(order.totalCents / 2);
+                      const balanceCents = order.totalCents - depositCents;
+                      const isPaidFull = ["delivered", "released"].includes(
+                        order.status,
+                      );
+                      return (
+                        <div className="pt-2 border-t border-border space-y-1 font-mono text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-text-muted">
+                              Total del pedido:
+                            </span>
+                            <span className="font-bold text-accent">
+                              {formatBOB(order.totalCents)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-text-muted">
+                              Reserva (50%):
+                            </span>
+                            <span className="font-semibold text-emerald-600">
+                              {formatBOB(depositCents)} · Pagado
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-text-muted">
+                              Saldo al recoger (50%):
+                            </span>
+                            <span
+                              className={
+                                isPaidFull
+                                  ? "font-semibold text-emerald-600"
+                                  : "font-semibold text-amber-600"
+                              }
+                            >
+                              {formatBOB(balanceCents)} ·{" "}
+                              {isPaidFull ? "Pagado" : "Pendiente"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -232,6 +290,21 @@ export function OrdersPanel() {
                       >
                         <Ban aria-hidden="true" className="w-3.5 h-3.5" />
                         Cancelar Pedido
+                      </button>
+                    )}
+                    
+                   {/* Botón Liberar Pago (cuando el punto ya entregó con QR) */}
+                    {order.status === "delivered" && (
+                      <button
+                        type="button"
+                        disabled={releasingId === order.id}
+                        onClick={() => void handleReleasePayment(order.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-accent text-on-accent hover:bg-accent-hover text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" />
+                        {releasingId === order.id
+                          ? "Liberando pago..."
+                          : "Liberar pago al vendedor"}
                       </button>
                     )}
 
@@ -270,6 +343,15 @@ export function OrdersPanel() {
                     </span>
                   )}
                 </div>
+
+                {order.status === "delivered" && (
+                  <p className="text-xs text-text-muted">
+                    Producto entregado. Si todo está conforme, puedes{" "}
+                    <strong>liberar el pago</strong> ahora; de lo contrario, se
+                    liberará automáticamente a las <strong>48 horas</strong> de
+                    la entrega.
+                  </p>
+                )}
 
                 {/* Reseña desplegada si existe */}
                 {order.review && (

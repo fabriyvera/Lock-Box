@@ -14,6 +14,9 @@ export type PointOrder = {
   status: PointStatus;
   buyerLabel: string;
   productTitle: string;
+  totalAmount?: number;
+  depositAmount?: number;
+  balanceAmount?: number;
   updatedAt?: string;
 };
 export type PointState = {

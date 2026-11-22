@@ -13,6 +13,7 @@ import {
   RotateCcw,
   LogOut,
   LoaderCircle,
+  UserRound,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useWorkspaceView } from "@/components/workspace/useWorkspaceView";
@@ -139,13 +140,25 @@ function BuyerWorkspace({ name }: { name: string }) {
               </span>
             )}
           </button>
-          <button
+         <button
             disabled={loggingOut}
             onClick={() => void logout()}
-            className="flex items-center gap-2 text-xs text-text-muted"
+            className="flex items-center gap-2 text-xs text-text-muted hover:text-foreground cursor-pointer"
           >
             <LogOut size={16} aria-hidden="true" /> Cerrar sesión
           </button>
+
+          <div className="flex items-center gap-2 pl-3 border-l border-border">
+            <div className="w-8 h-8 rounded-lg bg-surface-raised border border-border flex items-center justify-center text-accent shrink-0">
+              <UserRound size={16} aria-hidden="true" />
+            </div>
+            <div className="hidden sm:block leading-tight">
+              <p className="text-xs font-bold text-foreground max-w-[160px] truncate">
+                {name}
+              </p>
+              <p className="text-[11px] text-text-muted">Comprador</p>
+            </div>
+          </div>
         </div>
       </header>
 

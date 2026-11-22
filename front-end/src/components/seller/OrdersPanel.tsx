@@ -218,6 +218,24 @@ export default function OrdersPanel({ state, act }: PanelProps) {
                 <dd>{money(selected.subtotalCents)}</dd>
               </div>
               <div>
+                <dt>Reserva pagada (50%)</dt>
+                <dd>{money(Math.round(selected.subtotalCents / 2))}</dd>
+              </div>
+              <div>
+                <dt>Saldo al recoger (50%)</dt>
+                <dd>
+                  {money(
+                    selected.subtotalCents -
+                      Math.round(selected.subtotalCents / 2),
+                  )}{" "}
+                  (
+                  {["delivered", "released"].includes(selected.status)
+                    ? "Confirmado"
+                    : "Pendiente en punto"}
+                  )
+                </dd>
+              </div>
+              <div>
                 <dt>Comisión de esta venta</dt>
                 <dd>− {money(selected.commissionCents)}</dd>
               </div>
