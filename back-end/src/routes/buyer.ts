@@ -118,7 +118,7 @@ export function createBuyerRouter(
   router.get("/state", async (_req, res, next) => {
     try {
       const client = res.locals.client as SupabaseClient<Database>;
-      const { data, error } = await client.rpc("buyer_state");
+      const { data, error } = await client.rpc("buyer_state_v5");
       if (error) {
         failure(res, error);
         return;
@@ -136,7 +136,7 @@ export function createBuyerRouter(
         return;
       }
       const client = res.locals.client as SupabaseClient<Database>;
-      const { data, error } = await client.rpc("buyer_action", {
+      const { data, error } = await client.rpc("buyer_action_v5", {
         action: parsed.data.action,
         request_id: parsed.data.requestId,
       });

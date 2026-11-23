@@ -13,11 +13,12 @@ const qrCode = z
 const transition = z
   .object({
     qrCode: qrCode.optional(),
+    balanceConfirmed: z.boolean().optional(),
     status: z.enum(["in_lockbox", "ready", "delivered"]),
   })
   .strict()
-  .refine((data) => data.status !== "delivered" || Boolean(data.qrCode), {
-    message: "Se requiere el código QR para confirmar la entrega.",
+  .refine((data) => data.status !== "delivered" || (Boolean(data.qrCode) && data.balanceConfirmed === true), {
+    message: "Se requiere el código QR y la confirmación manual del saldo.",
   });
 export function createOrdersRouter(
   dependencies: Pick<Dependencies, "createClient">,
@@ -55,7 +56,7 @@ export function createOrdersRouter(
     }
   });
   async function invoke(client: SupabaseClient<Database>, action: Json) {
-    return client.rpc("collection_point_action", { action });
+    return client.rpc("point_action_v5", { action });
   }
   function statusFor(code?: string) {
     if (code === "42501") return 403;

@@ -995,6 +995,11 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      buyer_state_v5: { Args: never; Returns: Json };
+      buyer_action_v5: { Args: { action: Json; request_id: string }; Returns: Json };
+      point_action_v5: { Args: { action: Json }; Returns: Json };
+      admin_state: { Args: { p_start: string; p_end: string; p_include_tests?: boolean }; Returns: Json };
+      admin_set_active: { Args: { p_entity: string; p_id: string; p_active: boolean }; Returns: Json };
       buyer_state: { Args: never; Returns: Json };
       buyer_action: { Args: { action: Json; request_id: string }; Returns: Json };
       collection_point_action: { Args: { action: Json }; Returns: Json };
