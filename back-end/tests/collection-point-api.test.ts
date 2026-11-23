@@ -103,9 +103,9 @@ test("state and scan forward the verified JWT to guarded RPC", async () => {
       200,
     );
     assert.deepEqual(calls, [
-      { name: "collection_point_action", args: { action: { type: "state" } } },
+      { name: "point_action_v5", args: { action: { type: "state" } } },
       {
-        name: "collection_point_action",
+        name: "point_action_v5",
         args: { action: { type: "scan", qrCode: "LBX-123456" } },
       },
     ]);
@@ -148,19 +148,21 @@ test("only valid point transitions reach the database", async () => {
       400,
     );
     assert.deepEqual(calls, []);
+    assert.equal((await send(id, { status: "delivered", qrCode: "LBX-123456", balanceConfirmed: false })).status, 400);
     assert.equal(
-      (await send(id, { status: "delivered", qrCode: "LBX-123456" })).status,
+      (await send(id, { status: "delivered", qrCode: "LBX-123456", balanceConfirmed: true })).status,
       200,
     );
     assert.deepEqual(calls, [
       {
-        name: "collection_point_action",
+        name: "point_action_v5",
         args: {
           action: {
             type: "transition",
             orderId: id,
             status: "delivered",
             qrCode: "LBX-123456",
+            balanceConfirmed: true,
           },
         },
       },

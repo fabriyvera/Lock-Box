@@ -98,7 +98,9 @@ export default function AdminDashboard({ name }: { name: string }) {
       </>}
     </main>
     {pending && <Dialog title={pending.active ? "Activar acceso" : "Desactivar acceso"} onClose={() => { if (!busy) setPending(null); }}>
+      {error && <p role="alert" className={styles.error}>{error}</p>}
       <p>¿Quieres {pending?.active ? "activar" : "desactivar"} {pending?.name}? Su historial se conservará.</p><div className="flex flex-wrap gap-3 mt-5"><button className={styles.button} disabled={busy} onClick={() => setPending(null)}>Cancelar</button><button className={`${styles.button} ${styles.primary}`} disabled={busy} onClick={confirmActive}>{busy ? "Guardando…" : "Confirmar cambio"}</button></div>
     </Dialog>}
   </div>;
 }
+

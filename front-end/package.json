@@ -16,7 +16,8 @@
     "test:point": "node scripts/test-point.mjs",
     "test:point:workspace": "node scripts/test-point-workspace.mjs",
     "test:buyer": "node scripts/test-buyer.mjs",
-    "test:buyer:request": "node scripts/test-buyer-request.mjs"
+    "test:buyer:request": "node scripts/test-buyer-request.mjs",
+    "test:sprint5": "node --test scripts/test-sprint5.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

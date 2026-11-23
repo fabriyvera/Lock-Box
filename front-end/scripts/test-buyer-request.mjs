@@ -4,8 +4,8 @@ import { readFileSync } from "node:fs";
 import Module from "node:module";
 import ts from "typescript";
 const file = new URL("../src/lib/buyer/request.ts", import.meta.url);
-const module = new Module(file.pathname);
-module._compile(
+const fixtureModule = new Module(file.pathname);
+fixtureModule._compile(
   ts.transpileModule(readFileSync(file, "utf8"), {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
@@ -14,7 +14,7 @@ module._compile(
   }).outputText,
   file.pathname,
 );
-const { buyerRequest, buyerErrorMessage } = module.exports;
+const { buyerRequest, buyerErrorMessage } = fixtureModule.exports;
 test("buyer reads recover once from transient failures and server cold starts", async () => {
   for (const failure of [
     new DOMException("signal timed out", "TimeoutError"),

@@ -35,11 +35,12 @@ test("point UI only proposes the next physical fulfillment state", () => {
   ])
     assert.equal(nextPointStatus(status), null);
 });
-test("login preserves buyer and seller paths and routes staff to the point", () => {
+test("login separates administration from point staff without redirect loops", () => {
   assert.equal(accountPath("comprador"), "/dashboard");
   assert.equal(accountPath("vendedor"), "/vendedor");
   assert.equal(accountPath("admin"), "/admin");
-  assert.equal(accountPath("despachador"), "/admin");
+  assert.equal(accountPath("despachador"), "/punto-recojo");
   assert.equal(accountPath("operador_punto"), "/punto-recojo");
   assert.throws(() => accountPath("unknown"));
 });
+

@@ -15,10 +15,10 @@ const compiled = ts.transpileModule(source, {
     target: ts.ScriptTarget.ES2022,
   },
 }).outputText;
-const module = new Module("supabase-config-test");
-module.require = createRequire(import.meta.url);
-module._compile(compiled, "supabase-config-test.cjs");
-const { getSupabaseConfig, requireSupabaseConfig } = module.exports;
+const fixtureModule = new Module("supabase-config-test");
+fixtureModule.require = createRequire(import.meta.url);
+fixtureModule._compile(compiled, "supabase-config-test.cjs");
+const { getSupabaseConfig, requireSupabaseConfig } = fixtureModule.exports;
 const names = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",

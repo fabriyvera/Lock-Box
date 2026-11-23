@@ -128,6 +128,8 @@ function workspace(initialStatus = "dispatched", options = {}) {
       };
     if (id === "@/components/seller/Dialog")
       return { __esModule: true, default: function Dialog() {} };
+    if (id === "./QrCameraScanner")
+      return { __esModule: true, default: function QrCameraScanner() {} };
     return require(id);
   }
   vm.runInThisContext(
@@ -200,7 +202,7 @@ test("point lookup validates empty input and encodes the trimmed code", async ()
   );
 });
 
-test("all physical transitions require review and retain the existing request payload", async () => {
+test("physical transitions require review; delivery also sends the explicit balance declaration", async () => {
   for (const [status, next] of [
     ["dispatched", "in_lockbox"],
     ["in_lockbox", "ready"],
@@ -231,6 +233,12 @@ test("all physical transitions require review and retain the existing request pa
       .find((node) => node?.type === "button")
       .props.onClick();
     ui.render();
+    if (next === "delivered") {
+      const disabledSubmit = ui.nodes().filter((node) => node.type === "button").at(-1);
+      assert.equal(disabledSubmit.props.disabled, true);
+      ui.find((node) => node.type === "input" && node.props.type === "checkbox").props.onChange({ target: { checked: true } });
+      ui.render();
+    }
     const submit = ui
       .nodes()
       .filter((node) => node.type === "button")
@@ -242,6 +250,7 @@ test("all physical transitions require review and retain the existing request pa
     assert.deepEqual(JSON.parse(write.init.body), {
       qrCode: "LBX-123456",
       status: next,
+      ...(next === "delivered" ? { balanceConfirmed: true } : {}),
     });
     assert.equal(ui.calls.at(-1).path, "/state");
     assert.equal(
@@ -271,6 +280,8 @@ test("point confirmation prevents duplicate writes and explains a failed refresh
   ui.find((node) => node.props.className === "confirmation")
     .props.children.find((node) => node?.type === "button")
     .props.onClick();
+  ui.render();
+  ui.find((node) => node.type === "input" && node.props.type === "checkbox").props.onChange({ target: { checked: true } });
   ui.render();
   const submit = ui
     .nodes()

@@ -15,3 +15,6 @@ Consulta [BACKEND_SELLERS.md](docs/BACKEND_SELLERS.md) para los datos de prueba,
 - [Integración del administrador del punto de recojo](docs/INTEGRACION_COLLECTION_POINT.md).
 - [Registro y vista del responsable de Punto LockBox](docs/REGISTRO_PUNTOS_LOCKBOX.md).
 - [Integración del módulo comprador y verificación en Vercel](docs/INTEGRACION_BUYERS.md).
+- [Sprint 5: administración, tarifa del comprador y comisiones](docs/SPRINT5_ADMINISTRACION_COMISIONES.md).
+- [Sprint 5: aceptación técnica y pruebas de cierre](docs/SPRINT5_CIERRE.md).
+

@@ -131,7 +131,7 @@ test("buyer checkout forwards the idempotency key and reads disable caching", as
       result: { success: true, orderIds: [id] },
     });
     assert.deepEqual(calls[0], {
-      name: "buyer_action",
+      name: "buyer_action_v5",
       args: { action: checkout, request_id: requestId },
     });
     const read = await fetch(`${base}/api/buyer/state`, { headers });
