@@ -218,8 +218,8 @@ export function OrdersPanel() {
                       {order.lockBoxPoint.address}
                     </p>
                     {(() => {
-                      const depositCents = Math.round(order.totalCents / 2);
-                      const balanceCents = order.totalCents - depositCents;
+                      const depositCents = order.depositCents ?? Math.round(order.totalCents / 2);
+                      const balanceCents = order.balanceCents ?? order.totalCents - depositCents;
                       const isPaidFull = ["delivered", "released"].includes(
                         order.status,
                       );
@@ -235,9 +235,9 @@ export function OrdersPanel() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-text-muted">
-                              Reserva (50%):
+                              {(order.serviceFeeCents ?? 0) > 0 ? "Reserva (50% productos + servicio):" : "Reserva (50%):"}
                             </span>
-                            <span className="font-semibold text-emerald-600">
+                            <span className="font-semibold text-accent">
                               {formatBOB(depositCents)} · Pagado
                             </span>
                           </div>
@@ -248,14 +248,15 @@ export function OrdersPanel() {
                             <span
                               className={
                                 isPaidFull
-                                  ? "font-semibold text-emerald-600"
-                                  : "font-semibold text-amber-600"
+                                  ? "font-semibold text-accent"
+                                  : "font-semibold text-warning"
                               }
                             >
                               {formatBOB(balanceCents)} ·{" "}
                               {isPaidFull ? "Pagado" : "Pendiente"}
                             </span>
                           </div>
+                          {(order.serviceFeeCents ?? 0) > 0 && <p className="text-text-secondary">Servicio incluido: {formatBOB(order.serviceFeeCents ?? 0)}. No se descuenta del importe del vendedor.</p>}
                         </div>
                       );
                     })()}

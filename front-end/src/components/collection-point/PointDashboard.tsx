@@ -153,7 +153,7 @@ function lookup(event: FormEvent) {
           method: "PATCH",
           body: JSON.stringify(
             scan.qrCode
-              ? { qrCode: scan.qrCode, status: next.status }
+              ? { qrCode: scan.qrCode, status: next.status, ...(next.status === "delivered" ? { balanceConfirmed } : {}) }
               : { status: next.status },
           ),
         },
@@ -618,7 +618,7 @@ function lookup(event: FormEvent) {
                     <dd>{money(scan.order.totalAmount)}</dd>
                   </div>
                   <div>
-                    <dt>Reserva (50%)</dt>
+                    <dt>{(scan.order.serviceFeeAmount ?? 0) > 0 ? "Reserva (50% productos + servicio)" : "Reserva (50%)"}</dt>
                     <dd>{money(scan.order.depositAmount)} (Pagado)</dd>
                   </div>
                   <div>

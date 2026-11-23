@@ -15,6 +15,7 @@ export type PointOrder = {
   buyerLabel: string;
   productTitle: string;
   totalAmount?: number;
+  serviceFeeAmount?: number;
   depositAmount?: number;
   balanceAmount?: number;
   updatedAt?: string;

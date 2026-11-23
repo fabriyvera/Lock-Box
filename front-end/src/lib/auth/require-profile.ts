@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { AccountRole } from "./account";
 
-export async function requireProfile(role: AccountRole) {
+export async function requireProfile(role: AccountRole | "admin") {
   const client = await createClient();
   const {
     data: { user },
@@ -20,8 +20,8 @@ export async function requireProfile(role: AccountRole) {
     if (profile.role === "operador_punto") redirect("/punto-recojo");
     if (profile.role === "vendedor") redirect("/vendedor");
     if (profile.role === "comprador") redirect("/dashboard");
-    if (profile.role === "admin" || profile.role === "despachador")
-      redirect("/admin");
+    if (profile.role === "admin") redirect("/admin");
+    if (profile.role === "despachador") redirect("/punto-recojo");
     redirect("/login?error=role");
   }
   return {

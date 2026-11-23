@@ -1,0 +1,40 @@
+.shell { min-height: 100svh; background: var(--color-canvas); color: var(--color-foreground); }
+.header { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding: 18px max(20px, calc((100vw - 1280px) / 2)); border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
+.brand { font-weight: 800; font-size: 22px; color: var(--color-accent); }
+.header p { flex: 1; color: var(--color-text-secondary); }
+.main { max-width: 1280px; margin: auto; padding: 32px 20px 64px; }
+.intro { display: flex; flex-wrap: wrap; align-items: start; gap: 16px; margin-bottom: 24px; }
+.intro > div { flex: 1 1 300px; }
+.intro h1 { font-size: clamp(26px, 4vw, 36px); font-weight: 750; line-height: 1.2; margin: 8px 0; }
+.intro p, .note { color: var(--color-text-secondary); max-width: 78ch; line-height: 1.6; }
+.eyebrow { color: var(--color-accent); font-size: 13px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+.filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; padding: 20px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; }
+.filters label { display: grid; gap: 6px; font-size: 14px; color: var(--color-text-secondary); }
+.filters input:not([type=checkbox]), .search { background: var(--color-surface); color: var(--color-foreground); border: 1px solid var(--color-border-strong); padding: 10px 12px; border-radius: 8px; min-height: 44px; }
+.filters .check { display: flex; align-items: center; min-height: 44px; }
+.check input { width: 18px; height: 18px; accent-color: var(--color-accent); }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-foreground); font-weight: 650; cursor: pointer; }
+.button:hover { background: var(--color-surface-hover); }
+.primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
+.primary:hover { background: var(--color-accent-hover); }
+.button:disabled { opacity: .6; cursor: wait; }
+.shell :is(button,input,a):focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 16px; margin: 24px 0; }
+.metric { border: 1px solid var(--color-border); border-radius: 12px; padding: 20px; background: var(--color-surface); }
+.metric dt { color: var(--color-text-secondary); font-size: 14px; }
+.metric dd { font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 750; margin-top: 8px; }
+.section { margin-top: 32px; }
+.section h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.tableWrap { overflow-x: auto; margin-top: 16px; border: 1px solid var(--color-border); border-radius: 10px; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+.table th { background: var(--color-surface-raised); font-size: 13px; font-weight: 700; }
+.table :is(th,td) { padding: 14px 16px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+.table td { background: var(--color-surface); overflow-wrap: anywhere; }
+.table caption { text-align: left; padding: 12px 16px; color: var(--color-text-secondary); }
+.amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.status { display: inline-block; padding: 4px 8px; border-radius: 6px; background: var(--color-surface-raised); color: var(--color-text-secondary); font-size: 12px; }
+.search { width: min(100%,420px); margin-top: 16px; }
+.notice { margin: 16px 0; color: var(--color-text-secondary); }
+.error { color: var(--color-danger); }
+.success { color: var(--color-accent); }
+@media (max-width: 600px) { .header { align-items: start; gap: 10px; } .header p { flex-basis: calc(100% - 120px); } .main { padding: 24px 16px 48px; } .filters > label:not(.check) { flex: 1 1 130px; min-width: 0; } .filters input:not([type=checkbox]) { min-width: 0; width: 100%; } .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; } .metric { padding: 14px; } .metric dd { font-size: 22px; } }

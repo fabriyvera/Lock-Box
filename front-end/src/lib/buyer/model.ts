@@ -46,6 +46,9 @@ export interface BuyerOrder {
   items: CartItem[];
   subtotalCents: number;
   totalCents: number;
+  serviceFeeCents?: number;
+  depositCents?: number;
+  balanceCents?: number;
   lockBoxPoint: LockBoxPoint;
   paymentMethod: "yape" | "bcp";
   status: OrderStatus;
@@ -70,6 +73,7 @@ export interface BuyerOrder {
 }
 
 export interface BuyerState {
+  serviceFeeCentsPerOrder?: number;
   catalog: BuyerProduct[];
   cart: CartItem[];
   orders: BuyerOrder[];

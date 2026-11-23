@@ -12,6 +12,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { BuyerOrder } from "@/lib/buyer/model";
+import { previewCheckout } from "@/lib/buyer/pricing";
 
 export function CheckoutModal({
   isOpen,
@@ -30,6 +31,7 @@ export function CheckoutModal({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = calculateCartSubtotal(state.cart);
+  const quote = previewCheckout(state.cart, state.serviceFeeCentsPerOrder ?? 800);
   const pointId = state.lockBoxPoints.some(
     (point) => point.id === selectedPointId,
   )
@@ -169,15 +171,18 @@ export function CheckoutModal({
             <span>{formatBOB(subtotal)}</span>
           </div>
           <div className="flex justify-between text-xs text-text-muted">
-            <span>Custodia Escrow</span>
-            <span className="text-accent font-bold">Gratis</span>
+            <span>Servicio LockBox ({quote.orderCount} pedido{quote.orderCount === 1 ? "" : "s"})</span>
+            <span className="text-accent font-bold">{formatBOB(quote.fee)}</span>
           </div>
+          <p className="text-xs text-text-secondary">Bs 8 por pedido y vendedor, a cargo del comprador. La reserva incluye 50% de los productos y toda la tarifa; el saldo al recoger es el otro 50% de los productos.</p>
           <div className="flex justify-between text-sm font-bold text-foreground pt-1 border-t border-border/60">
             <span>Total de prueba</span>
             <span className="text-accent font-mono text-base">
-              {formatBOB(subtotal)}
+              {formatBOB(quote.total)}
             </span>
           </div>
+          <div className="flex justify-between text-sm text-foreground"><span>Reserva simulada ahora</span><strong>{formatBOB(quote.deposit)}</strong></div>
+          <div className="flex justify-between text-sm text-text-secondary"><span>Saldo al recoger</span><strong>{formatBOB(quote.balance)}</strong></div>
         </div>
 
         {meta.error && (

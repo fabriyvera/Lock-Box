@@ -8,8 +8,8 @@ export const ACCOUNT_LABELS: Record<AccountRole, string> = {
   operador_punto: "responsable de Punto LockBox",
 };
 export function accountPath(role: string): string {
-  if (role === "operador_punto") return "/punto-recojo";
-  if (role === "admin" || role === "despachador") return "/admin";
+  if (role === "operador_punto" || role === "despachador") return "/punto-recojo";
+  if (role === "admin") return "/admin";
   if (role === "vendedor") return "/vendedor";
   if (role === "comprador") return "/dashboard";
   throw new Error("Tu perfil no tiene acceso a estos módulos.");
