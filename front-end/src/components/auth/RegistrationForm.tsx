@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import DeferredCaptcha from "./DeferredCaptcha";
+import { LocationPicker } from "@/components/maps/LocationPicker";
+import { parseCoordinates } from "@/lib/maps/location";
 import {
   ACCOUNT_LABELS,
   apiUrl,
@@ -105,6 +107,8 @@ export default function RegistrationForm({
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const id = useId();
   const [token, setToken] = useState<string | null>(null);
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [confirmation, setConfirmation] = useState(false);
@@ -143,6 +147,7 @@ export default function RegistrationForm({
         "pointName",
         "pointAddress",
         "pointCapacity",
+        "pointCity",
       ].includes(event.target.name)
     )
       return;
@@ -175,7 +180,11 @@ export default function RegistrationForm({
     setFieldErrors(invalidFields);
     const invalid = inputs.find((input) => invalidFields[input.name]);
     if (invalid) {
-      setError("");
+      setError(
+        ["pointLatitude", "pointLongitude"].includes(invalid.name)
+          ? "Ingresa una latitud y longitud válidas para ubicar el punto."
+          : "",
+      );
       invalid.focus();
       return;
     }
@@ -191,6 +200,13 @@ export default function RegistrationForm({
     }
     if (!token) {
       setError("Completa la verificación de seguridad.");
+      return;
+    }
+
+    if (role === "operador_punto" && !parseCoordinates(latitude, longitude)) {
+      setError(
+        "Marca la ubicación del punto o ingresa una latitud y longitud válidas.",
+      );
       return;
     }
 
@@ -231,6 +247,9 @@ export default function RegistrationForm({
                 pointName: value("pointName").trim(),
                 pointAddress: value("pointAddress").trim(),
                 pointCapacity: Number(value("pointCapacity") || 50),
+                pointCity: value("pointCity").trim(),
+                pointLatitude: Number(latitude),
+                pointLongitude: Number(longitude),
               }
             : {}),
         }),
@@ -258,6 +277,8 @@ export default function RegistrationForm({
         );
       }
       form.reset();
+      setLatitude("");
+      setLongitude("");
       setDirty(false);
       setComplete(false);
       if (result.requiresConfirmation) setConfirmation(true);
@@ -344,6 +365,16 @@ export default function RegistrationForm({
               autoComplete: "off",
               placeholder: "Ej. 50…",
               required: false,
+            },
+            {
+              name: "pointCity",
+              label: "Ciudad o localidad",
+              type: "text",
+              autoComplete: "address-level2",
+              maxLength: 80,
+              minLength: 2,
+              placeholder: "Ej. La Paz",
+              required: true,
             },
           ]
         : [];
@@ -457,6 +488,21 @@ export default function RegistrationForm({
               : "Datos de tu Punto LockBox"}
           </legend>
           {additionalFields.map(renderField)}
+          {role === "operador_punto" && (
+            <LocationPicker
+              latitude={latitude}
+              longitude={longitude}
+              disabled={busy}
+              onChange={(lat, lng) => {
+                setLatitude(lat);
+                setLongitude(lng);
+                setDirty(true);
+                setToken(null);
+                setRevision((value) => value + 1);
+                setError("");
+              }}
+            />
+          )}
         </fieldset>
       )}
       <div className={styles.captcha} id={`${id}-security`}>

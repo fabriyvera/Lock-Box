@@ -7,6 +7,7 @@ import { CatalogPanel } from "./CatalogPanel";
 import { CartDrawer } from "./CartDrawer";
 import { CheckoutModal } from "./CheckoutModal";
 import { OrdersPanel } from "./OrdersPanel";
+import { PointsFinder } from "./PointsFinder";
 import {
   ShoppingBag,
   Package,
@@ -33,7 +34,7 @@ function BuyerWorkspace({ name }: { name: string }) {
     view: activeTab,
     navigate: setActiveTab,
     follow,
-  } = useWorkspaceView(["catalog", "orders"] as const, "catalog");
+  } = useWorkspaceView(["catalog", "orders", "points"] as const, "catalog");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
@@ -113,6 +114,14 @@ function BuyerWorkspace({ name }: { name: string }) {
               <Package aria-hidden="true" className="w-3.5 h-3.5" />
               Mis Pedidos ({state.orders.length})
             </a>
+            <a
+              href="?vista=points"
+              onClick={(event) => follow(event, "points")}
+              aria-current={activeTab === "points" ? "page" : undefined}
+              className={`px-3 py-1.5 rounded font-bold ${activeTab === "points" ? "bg-surface-raised text-accent" : "text-text-muted hover:text-foreground"}`}
+            >
+              Puntos LockBox
+            </a>
           </nav>
         </div>
 
@@ -140,7 +149,7 @@ function BuyerWorkspace({ name }: { name: string }) {
               </span>
             )}
           </button>
-         <button
+          <button
             disabled={loggingOut}
             onClick={() => void logout()}
             className="flex items-center gap-2 text-xs text-text-muted hover:text-foreground cursor-pointer"
@@ -174,7 +183,9 @@ function BuyerWorkspace({ name }: { name: string }) {
             <h1>
               {activeTab === "catalog"
                 ? "Encuentra tu próxima compra"
-                : "Sigue tus pedidos"}
+                : activeTab === "points"
+                  ? "Encuentra tu punto LockBox"
+                  : "Sigue tus pedidos"}
             </h1>
             <p>Hola, {name}. Compra y recoge en tu punto LockBox.</p>
           </div>
@@ -211,7 +222,13 @@ function BuyerWorkspace({ name }: { name: string }) {
             {logoutError}
           </p>
         )}
-        {activeTab === "catalog" ? <CatalogPanel /> : <OrdersPanel />}
+        {activeTab === "catalog" ? (
+          <CatalogPanel />
+        ) : activeTab === "points" ? (
+          <PointsFinder points={state.lockBoxPoints} />
+        ) : (
+          <OrdersPanel />
+        )}
       </main>
 
       {/* DRAWERS Y MODALES */}

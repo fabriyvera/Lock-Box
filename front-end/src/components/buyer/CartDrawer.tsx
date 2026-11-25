@@ -103,9 +103,9 @@ export function CartDrawer({
               </button>
             </div>
           ) : (
-            state.cart.map(({ product, quantity }) => (
+            state.cart.map(({ product, quantity, size = "" }) => (
               <div
-                key={product.id}
+                key={`${product.id}:${size}`}
                 className={`${styles.cartItem} bg-canvas border border-border rounded-lg p-3.5 gap-3 items-center`}
               >
                 <Image
@@ -121,6 +121,19 @@ export function CartDrawer({
                   <h3 className="text-xs font-bold text-foreground truncate">
                     {product.title}
                   </h3>
+                  <p className="text-xs text-text-muted">
+                    {product.categoryName}
+                    {size ? ` · Talla ${size}` : ""}
+                  </p>
+                  {size &&
+                    !product.variants?.some(
+                      (v) => v.size === size && v.stock >= quantity,
+                    ) && (
+                      <p role="alert" className="text-xs text-danger">
+                        Esta talla ya no tiene stock suficiente. Ajusta o
+                        elimina el artículo.
+                      </p>
+                    )}
                   <p className="text-xs text-accent font-mono mt-0.5">
                     {formatBOB(product.priceCents)} c/u
                   </p>
@@ -133,7 +146,11 @@ export function CartDrawer({
                           window.confirm(
                             `¿Quitar ${product.title} del carrito?`,
                           )) &&
-                        actions.updateCartQuantity(product.id, quantity - 1)
+                        actions.updateCartQuantity(
+                          product.id,
+                          quantity - 1,
+                          size,
+                        )
                       }
                       aria-label={`Reducir cantidad de ${product.title}`}
                       className="p-1 rounded bg-surface-raised border border-border text-text-secondary hover:text-foreground"
@@ -145,10 +162,21 @@ export function CartDrawer({
                     </span>
                     <button
                       onClick={() =>
-                        actions.updateCartQuantity(product.id, quantity + 1)
+                        actions.updateCartQuantity(
+                          product.id,
+                          quantity + 1,
+                          size,
+                        )
                       }
                       aria-label={`Aumentar cantidad de ${product.title}`}
-                      disabled={meta.busy || quantity >= product.stock}
+                      disabled={
+                        meta.busy ||
+                        quantity >=
+                          (size
+                            ? (product.variants?.find((v) => v.size === size)
+                                ?.stock ?? 0)
+                            : product.stock)
+                      }
                       className="p-1 rounded bg-surface-raised border border-border text-text-secondary hover:text-foreground disabled:opacity-40"
                     >
                       <Plus aria-hidden="true" className="w-3 h-3" />
@@ -165,7 +193,7 @@ export function CartDrawer({
                       if (
                         window.confirm(`¿Quitar ${product.title} del carrito?`)
                       )
-                        actions.removeFromCart(product.id);
+                        actions.removeFromCart(product.id, size);
                     }}
                     aria-label={`Eliminar ${product.title} del carrito`}
                     className="text-text-subtle hover:text-danger transition-colors p-1"

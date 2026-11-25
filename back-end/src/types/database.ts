@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       cart_items: {
         Row: {
+          size: string;
           added_at: string;
           cart_id: string;
           id: string;
@@ -23,6 +24,7 @@ export type Database = {
           quantity: number;
         };
         Insert: {
+          size?: string;
           added_at?: string;
           cart_id: string;
           id?: string;
@@ -30,6 +32,7 @@ export type Database = {
           quantity: number;
         };
         Update: {
+          size?: string;
           added_at?: string;
           cart_id?: string;
           id?: string;
@@ -258,6 +261,7 @@ export type Database = {
       };
       lockbox_points: {
         Row: {
+          location_is_approximate: boolean;
           address: string;
           capacity: number;
           city: string | null;
@@ -271,6 +275,7 @@ export type Database = {
           phone: string | null;
         };
         Insert: {
+          location_is_approximate?: boolean;
           address: string;
           capacity?: number;
           city?: string | null;
@@ -284,6 +289,7 @@ export type Database = {
           phone?: string | null;
         };
         Update: {
+          location_is_approximate?: boolean;
           address?: string;
           capacity?: number;
           city?: string | null;
@@ -349,6 +355,8 @@ export type Database = {
       };
       order_items: {
         Row: {
+          size: string;
+          category_name: string;
           created_at: string;
           id: string;
           order_id: string;
@@ -359,6 +367,8 @@ export type Database = {
           unit_price: number;
         };
         Insert: {
+          size?: string;
+          category_name?: string;
           created_at?: string;
           id?: string;
           order_id: string;
@@ -369,6 +379,8 @@ export type Database = {
           unit_price: number;
         };
         Update: {
+          size?: string;
+          category_name?: string;
           created_at?: string;
           id?: string;
           order_id?: string;
@@ -696,6 +708,7 @@ export type Database = {
       };
       products: {
         Row: {
+          variants: Json;
           category_id: string | null;
           created_at: string;
           description: string | null;
@@ -711,6 +724,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          variants?: Json;
           category_id?: string | null;
           created_at?: string;
           description?: string | null;
@@ -726,6 +740,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          variants?: Json;
           category_id?: string | null;
           created_at?: string;
           description?: string | null;

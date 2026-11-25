@@ -36,6 +36,9 @@ export const registerSchema = z
     pointName: z.string().trim().min(2).max(80).optional(),
     pointAddress: z.string().trim().min(10).max(240).optional(),
     pointCapacity: z.number().int().min(1).max(500).optional(),
+    pointCity: z.string().trim().min(2).max(80).optional(),
+    pointLatitude: z.number().finite().min(-90).max(90).optional(),
+    pointLongitude: z.number().finite().min(-180).max(180).optional(),
     captchaToken: z.string().min(1).max(4096),
   })
   .strict()
@@ -48,6 +51,16 @@ export const registerSchema = z
       });
     }
     if (value.role === "operador_punto") {
+      if (
+        (value.pointLatitude === undefined) !==
+        (value.pointLongitude === undefined)
+      ) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["pointLatitude"],
+          message: "Ingresa latitud y longitud juntas",
+        });
+      }
       for (const [field, message] of [
         ["pointName", "Ingresa el nombre del punto"],
         ["pointAddress", "Ingresa la dirección completa del punto"],
@@ -64,7 +77,10 @@ export const registerSchema = z
     } else if (
       value.pointName !== undefined ||
       value.pointAddress !== undefined ||
-      value.pointCapacity !== undefined
+      value.pointCapacity !== undefined ||
+      value.pointCity !== undefined ||
+      value.pointLatitude !== undefined ||
+      value.pointLongitude !== undefined
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

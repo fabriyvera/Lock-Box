@@ -148,16 +148,26 @@ function useConnectedBuyer() {
         setState((s) => ({ ...s, selectedCategory })),
       toggleLiveSessionFilter: () =>
         setState((s) => ({ ...s, activeLiveSession: !s.activeLiveSession })),
-      addToCart: async (product: BuyerProduct, quantity = 1) =>
+      addToCart: async (product: BuyerProduct, quantity = 1, size = "") =>
         !!(await mutate({
           type: "addToCart",
           productId: product.id,
           quantity,
+          size,
         })),
-      updateCartQuantity: async (productId: string, quantity: number) =>
-        !!(await mutate({ type: "setCartQuantity", productId, quantity })),
-      removeFromCart: async (productId: string) =>
-        !!(await mutate({ type: "removeFromCart", productId })),
+      updateCartQuantity: async (
+        productId: string,
+        quantity: number,
+        size = "",
+      ) =>
+        !!(await mutate({
+          type: "setCartQuantity",
+          productId,
+          quantity,
+          size,
+        })),
+      removeFromCart: async (productId: string, size = "") =>
+        !!(await mutate({ type: "removeFromCart", productId, size })),
       clearCart: async () => !!(await mutate({ type: "clearCart" })),
       checkout: async (pointId: string, paymentMethod: "yape" | "bcp") => {
         const response = await mutate({

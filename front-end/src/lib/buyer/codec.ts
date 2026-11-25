@@ -1,5 +1,6 @@
 import { BuyerState } from "./model";
 import { createInitialBuyerState } from "./seed";
+import { validCoordinates } from "../maps/location";
 
 export const BUYER_STORAGE_KEY = "lockbox.buyer.demo.v1";
 
@@ -28,6 +29,16 @@ function product(value: unknown) {
     ]) &&
     integer(value.priceCents) &&
     integer(value.stock) &&
+    (value.variants === undefined ||
+      (Array.isArray(value.variants) &&
+        value.variants.length <= 40 &&
+        value.variants.every(
+          (v) =>
+            object(v) &&
+            typeof v.size === "string" &&
+            /^[A-Z0-9][A-Z0-9 ./-]{0,19}$/.test(v.size) &&
+            integer(v.stock),
+        ))) &&
     (value.isLiveFeatured === undefined ||
       typeof value.isLiveFeatured === "boolean")
   );
@@ -39,6 +50,8 @@ function items(value: unknown) {
       (item) =>
         object(item) &&
         product(item.product) &&
+        (item.size === undefined ||
+          (typeof item.size === "string" && item.size.length <= 20)) &&
         integer(item.quantity) &&
         item.quantity > 0,
     )
@@ -48,6 +61,10 @@ function point(value: unknown) {
   return (
     object(value) &&
     strings(value, ["id", "name", "address", "city", "phone"]) &&
+    ((value.latitude == null && value.longitude == null) ||
+      validCoordinates(value.latitude, value.longitude)) &&
+    (value.locationIsApproximate === undefined ||
+      typeof value.locationIsApproximate === "boolean") &&
     integer(value.capacity)
   );
 }

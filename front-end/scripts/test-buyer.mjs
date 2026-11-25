@@ -44,6 +44,23 @@ test("buyer seed is deterministic for server and browser rendering", () => {
     seed.createInitialBuyerState(),
   );
 });
+
+test("buyer snapshots accept located and legacy points but reject invalid coordinate pairs", () => {
+  const f = fixture();
+  const state = f.seed.createInitialBuyerState();
+  assert.ok(state.lockBoxPoints.length);
+  const point = state.lockBoxPoints[0];
+  point.latitude = -16.51;
+  point.longitude = -68.12;
+  point.locationIsApproximate = true;
+  assert.equal(f.codec.isBuyerStateValid(state), true);
+  point.latitude = 91;
+  assert.equal(f.codec.isBuyerStateValid(state), false);
+  point.latitude = null;
+  assert.equal(f.codec.isBuyerStateValid(state), false);
+  point.longitude = null;
+  assert.equal(f.codec.isBuyerStateValid(state), true);
+});
 test("buyer cart caps stock and rejects fractional or negative quantities", () => {
   const f = fixture();
   const product = f.read().catalog[0];

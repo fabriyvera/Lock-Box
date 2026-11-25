@@ -13,6 +13,7 @@ export const buyerRequestSchema = z
         .object({
           type: z.literal("addToCart"),
           productId: uuid,
+          size: z.string().max(20).optional(),
           quantity: z.number().int().min(1).max(99999),
         })
         .strict(),
@@ -20,10 +21,17 @@ export const buyerRequestSchema = z
         .object({
           type: z.literal("setCartQuantity"),
           productId: uuid,
+          size: z.string().max(20).optional(),
           quantity: z.number().int().min(0).max(99999),
         })
         .strict(),
-      z.object({ type: z.literal("removeFromCart"), productId: uuid }).strict(),
+      z
+        .object({
+          type: z.literal("removeFromCart"),
+          productId: uuid,
+          size: z.string().max(20).optional(),
+        })
+        .strict(),
       z.object({ type: z.literal("clearCart") }).strict(),
       z
         .object({
@@ -106,14 +114,12 @@ export function createBuyerRouter(
             : ["22023", "22P02", "23514", "23502"].includes(error.code ?? "")
               ? 400
               : 500;
-    res
-      .status(status)
-      .json({
-        message:
-          status === 500
-            ? "No se pudo completar la operación del comprador."
-            : error.message,
-      });
+    res.status(status).json({
+      message:
+        status === 500
+          ? "No se pudo completar la operación del comprador."
+          : error.message,
+    });
   }
   router.get("/state", async (_req, res, next) => {
     try {

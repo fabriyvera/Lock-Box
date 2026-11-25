@@ -4,13 +4,8 @@ import React, { useState } from "react";
 import { useBuyerStore } from "@/lib/buyer/connected-store";
 import { calculateCartSubtotal, formatBOB } from "@/lib/buyer/domain";
 import { Modal } from "./ui";
-import {
-  ShieldCheck,
-  MapPin,
-  Smartphone,
-  Landmark,
-  CheckCircle2,
-} from "lucide-react";
+import { PointsFinder } from "./PointsFinder";
+import { ShieldCheck, Smartphone, Landmark, CheckCircle2 } from "lucide-react";
 import { BuyerOrder } from "@/lib/buyer/model";
 import { previewCheckout } from "@/lib/buyer/pricing";
 
@@ -31,7 +26,10 @@ export function CheckoutModal({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = calculateCartSubtotal(state.cart);
-  const quote = previewCheckout(state.cart, state.serviceFeeCentsPerOrder ?? 800);
+  const quote = previewCheckout(
+    state.cart,
+    state.serviceFeeCentsPerOrder ?? 800,
+  );
   const pointId = state.lockBoxPoints.some(
     (point) => point.id === selectedPointId,
   )
@@ -84,41 +82,12 @@ export function CheckoutModal({
           <legend className="block text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">
             1. Selecciona tu Punto LockBox de entrega
           </legend>
-          <div className="space-y-2">
-            {state.lockBoxPoints.map((point) => (
-              <label
-                key={point.id}
-                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                  pointId === point.id
-                    ? "border-accent bg-surface-raised"
-                    : "border-border bg-canvas hover:border-border-strong"
-                }`}
-              >
-                <input
-                  autoComplete="off"
-                  type="radio"
-                  name="lockbox_point"
-                  value={point.id}
-                  checked={pointId === point.id}
-                  onChange={() => setSelectedPointId(point.id)}
-                  className="mt-1 accent-accent"
-                />
-                <div className="flex-1 text-xs">
-                  <div className="flex items-center gap-1.5 font-bold text-foreground">
-                    <MapPin
-                      aria-hidden="true"
-                      className="w-3.5 h-3.5 text-accent"
-                    />
-                    {point.name}
-                  </div>
-                  <p className="text-text-muted mt-0.5">{point.address}</p>
-                  <p className="text-text-subtle text-xs mt-1 font-mono">
-                    Tel: {point.phone} • Capacidad: {point.capacity} casilleros
-                  </p>
-                </div>
-              </label>
-            ))}
-          </div>
+          <PointsFinder
+            points={state.lockBoxPoints}
+            selectedId={pointId}
+            onSelect={setSelectedPointId}
+            disabled={isProcessing || meta.busy}
+          />
         </fieldset>
 
         {/* Método de Pago */}
@@ -164,6 +133,17 @@ export function CheckoutModal({
           </div>
         </fieldset>
 
+        <div className="space-y-2" aria-label="Productos y tallas de tu compra">
+          {state.cart.map((item) => (
+            <p
+              key={`${item.product.id}:${item.size ?? ""}`}
+              className="text-xs text-text-secondary"
+            >
+              {item.quantity} × {item.product.title}
+              {item.size ? ` · Talla ${item.size}` : ""}
+            </p>
+          ))}
+        </div>
         {/* Resumen Final */}
         <div className="border-t border-border pt-4 space-y-2">
           <div className="flex justify-between text-xs text-text-muted">
@@ -171,18 +151,33 @@ export function CheckoutModal({
             <span>{formatBOB(subtotal)}</span>
           </div>
           <div className="flex justify-between text-xs text-text-muted">
-            <span>Servicio LockBox ({quote.orderCount} pedido{quote.orderCount === 1 ? "" : "s"})</span>
-            <span className="text-accent font-bold">{formatBOB(quote.fee)}</span>
+            <span>
+              Servicio LockBox ({quote.orderCount} pedido
+              {quote.orderCount === 1 ? "" : "s"})
+            </span>
+            <span className="text-accent font-bold">
+              {formatBOB(quote.fee)}
+            </span>
           </div>
-          <p className="text-xs text-text-secondary">Bs 8 por pedido y vendedor, a cargo del comprador. La reserva incluye 50% de los productos y toda la tarifa; el saldo al recoger es el otro 50% de los productos.</p>
+          <p className="text-xs text-text-secondary">
+            Bs 8 por pedido y vendedor, a cargo del comprador. La reserva
+            incluye 50% de los productos y toda la tarifa; el saldo al recoger
+            es el otro 50% de los productos.
+          </p>
           <div className="flex justify-between text-sm font-bold text-foreground pt-1 border-t border-border/60">
             <span>Total de prueba</span>
             <span className="text-accent font-mono text-base">
               {formatBOB(quote.total)}
             </span>
           </div>
-          <div className="flex justify-between text-sm text-foreground"><span>Reserva simulada ahora</span><strong>{formatBOB(quote.deposit)}</strong></div>
-          <div className="flex justify-between text-sm text-text-secondary"><span>Saldo al recoger</span><strong>{formatBOB(quote.balance)}</strong></div>
+          <div className="flex justify-between text-sm text-foreground">
+            <span>Reserva simulada ahora</span>
+            <strong>{formatBOB(quote.deposit)}</strong>
+          </div>
+          <div className="flex justify-between text-sm text-text-secondary">
+            <span>Saldo al recoger</span>
+            <strong>{formatBOB(quote.balance)}</strong>
+          </div>
         </div>
 
         {meta.error && (
