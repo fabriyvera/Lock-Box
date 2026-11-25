@@ -8,6 +8,9 @@ import { Search, Radio, ShoppingCart, Check } from "lucide-react";
 
 export function CatalogPanel() {
   const [state, actions, meta] = useBuyerStore();
+  const [selectedSizes, setSelectedSizes] = React.useState<
+    Record<string, string>
+  >({});
   const [addedId, setAddedId] = React.useState<string | null>(null);
   React.useEffect(() => {
     if (!addedId) return;
@@ -42,7 +45,15 @@ export function CatalogPanel() {
   });
 
   const handleAddToCart = async (product: (typeof state.catalog)[0]) => {
-    if (!(await actions.addToCart(product, 1))) return;
+    if (
+      product.variants?.length &&
+      !product.variants.some(
+        (v) => v.size === selectedSizes[product.id] && v.stock > 0,
+      )
+    )
+      return;
+    if (!(await actions.addToCart(product, 1, selectedSizes[product.id] ?? "")))
+      return;
     setAddedId(product.id);
   };
 
@@ -151,7 +162,16 @@ export function CatalogPanel() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredProducts.map((product) => {
-            const isOutOfStock = product.stock <= 0;
+            const variants = product.variants ?? [];
+            const selectedSize = selectedSizes[product.id] ?? "";
+            const selectedVariant = variants.find(
+              (v) => v.size === selectedSize,
+            );
+            const requiresSize = variants.length > 0;
+            const isOutOfStock =
+              product.stock <= 0 ||
+              (requiresSize && !!selectedSize && !selectedVariant?.stock);
+            const needsSize = requiresSize && !selectedSize;
             const isJustAdded = addedId === product.id;
 
             return (
@@ -187,6 +207,36 @@ export function CatalogPanel() {
                       </span>
                     </div>
 
+                    {requiresSize && (
+                      <label className="block text-xs font-semibold text-text-secondary">
+                        Talla
+                        <select
+                          aria-label={`Talla de ${product.title}`}
+                          value={selectedSize}
+                          onChange={(e) =>
+                            setSelectedSizes((current) => ({
+                              ...current,
+                              [product.id]: e.target.value,
+                            }))
+                          }
+                          className="mt-1 w-full rounded border border-border bg-surface p-2 text-foreground"
+                        >
+                          <option value="">Elige una talla</option>
+                          {variants.map((v) => (
+                            <option
+                              key={v.size}
+                              value={v.size}
+                              disabled={v.stock <= 0}
+                            >
+                              {v.size} —{" "}
+                              {v.stock > 0
+                                ? `${v.stock} disponibles`
+                                : "Agotada"}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
                     <h3 className="text-sm font-bold text-foreground line-clamp-1 group-hover:text-accent transition-colors">
                       {product.title}
                     </h3>
@@ -209,7 +259,9 @@ export function CatalogPanel() {
                   <button
                     onClick={() => handleAddToCart(product)}
                     aria-label={`${isOutOfStock ? "Sin stock:" : "Agregar al carrito:"} ${product.title}`}
-                    disabled={isOutOfStock || meta.busy || meta.loading}
+                    disabled={
+                      isOutOfStock || needsSize || meta.busy || meta.loading
+                    }
                     className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-bold transition-colors cursor-pointer ${
                       isOutOfStock
                         ? "bg-border text-text-subtle cursor-not-allowed"
@@ -229,7 +281,11 @@ export function CatalogPanel() {
                           aria-hidden="true"
                           className="w-3.5 h-3.5"
                         />
-                        Agregar
+                        {isOutOfStock
+                          ? "Agotado"
+                          : needsSize
+                            ? "Elige talla"
+                            : "Agregar"}
                       </>
                     )}
                   </button>

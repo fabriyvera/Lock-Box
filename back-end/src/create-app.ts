@@ -51,10 +51,15 @@ export function createApp(
   };
   const app = express();
   app.disable("x-powered-by");
-  app.use(cors({
-    origin: [new URL(config.FRONTEND_URL).origin, ...config.CORS_ALLOWED_ORIGINS],
-    credentials: true,
-  }));
+  app.use(
+    cors({
+      origin: [
+        new URL(config.FRONTEND_URL).origin,
+        ...config.CORS_ALLOWED_ORIGINS,
+      ],
+      credentials: true,
+    }),
+  );
   app.use(express.json({ limit: "64kb" }));
   app.get("/api/health", (_req, res) =>
     res.json({ status: "ok", timestamp: new Date().toISOString() }),
@@ -108,6 +113,9 @@ export function createApp(
                   point_name: input.pointName,
                   point_address: input.pointAddress,
                   point_capacity: input.pointCapacity,
+                  point_city: input.pointCity,
+                  point_latitude: input.pointLatitude,
+                  point_longitude: input.pointLongitude,
                 }
               : {}),
           },

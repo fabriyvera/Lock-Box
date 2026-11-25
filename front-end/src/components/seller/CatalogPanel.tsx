@@ -28,7 +28,7 @@ export default function CatalogPanel({ state, act }: PanelProps) {
       p.status !== "archived" &&
       (filter === "all" || p.status === filter) &&
       (category === "all" || p.category === category) &&
-      `${p.title} ${p.sku} ${p.tags.join(" ")}`
+      `${p.title} ${p.category} ${p.sku} ${p.tags.join(" ")} ${(p.variants ?? []).map((v) => v.size).join(" ")}`
         .toLowerCase()
         .includes(query.toLowerCase()),
   );
@@ -118,6 +118,15 @@ export default function CatalogPanel({ state, act }: PanelProps) {
                     {product.stock} unidades
                   </span>
                 </div>
+                {!!product.variants?.length && (
+                  <div className={styles.tags} aria-label="Stock por talla">
+                    {product.variants.map((v) => (
+                      <span key={v.size}>
+                        Talla {v.size}: {v.stock} uds.
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className={styles.tags}>
                   {product.tags.map((tag) => (
                     <span key={tag}>#{tag}</span>

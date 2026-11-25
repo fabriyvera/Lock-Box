@@ -196,7 +196,8 @@ export function OrdersPanel() {
                             {item.product.title}
                           </p>
                           <p className="text-text-muted text-xs">
-                            Cant: {item.quantity} • @{item.product.sellerName}
+                            {item.size && <>Talla {item.size} • </>}Cant:{" "}
+                            {item.quantity} • @{item.product.sellerName}
                           </p>
                         </div>
                         <span className="text-xs font-mono font-bold text-accent">
@@ -218,8 +219,10 @@ export function OrdersPanel() {
                       {order.lockBoxPoint.address}
                     </p>
                     {(() => {
-                      const depositCents = order.depositCents ?? Math.round(order.totalCents / 2);
-                      const balanceCents = order.balanceCents ?? order.totalCents - depositCents;
+                      const depositCents =
+                        order.depositCents ?? Math.round(order.totalCents / 2);
+                      const balanceCents =
+                        order.balanceCents ?? order.totalCents - depositCents;
                       const isPaidFull = ["delivered", "released"].includes(
                         order.status,
                       );
@@ -235,7 +238,9 @@ export function OrdersPanel() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-text-muted">
-                              {(order.serviceFeeCents ?? 0) > 0 ? "Reserva (50% productos + servicio):" : "Reserva (50%):"}
+                              {(order.serviceFeeCents ?? 0) > 0
+                                ? "Reserva (50% productos + servicio):"
+                                : "Reserva (50%):"}
                             </span>
                             <span className="font-semibold text-accent">
                               {formatBOB(depositCents)} · Pagado
@@ -256,7 +261,13 @@ export function OrdersPanel() {
                               {isPaidFull ? "Pagado" : "Pendiente"}
                             </span>
                           </div>
-                          {(order.serviceFeeCents ?? 0) > 0 && <p className="text-text-secondary">Servicio incluido: {formatBOB(order.serviceFeeCents ?? 0)}. No se descuenta del importe del vendedor.</p>}
+                          {(order.serviceFeeCents ?? 0) > 0 && (
+                            <p className="text-text-secondary">
+                              Servicio incluido:{" "}
+                              {formatBOB(order.serviceFeeCents ?? 0)}. No se
+                              descuenta del importe del vendedor.
+                            </p>
+                          )}
                         </div>
                       );
                     })()}
@@ -293,8 +304,8 @@ export function OrdersPanel() {
                         Cancelar Pedido
                       </button>
                     )}
-                    
-                   {/* Botón Liberar Pago (cuando el punto ya entregó con QR) */}
+
+                    {/* Botón Liberar Pago (cuando el punto ya entregó con QR) */}
                     {order.status === "delivered" && (
                       <button
                         type="button"
@@ -302,7 +313,10 @@ export function OrdersPanel() {
                         onClick={() => void handleReleasePayment(order.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-accent text-on-accent hover:bg-accent-hover text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                       >
-                        <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" />
+                        <CheckCircle2
+                          aria-hidden="true"
+                          className="w-3.5 h-3.5"
+                        />
                         {releasingId === order.id
                           ? "Liberando pago..."
                           : "Liberar pago al vendedor"}

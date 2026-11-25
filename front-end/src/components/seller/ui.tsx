@@ -23,6 +23,11 @@ export function ProductVisual({ product }: { product: SellerProduct }) {
     (
       {
         Moda: Shirt,
+        Camisas: Shirt,
+        Pantalones: Shirt,
+        "Ropa infantil": Shirt,
+        Calzado: Package,
+        Deportes: Backpack,
         Tecnología: Headphones,
         Accesorios: Backpack,
         Belleza: Sparkles,

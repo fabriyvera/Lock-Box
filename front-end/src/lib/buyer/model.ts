@@ -20,17 +20,22 @@ export interface BuyerProduct {
   description: string;
   priceCents: number; // Precio en centavos para precisión
   stock: number;
+  variants?: { size: string; stock: number }[];
   sku: string;
   imageUrl: string;
   isLiveFeatured?: boolean; // Caso B2: Destacado en TikTok Live
 }
 
 export interface CartItem {
+  size?: string;
   product: BuyerProduct;
   quantity: number;
 }
 
 export interface LockBoxPoint {
+  latitude?: number | null;
+  longitude?: number | null;
+  locationIsApproximate?: boolean;
   id: string;
   name: string;
   address: string;

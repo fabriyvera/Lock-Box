@@ -25,15 +25,67 @@ export default function ProductEditor({
     sku: product?.sku ?? "",
     imageUrl: product?.imageUrl ?? "",
     tags: product?.tags.join(", ") ?? "",
+    variants: (product?.variants ?? []).map((v) => ({
+      size: v.size,
+      stock: String(v.stock),
+    })),
   });
   const [form, setForm] = useState(initialForm);
   const confirmDiscard = useUnsavedChanges(
     JSON.stringify(form) !== JSON.stringify(initialForm),
   );
   function close() {
-    if (confirmDiscard()) onClose();
+    if (!submitting.current && confirmDiscard()) onClose();
   }
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const submitting = useRef(false);
+  const sizeSuggestions =
+    form.category === "Calzado"
+      ? Array.from({ length: 31 }, (_, i) => `EU ${i + 20}`)
+      : form.category === "Pantalones"
+        ? [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "28",
+            "30",
+            "32",
+            "34",
+            "36",
+            "38",
+            "40",
+            "42",
+          ]
+        : form.category === "Ropa infantil"
+          ? [
+              "0-3 M",
+              "3-6 M",
+              "6-12 M",
+              "12-18 M",
+              "2 A",
+              "4 A",
+              "6 A",
+              "8 A",
+              "10 A",
+              "12 A",
+            ]
+          : ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "UNICA"];
+  const variantStock = form.variants.reduce(
+    (sum, v) => sum + (Number(v.stock) || 0),
+    0,
+  );
+  function updateVariant(index: number, name: "size" | "stock", value: string) {
+    setForm((current) => ({
+      ...current,
+      variants: current.variants.map((v, i) =>
+        i === index ? { ...v, [name]: value } : v,
+      ),
+    }));
+  }
   const [invalidField, setInvalidField] = useState<"price" | "stock" | null>(
     null,
   );
@@ -47,6 +99,7 @@ export default function ProductEditor({
     setForm((current) => ({ ...current, [name]: value }));
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current) return;
     setError("");
     setInvalidField(null);
     let priceCents: number;
@@ -60,7 +113,7 @@ export default function ProductEditor({
         ?.focus();
       return;
     }
-    if (!/^\d+$/.test(form.stock)) {
+    if (!form.variants.length && !/^\d+$/.test(form.stock)) {
       setInvalidField("stock");
       setError("El stock debe ser un número entero positivo o cero.");
       formRef.current
@@ -68,6 +121,30 @@ export default function ProductEditor({
         ?.focus();
       return;
     }
+    const variants = form.variants.map((v) => ({
+      size: v.size.trim().toUpperCase(),
+      stock: Number(v.stock),
+    }));
+    if (
+      variants.some(
+        (v, i) =>
+          !/^[A-Z0-9][A-Z0-9 ./-]{0,19}$/.test(v.size) ||
+          !/^\d+$/.test(form.variants[i].stock) ||
+          !Number.isSafeInteger(v.stock) ||
+          v.stock < 0 ||
+          v.stock > 99999,
+      ) ||
+      new Set(variants.map((v) => v.size)).size !== variants.length ||
+      variantStock > 99999
+    ) {
+      setError(
+        "Completa cada talla sin repetirla y usa cantidades enteras. Máximo total: 99999 unidades.",
+      );
+      requestAnimationFrame(() => errorRef.current?.focus());
+      return;
+    }
+    submitting.current = true;
+    setSaving(true);
     try {
       await onSave({
         id: identity.id,
@@ -75,7 +152,8 @@ export default function ProductEditor({
         description: form.description.trim(),
         category: form.category,
         priceCents,
-        stock: Number(form.stock),
+        stock: variants.length ? variantStock : Number(form.stock),
+        variants,
         sku: form.sku.trim(),
         imageUrl: form.imageUrl.trim(),
         tags: [
@@ -94,6 +172,9 @@ export default function ProductEditor({
         err instanceof Error ? err.message : "No se pudo guardar el producto.",
       );
       requestAnimationFrame(() => errorRef.current?.focus());
+    } finally {
+      submitting.current = false;
+      setSaving(false);
     }
   }
   return (
@@ -127,7 +208,7 @@ export default function ProductEditor({
             maxLength={2000}
             value={form.description}
             onChange={(e) => field("description", e.target.value)}
-            placeholder="Material, tallas, colores y detalles para tu comprador"
+            placeholder="Material, colores y detalles para tu comprador"
           />
         </label>
         <div className={styles.formGrid}>
@@ -155,6 +236,81 @@ export default function ProductEditor({
             />
           </label>
         </div>
+        <fieldset className={styles.sizeFieldset} disabled={saving}>
+          <legend>Tallas y unidades</legend>
+          <p className={styles.muted}>
+            Añade cada talla disponible y su stock. En calzado indica el
+            sistema, por ejemplo EU 38 o US 8. Sin tallas, usa el stock general.
+          </p>
+          <datalist id="product-size-suggestions">
+            {sizeSuggestions.map((size) => (
+              <option key={size} value={size} />
+            ))}
+          </datalist>
+          {form.variants.map((variant, index) => (
+            <div className={styles.sizeRow} key={index}>
+              <label>
+                Talla {index + 1}
+                <input
+                  aria-label={`Talla ${index + 1}`}
+                  required
+                  maxLength={20}
+                  list="product-size-suggestions"
+                  placeholder={sizeSuggestions[0]}
+                  value={variant.size}
+                  onChange={(e) => updateVariant(index, "size", e.target.value)}
+                />
+              </label>
+              <label>
+                Unidades
+                <input
+                  aria-label={`Unidades talla ${index + 1}`}
+                  required
+                  type="number"
+                  min={0}
+                  max={99999}
+                  step={1}
+                  value={variant.stock}
+                  onChange={(e) =>
+                    updateVariant(index, "stock", e.target.value)
+                  }
+                />
+              </label>
+              <button
+                type="button"
+                className={styles.secondary}
+                aria-label={`Quitar talla ${index + 1}`}
+                onClick={() =>
+                  setForm((current) => ({
+                    ...current,
+                    variants: current.variants.filter((_, i) => i !== index),
+                  }))
+                }
+              >
+                Quitar
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={styles.secondary}
+            disabled={form.variants.length >= 40}
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                variants: [...current.variants, { size: "", stock: "0" }],
+              }))
+            }
+          >
+            + Añadir talla
+          </button>
+          {form.variants.length > 0 && (
+            <p role="status" className={styles.muted}>
+              Stock total: {variantStock} unidades. El precio es el mismo para
+              todas las tallas.
+            </p>
+          )}
+        </fieldset>
         <div className={styles.formGrid}>
           <label>
             Precio en Bs.
@@ -178,7 +334,9 @@ export default function ProductEditor({
             )}
           </label>
           <label>
-            Unidades disponibles
+            {form.variants.length
+              ? "Stock total por tallas"
+              : "Unidades disponibles"}
             <input
               autoComplete="off"
               name="stock"
@@ -191,7 +349,8 @@ export default function ProductEditor({
               min={0}
               max={99999}
               step={1}
-              value={form.stock}
+              readOnly={form.variants.length > 0}
+              value={form.variants.length ? variantStock : form.stock}
               onChange={(e) => field("stock", e.target.value)}
             />
             {invalidField === "stock" && (
@@ -240,8 +399,12 @@ export default function ProductEditor({
           <button type="button" className={styles.secondary} onClick={close}>
             Cancelar
           </button>
-          <button type="submit" className={styles.primary}>
-            Guardar {product ? "cambios" : "borrador"}
+          <button type="submit" className={styles.primary} disabled={saving}>
+            {saving
+              ? "Guardando…"
+              : product
+                ? "Guardar cambios"
+                : "Guardar borrador"}
           </button>
         </div>
       </form>

@@ -10,6 +10,12 @@ const product = z
     description: z.string().max(2000),
     category: z.enum([
       "Moda",
+      "Calzado",
+      "Camisas",
+      "Pantalones",
+      "Ropa infantil",
+      "Deportes",
+
       "Tecnología",
       "Hogar",
       "Belleza",
@@ -18,6 +24,21 @@ const product = z
     ]),
     priceCents: z.number().int().min(1).max(999999999),
     stock: z.number().int().min(0).max(99999),
+    variants: z
+      .array(
+        z
+          .object({
+            size: z
+              .string()
+              .trim()
+              .toUpperCase()
+              .regex(/^[A-Z0-9][A-Z0-9 ./-]{0,19}$/),
+            stock: z.number().int().min(0).max(99999),
+          })
+          .strict(),
+      )
+      .max(40)
+      .optional(),
     sku: z.string().trim().max(40),
     imageUrl: z.union([
       z.literal(""),
@@ -27,7 +48,25 @@ const product = z
     status,
     createdAt: at,
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    const variants = value.variants ?? [];
+    if (new Set(variants.map((v) => v.size)).size !== variants.length)
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["variants"],
+        message: "Tallas duplicadas.",
+      });
+    if (
+      variants.length &&
+      variants.reduce((sum, v) => sum + v.stock, 0) !== value.stock
+    )
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["stock"],
+        message: "Stock por talla inconsistente.",
+      });
+  });
 const profile = z
   .object({
     storeName: z.string().trim().min(2).max(80),

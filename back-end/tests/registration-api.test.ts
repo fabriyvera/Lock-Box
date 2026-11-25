@@ -105,6 +105,39 @@ const post = (url: string, body: unknown) =>
     body: JSON.stringify(body),
   });
 
+test("point registration validates coordinates and forwards only the operator's location", async () => {
+  const point = {
+    ...input,
+    role: "operador_punto",
+    pointName: "Punto mapa",
+    pointAddress: "Av. Central 123, La Paz",
+    pointCapacity: 30,
+    pointCity: "La Paz",
+    pointLatitude: -16.51,
+    pointLongitude: -68.12,
+  };
+  await withServer({}, async (url, calls) => {
+    assert.equal((await post(url, point)).status, 202);
+    const body = calls[0] as { options: { data: Record<string, unknown> } };
+    assert.equal(body.options.data.point_latitude, -16.51);
+    assert.equal(body.options.data.point_longitude, -68.12);
+    assert.equal(body.options.data.point_city, "La Paz");
+  });
+  for (const patch of [
+    { pointLatitude: 91 },
+    { pointLongitude: -181 },
+    { pointLatitude: "-16.51" },
+    { pointLatitude: null },
+    { pointLongitude: undefined },
+    { role: "comprador" },
+  ]) {
+    await withServer({}, async (url, calls) => {
+      assert.equal((await post(url, { ...point, ...patch })).status, 400);
+      assert.equal(calls.length, 0);
+    });
+  }
+});
+
 test("signup accepts all public roles, sends validated metadata and handles email confirmation", async () => {
   for (const role of ["comprador", "vendedor", "operador_punto"]) {
     await withServer({}, async (url, calls) => {

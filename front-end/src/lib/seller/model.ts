@@ -17,6 +17,7 @@ export interface SellerProduct {
   title: string;
   description: string;
   category: string;
+  variants?: { size: string; stock: number }[];
   priceCents: number;
   stock: number;
   sku: string;
@@ -87,6 +88,12 @@ export type SellerAction =
 
 export const CATEGORIES = [
   "Moda",
+  "Calzado",
+  "Camisas",
+  "Pantalones",
+  "Ropa infantil",
+  "Deportes",
+
   "Tecnología",
   "Hogar",
   "Belleza",

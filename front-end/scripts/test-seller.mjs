@@ -34,6 +34,53 @@ const now = Date.parse("2026-10-01T16:00:00Z");
 const at = new Date(now).toISOString();
 const fixture = () => createDemoState(now);
 
+test("sizes persist on edits and reject inconsistent stock or duplicate labels", () => {
+  const state = fixture();
+  state.sessions = [];
+  const product = {
+    ...state.products[0],
+    category: "Calzado",
+    stock: 5,
+    variants: [
+      { size: "EU 38", stock: 2 },
+      { size: "EU 39", stock: 3 },
+    ],
+  };
+  const updated = applySellerAction(state, { type: "saveProduct", product });
+  assert.deepEqual(
+    decodeSnapshot(JSON.stringify(updated)).products.find(
+      (p) => p.id === product.id,
+    ).variants,
+    product.variants,
+  );
+  assert.throws(() =>
+    applySellerAction(state, {
+      type: "saveProduct",
+      product: { ...product, stock: 4 },
+    }),
+  );
+  assert.throws(() =>
+    applySellerAction(state, {
+      type: "saveProduct",
+      product: {
+        ...product,
+        variants: [
+          { size: "M", stock: 2 },
+          { size: "M", stock: 3 },
+        ],
+      },
+    }),
+  );
+  const depleted = {
+    ...product,
+    stock: 0,
+    variants: [{ size: "EU 38", stock: 0 }],
+  };
+  assert.doesNotThrow(() =>
+    decodeSnapshot(JSON.stringify({ ...state, products: [depleted] })),
+  );
+});
+
 test("API snapshots accept depleted stock and pending/completed payouts", () => {
   const state = fixture();
   state.products[0].stock = 0;
@@ -282,7 +329,10 @@ test("corrupt/obsolete browser snapshots are rejected rather than trusted", () =
 test("seller store profiles are validated", () => {
   const state = fixture();
   assert.equal(Object.hasOwn(state.profile, "city"), false);
-  assert.deepEqual(decodeSnapshot(JSON.stringify(state)).profile, state.profile);
+  assert.deepEqual(
+    decodeSnapshot(JSON.stringify(state)).profile,
+    state.profile,
+  );
   assert.throws(() =>
     applySellerAction(state, {
       type: "saveProfile",
